@@ -7,7 +7,7 @@ http = httpProvider()
 class RCSB():
 
     def fetch(self, pdb_code):
-        url = 'https://files.rcsb.org/download/2hla.pdb'
+        url = 'https://files.rcsb.org/download/'+ pdb_code +'.pdb'
         pdb_data = http.get(url, 'txt')
         return pdb_data
 

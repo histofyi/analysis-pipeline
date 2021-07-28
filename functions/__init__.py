@@ -1,19 +1,14 @@
-import urllib3
 import json
 
 import logging
 
-http = urllib3.PoolManager()
-
-
-
-basepath = '../../../data'
+basepath = '../../data'
 
 
 
 
 def rcsb_search(mhc_class):
-    filename = basepath + '/constants/'+ mhc_class +'_shape_query.json'
+    filename = basepath + '/constants/class_i_query.json'
     f = open(filename)
     query = json.load(f)
 
@@ -25,12 +20,7 @@ def rcsb_search(mhc_class):
 
     if r.status == 200:
         search_content = json.loads(r.data.decode('utf-8'))
-        logging.warning(search_content)
-
         download_list = [entry['identifier'].lower() for entry in search_content['result_set']]
-
-        with open(basepath + '/logs/'+ mhc_class + '_search_set.json', 'w') as outfile:
-            json.dump(download_list, outfile)
 
         return download_list, True, None
     else:
@@ -41,9 +31,6 @@ def rcsb_search(mhc_class):
 def rcsb_download(pdb_code, mhc_class):
     url = 'https://files.rcsb.org/download/'+ pdb_code.upper() +'.pdb'
     filepath = basepath + '/structures/'+ mhc_class + '/raw/' + pdb_code +'.pdb'
-    logging.warn(url)
-    logging.warn(filepath)
-
     r = http.request('GET', url)
     if r.status == 200:
         pdb_content = r.data.decode('utf-8')

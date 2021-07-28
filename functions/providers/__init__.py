@@ -1,2 +1,3 @@
-from .filesystem import filesystem
 from .filesystem import filesystemProvider
+from .s3 import s3Provider
+from .http import httpProvider

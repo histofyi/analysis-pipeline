@@ -2,6 +2,8 @@
     <h1>Structure search for {{molecule_metadata.title}}</h1>
     <p>{{count}} structures found</p>
     <p>
-        {{search_data}}
+        {% for structure in search_data %}
+            <a href="/structures/information/{{structure}}">{{structure}}</a>
+        {% endfor %}
     </p>
 </body>

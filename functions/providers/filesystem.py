@@ -29,7 +29,6 @@ class filesystemProvider():
         if _file:
             if format == 'json':
                 data = json.load(_file)
-                logging.warn(data)
             else:
                 data = _file.read()
         return data, success, errors

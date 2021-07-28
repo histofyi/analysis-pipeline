@@ -1,0 +1,2 @@
+def filesystem():
+    return True

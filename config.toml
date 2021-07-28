@@ -1,0 +1,5 @@
+# config.toml
+
+
+DEFAULT_PROVIDER = 'filesystem'
+BASEDIR = '../../data'

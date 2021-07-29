@@ -7,16 +7,19 @@
         </div>
         <div>
             <strong>Publication title:</strong>
-            {% if pdb_info.rcsb_primary_citation.pdbx_database_id_doi %}
-                <a href="doi://{{pdb_info.rcsb_primary_citation.pdbx_database_id_doi}}"> {{pdb_info.rcsb_primary_citation.title}}</a>
+            {% if doi_url %}
+                <a href="{{doi_url}}" target="_new"> {{pdb_info.rcsb_primary_citation.title}}</a>
             {% else %}
                  {{pdb_info.rcsb_primary_citation.title}}
             {% endif %}
         </div>
+        <div><strong>Publication date: </strong> {{pdb_info.rcsb_primary_citation.year}}</div>
         <div><strong>Assembly count:</strong> {{pdb_info.rcsb_entry_info.assembly_count}}</div>
         <div><strong>Resolution:</strong> {{pdb_info.rcsb_entry_info.resolution_combined}}</div>
     </div>
-
+    <div>
+        {{structure_stats}}
+    </div>
     <hr />
 
 

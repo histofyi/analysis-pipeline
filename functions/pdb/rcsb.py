@@ -8,14 +8,13 @@ import doi
 import logging
 
 
-
 from ..providers import httpProvider
 from ..providers import filesystemProvider
 
 
-
 http = httpProvider()
 file = filesystemProvider(None)
+
 
 class RCSB():
 
@@ -51,7 +50,6 @@ class RCSB():
         return pdb_info
 
 
-
     def load_structure(self, pdb_code):
         filepath = 'structures/pdb_format/raw/{pdb_code}'.format(pdb_code = pdb_code)
         full_filepath = file.build_filepath(filepath,'pdb')
@@ -64,9 +62,8 @@ class RCSB():
         complexes, success, errors = file.get('constants/shared/complexes')
         logging.warn("GENERATING BASIC INFORMATION")
         
-        basic_information = {}
-
         chains = [chain.id for chain in structure.get_chains()]
+
 
         structure_stats = {
             'chains': chains,
@@ -74,33 +71,51 @@ class RCSB():
             'assembly_count': assembly_count
         }
 
-
-
         structures = []
+
+
 
         chain_count = int(structure_stats['total_chains'])/int(structure_stats['assembly_count'])
 
         possible_complexes = {}
+        possible_complexes_labels = []
 
         for item in complexes['complexes']:
             if item['chain_count'] == chain_count:
-                possible_complexes = item
-                logging.warn(item)
-                logging.warn([option['label'] for option in item['possible_complexes']])
-
-        logging.warn("ASSEMBLY COUNT" + str(assembly_count))
-
-        logging.warn("CHAIN COUNT" + str(chain_count))
+                possible_complexes = item['possible_complexes']
+                possible_complexes_labels = [option['label'] for option in item['possible_complexes']]
 
 
-        chain_sequence_arrays = [[IUPACData.protein_letters_3to1[residue.resname.title()] for residue in chain if residue.resname not in self.hetgroups] for chain in structure.get_chains()]
-
+        chain_sequence_arrays = [[residue.resname for residue in chain if residue.resname not in self.hetgroups] for chain in structure.get_chains()]
         
+        i = 0
 
-        for chain_sequence_array in chain_sequence_arrays:
-            logging.warn(len(chain_sequence_array))
-            logging.warn(chain_sequence_array)
+        unique_chains = []
+        unique_chain_sequences = {}
+        unique_chain_lengths = []
+        while i < chain_count:
+            this_chain_sequence_array = chain_sequence_arrays[i]
+            i += 1
+            unique_chains.append('chain_' + str(i))
+            unique_chain_sequences['chain_' + str(i)] = this_chain_sequence_array
+            unique_chain_lengths.append(len(this_chain_sequence_array))
 
+        logging.warn(possible_complexes)
+
+        for possible_complex in possible_complexes:
+            logging.warn(possible_complex)
+
+
+        basic_information = {
+            "structure_stats":structure_stats,
+            "possible_complexes":possible_complexes,
+            "possible_complexes_labels": possible_complexes_labels,
+            "chain_sequences":unique_chain_sequences
+        }
+
+    
+        
+        logging.warn(basic_information)
 
 
         return basic_information

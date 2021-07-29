@@ -4,10 +4,11 @@ import json
 
 class filesystemProvider():
 
-    basedir = ''
+    basedir = '../../data'
 
     def __init__(self,basedir):
-        self.basedir = basedir
+        if basedir is not None:
+            self.basedir = basedir
 
     def __build_filepath(self, filename, format):
         filepath = self.basedir +'/' + filename + '.' + format
@@ -19,7 +20,7 @@ class filesystemProvider():
 
     def get(self,filename,format='json'):
         errors = []
-        success = True
+        success = False
         data = None
         _file = None
         try:
@@ -28,24 +29,33 @@ class filesystemProvider():
             errors.append('not_found')
         if _file:
             if format == 'json':
-                data = json.load(_file)
+                try:
+                    data = json.load(_file)
+                    success = True
+                except:
+                    data = None
             else:
                 data = _file.read()
+                success = True
         return data, success, errors
 
 
     def put(self, filename , payload, format='json'):
         errors = []
-        success = True
+        success = False
         data = None
         _file = None
         try:
-            _file = self.get_file_handle(filename, format, 'r')
+            _file = self.get_file_handle(filename, format, 'w')
         except:
-            errors.append('not_found')
-        if _file:
+            _file = self.get_file_handle(filename, format, 'x')
+        if _file: 
+            success = True
             _file.write(payload)
             _file.close()     
-            data = payload   
-        return data, success, errors
+            data = payload
+            return data, True, []   
+        else:
+            return None, False, ['cannot_get_or_create']
+        
 

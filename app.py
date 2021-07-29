@@ -44,6 +44,10 @@ def structure_info_handler(pdb_code):
 
     pdb_image_folder = pdb_code[1:3]
 
+
+    assembly_count = pdb_info['rcsb_entry_info']['assembly_count']
+
+
     structure = rcsb.load_structure(pdb_code)
 
     try:
@@ -54,6 +58,8 @@ def structure_info_handler(pdb_code):
     chains = [chain.id for chain in structure.get_chains()]
 
     chain_sequences = [[residue.resname for residue in chain if residue.resname != 'HOH'] for chain in structure.get_chains()]
+
+
 
 
     logging.warn(chain_sequences)
@@ -67,6 +73,7 @@ def structure_info_handler(pdb_code):
         'pdb_file':pdb_file, 
         'pdb_code':pdb_code, 
         'pdb_info':pdb_info, 
+        'assembly_count': assembly_count,
         'pdb_info_text':json.dumps(pdb_info, sort_keys=True, indent=4), 
         'pdb_image_folder':pdb_image_folder, 
         'doi_url':doi_url,

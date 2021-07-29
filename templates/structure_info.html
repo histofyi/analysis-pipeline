@@ -13,20 +13,18 @@
                  {{pdb_info.rcsb_primary_citation.title}}
             {% endif %}
         </div>
+        <div><strong>Resolution:</strong> {{pdb_info.rcsb_entry_info.resolution_combined}}</div>
         <div><strong>Publication date: </strong> {{pdb_info.rcsb_primary_citation.year}}</div>
         <div><strong>Assembly count:</strong> {{assembly_count}}</div>
-        <div><strong>Resolution:</strong> {{pdb_info.rcsb_entry_info.resolution_combined}}</div>
+        <div><strong>Chain count:</strong> {{basic_information.structure_stats.total_chains}}</div>
+        <div><strong>Chains:</strong> {{basic_information.structure_stats.chains|join(', ')}}</div>
+        <div><strong>Possible complexes:</strong> {{basic_information.possible_complexes_labels|join(' | ')}}</div>
     </div>
+    <hr />
     <div>
         {{basic_information}}
     </div>
-
-    <div>
-        {{structure_stats}}
-    </div>
     <hr />
-
-
     <pre>{{pdb_info_text}}</pre>
     <pre>{{pdb_file}}</pre>
 </body>

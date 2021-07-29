@@ -113,11 +113,6 @@ class RCSB():
             "chain_sequences":unique_chain_sequences
         }
 
-    
-        
-        logging.warn(basic_information)
-
-
         return basic_information
 
 

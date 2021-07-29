@@ -38,7 +38,8 @@ def structure_info_handler(pdb_code):
     pdb_info = rcsb.get_info(pdb_code)
     pdb_info_text = json.dumps(pdb_info, sort_keys=True, indent=4)
     pdb_file = rcsb.fetch(pdb_code)
-    return template.render('structure_info', {'pdb_file':pdb_file, 'pdb_code':pdb_code, 'pdb_info':pdb_info, 'pdb_info_text':pdb_info_text})
+    pdb_image_folder = pdb_code[1:3]
+    return template.render('structure_info', {'pdb_file':pdb_file, 'pdb_code':pdb_code, 'pdb_info':pdb_info, 'pdb_info_text':pdb_info_text, 'pdb_image_folder':pdb_image_folder})
 
 
 

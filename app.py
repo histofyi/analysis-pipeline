@@ -75,7 +75,8 @@ def structure_info_handler(pdb_code):
         'assembly_count': assembly_count,
         'pdb_info_text':json.dumps(pdb_info, sort_keys=True, indent=4), 
         'pdb_image_folder':pdb_image_folder, 
-        'doi_url':doi_url
+        'doi_url':doi_url,
+        'basic_information':basic_information
     }
     return template.render('structure_info', variables)
 

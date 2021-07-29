@@ -1,5 +1,8 @@
 import json
-import toml
+
+from Bio.PDB import *
+import doi 
+
 import logging
 
 
@@ -39,5 +42,20 @@ class RCSB():
             pdb_info = http.get(url, 'json')
             payload, success, errors = file.put(filepath, json.dumps(pdb_info))
         return pdb_info
+
+
+
+    def load_structure(self, pdb_code):
+        filepath = 'structures/pdb_format/raw/{pdb_code}'.format(pdb_code = pdb_code)
+        full_filepath = file.build_filepath(filepath,'pdb')
+        logging.warn(full_filepath)
+        parser = PDBParser(PERMISSIVE=1)
+        structure = parser.get_structure('mhc', full_filepath)
+        return structure
+
+
+    def resolve_doi(self, paper_doi):
+        url = doi.get_real_url_from_doi(paper_doi)
+        return url
 
 

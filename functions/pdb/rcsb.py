@@ -1,6 +1,8 @@
+from functions.providers import filesystem
 import json
 
 from Bio.PDB import *
+from Bio.SeqUtils import *
 import doi 
 
 import logging
@@ -16,6 +18,11 @@ http = httpProvider()
 file = filesystemProvider(None)
 
 class RCSB():
+
+    hetgroups = None
+
+    def __init__(self):
+        self.hetgroups = ['HOH','IOD','PEG','NAG','NA','GOL','EDO','S04','15P','PG4',' NA','FME']
 
     def fetch(self, pdb_code):
         filepath = 'structures/pdb_format/raw/{pdb_code}'.format(pdb_code = pdb_code)
@@ -54,6 +61,7 @@ class RCSB():
 
 
     def generate_basic_information(self, structure, assembly_count):
+        complexes, success, errors = file.get('constants/shared/complexes')
         logging.warn("GENERATING BASIC INFORMATION")
         
         basic_information = {}
@@ -62,7 +70,7 @@ class RCSB():
 
         structure_stats = {
             'chains': chains,
-            'chain_count': len(chains),
+            'total_chains': len(chains),
             'assembly_count': assembly_count
         }
 
@@ -70,13 +78,28 @@ class RCSB():
 
         structures = []
 
-        chain_number = int(structure_stats['chain_count'])/int(structure_stats['assembly_count'])
+        chain_count = int(structure_stats['total_chains'])/int(structure_stats['assembly_count'])
 
-        logging.warn("CHAIN NUMBER")
-        logging.warning(chain_number)
+        possible_complexes = {}
+
+        for item in complexes['complexes']:
+            if item['chain_count'] == chain_count:
+                possible_complexes = item
+                logging.warn(item)
+                logging.warn([option['label'] for option in item['possible_complexes']])
+
+        logging.warn("ASSEMBLY COUNT" + str(assembly_count))
+
+        logging.warn("CHAIN COUNT" + str(chain_count))
 
 
-        chain_sequences = [[residue.resname for residue in chain if residue.resname != 'HOH'] for chain in structure.get_chains()]
+        chain_sequence_arrays = [[IUPACData.protein_letters_3to1[residue.resname.title()] for residue in chain if residue.resname not in self.hetgroups] for chain in structure.get_chains()]
+
+        
+
+        for chain_sequence_array in chain_sequence_arrays:
+            logging.warn(len(chain_sequence_array))
+            logging.warn(chain_sequence_array)
 
 
 

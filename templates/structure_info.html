@@ -18,7 +18,17 @@
         <div><strong>Assembly count:</strong> {{assembly_count}}</div>
         <div><strong>Chain count:</strong> {{basic_information.structure_stats.total_chains}}</div>
         <div><strong>Chains:</strong> {{basic_information.structure_stats.chains|join(', ')}}</div>
-        <div><strong>Possible complexes:</strong> {{basic_information.possible_complexes_labels|join(' | ')}}</div>
+        <form>
+            <div><strong>Possible complex types:</strong></div>
+                {% for possible_complex in basic_information.possible_complexes_labels %}
+                    <input type="radio" id="{{ possible_complex }}" name="complex_type" value="{{ possible_complex }}">
+                    <label for="{{ possible_complex }}">{{ possible_complex }}</label><br>
+                {% endfor %}
+            <div><strong>Open Access?:</strong></div>
+            <div><strong>Publication PDF URL:</strong></div>
+            <div><strong>Not MHC related:</strong></div>
+        </form>
+        
     </div>
     <hr />
     <div>

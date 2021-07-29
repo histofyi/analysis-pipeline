@@ -33,6 +33,13 @@ def home_handler():
     return template.render('index', {'pdb_file':scratch_json})
 
 
+@app.get('/structures/search/<path:mhc_class>')
+def structures_search_handler(mhc_class):
+    query_name = mhc_class + '_sequence_query'
+    query, success, errors = filesystem.get('constants/rcsb/'+ query_name)
+    search_data = pdb.RCSB().search(query)
+    return template.render('structure_search', {'search_data':search_data,'molecule_metadata':molecules[mhc_class],'count':len(search_data)})
+
 
 @app.get('/structures/information/<path:pdb_code>')
 def structure_info_handler(pdb_code):
@@ -55,20 +62,12 @@ def structure_info_handler(pdb_code):
     except:
         doi_url = None
     
-    chains = [chain.id for chain in structure.get_chains()]
+    
 
-    chain_sequences = [[residue.resname for residue in chain if residue.resname != 'HOH'] for chain in structure.get_chains()]
-
-
+    basic_information = rcsb.generate_basic_information(structure, assembly_count)
 
 
-    logging.warn(chain_sequences)
-
-    structure_stats = {
-        'chains': chains,
-        'chain_count': len(chains)
-    }
-
+    
     variables = {
         'pdb_file':pdb_file, 
         'pdb_code':pdb_code, 
@@ -76,20 +75,14 @@ def structure_info_handler(pdb_code):
         'assembly_count': assembly_count,
         'pdb_info_text':json.dumps(pdb_info, sort_keys=True, indent=4), 
         'pdb_image_folder':pdb_image_folder, 
-        'doi_url':doi_url,
-        'structure_stats':structure_stats
+        'doi_url':doi_url
     }
     return template.render('structure_info', variables)
 
 
 
 
-@app.get('/structures/search/<path:mhc_class>')
-def structures_search_handler(mhc_class):
-    query_name = mhc_class + '_sequence_query'
-    query, success, errors = filesystem.get('constants/rcsb/'+ query_name)
-    search_data = pdb_data = pdb.RCSB().search(query)
-    return template.render('structure_search', {'search_data':search_data,'molecule_metadata':molecules[mhc_class],'count':len(search_data)})
+
 
 
 

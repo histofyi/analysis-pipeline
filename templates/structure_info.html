@@ -35,91 +35,92 @@
         </div>
     </section>
 
-    <section class="proto-style-block typography">
+    <section class="typography">
         <div class="grid-container">
           <div class="column-full-width">
-            <div class="inner bottom-border">
-                <div class="heading-medium">{{pdb_code | upper}}</div>
-                <h1 class="heading-large vertical-spacing-bottom">{{pdb_info.struct.title}}</h1>
-                <div class="grid-container">
-                    <div class="column-one-half">
-                      <div class="inner vertical-spacing-top-0-5">
-                        <img class="pdb-image" src="https://cdn.rcsb.org/images/structures/{{pdb_image_folder}}/{{pdb_code}}/{{pdb_code}}_assembly-1.jpeg" />
-                      </div>
-                    </div>
-                    <div class="column-one-half">
-                      <div class="inner">
-                            <div class="body-copy-small vertical-spacing-top-0-5">
-                                <h3 class="heading-small vertical-spacing-bottom-0-5">Structure information</h3>
-                                <table>
-                                    <tr>
-                                        <td class="strong">Resolution:</td>
-                                        <td>{{pdb_info.rcsb_entry_info.resolution_combined|join(', ')}}&#8491;</td>
-                                    </tr>
-                                    <tr>
-                                        <td class="strong">Assembly count:</td>
-                                        <td>{{assembly_count}}</td>
-                                    </tr>
-                                    <tr>
-                                        <td class="strong">Chain count:</td>
-                                        <td>{{basic_information.structure_stats.total_chains}}</td>
-                                    </tr>
-                                    <tr>
-                                        <td class="strong">Chains:</td>
-                                        <td>{{basic_information.structure_stats.chains|join(', ')}}</td>
-                                    </tr>
-                                </table>
-                            </div>
-                            <div class="body-copy-small vertical-spacing-top-0-5">
-                                <h3 class="heading-small vertical-spacing-bottom-0-5">Publication Details</h3>
-                                <div>
-                                    {% if doi_url %}
-                                        <a href="{{doi_url}}" target="_new"> {{pdb_info.rcsb_primary_citation.title}}</a>
-                                    {% else %}
-                                        {{pdb_info.rcsb_primary_citation.title}}
-                                    {% endif %}
-                                    <div>{{pdb_info.rcsb_primary_citation.year}}</div>
-                                    <div>Open Access?:</div>
-                                    <div>Publication PDF URL:</div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>  
-                  </div>                
+                <div class="inner">
+                    <div class="heading-medium">{{pdb_code | upper}}</div>
+                    <h1 class="heading-large vertical-spacing-bottom">{{pdb_info.struct.title}}</h1>
                 </div>
             </div>
         </div>
-      </div>
     </section>
 
+    <section class="typography">
+        <div class="grid-container bottom-border">
+            <div class="column-one-half">
+                <div class="inner vertical-spacing-top-0-5">
+                    <img class="pdb-image" src="https://cdn.rcsb.org/images/structures/{{pdb_image_folder}}/{{pdb_code}}/{{pdb_code}}_assembly-1.jpeg" />
+                </div>
+            </div>
+            <div class="column-one-half">
+                <div class="inner vertical-spacing-bottom-0-5">    
+                    <h3 class="heading-small vertical-spacing-bottom-0-25">Structure information</h3>
+                    <table class="body-copy-smallest">
+                        <tr>
+                            <td class="strong">Resolution:</td>
+                            <td>{{pdb_info.rcsb_entry_info.resolution_combined|join(', ')}}&#8491;</td>
+                        </tr>
+                        <tr>
+                            <td class="strong">Assembly count:</td>
+                            <td>{{assembly_count}}</td>
+                        </tr>
+                        <tr>
+                            <td class="strong">Chain count:</td>
+                            <td>{{basic_information.structure_stats.total_chains}}</td>
+                        </tr>
+                        <tr>
+                            <td class="strong">Chains:</td>
+                            <td>{{basic_information.structure_stats.chains|join(', ')}}</td>
+                        </tr>
+                    </table>
+                    <h3 class="heading-small vertical-spacing-top-0-5 vertical-spacing-bottom-0-25">Publication details</h3>
+                    <div class="body-copy-smallest">
+                        {% if doi_url %}
+                            <a href="{{doi_url}}" target="_new"> {{pdb_info.rcsb_primary_citation.title}}</a>
+                        {% else %}
+                            {{pdb_info.rcsb_primary_citation.title}}
+                        {% endif %}
+                        <div>{{pdb_info.rcsb_primary_citation.year}}</div>
+                        <div>Open Access?:</div>
+                        <div>Publication PDF URL:</div>
+                    </div>
+                    <h3 class="heading-small vertical-spacing-top-0-5 vertical-spacing-bottom-0-25">Complex details</h3>
+                    <div class="body-copy-small"><strong>Possible complex types:</strong></div>
+                    <form >
+                        {% for possible_complex in basic_information.possible_complexes_labels %}
+                            <input type="radio" id="{{ possible_complex }}" name="complex_type" value="{{ possible_complex }}">
+                            <label class="body-copy-smallest" for="{{ possible_complex }}">{{ possible_complex }}</label><br>
+                        {% endfor %}
+                        <input type="radio" id="not_mhc_related" name="complex_type" value="not_mhc_related">
+                        <label class="body-copy-smallest" for="not_mhc_related">not_mhc_related</label><br>
+                        <input type="radio" id="other" name="complex_type" value="other">
+                        <label class="body-copy-smallest" for="other">other (please enter) </label><input type="text" id="other_description" name="other_description"/>
+                        <div class="vertical-spacing-top-0-25"><input type="button" value="submit" /></div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </section>
 
+    <section class="vertical-spacing-top-0-5">
+        <div class="grid-container">
+            <div class="column-full-width">
+                <div class="inner">
+                    <h2 class="heading-small">Chain sequences</h2>
+                    <div>
+                        {{basic_information.chain_sequences.unique_one_letter_sequences}}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
 
-        
-        
-        <h3>Complex information</h3>
-        <form>
-            <div><strong>Possible complex types:</strong></div>
-                {% for possible_complex in basic_information.possible_complexes_labels %}
-                    <input type="radio" id="{{ possible_complex }}" name="complex_type" value="{{ possible_complex }}">
-                    <label for="{{ possible_complex }}">{{ possible_complex }}</label><br>
-                {% endfor %}
-                <input type="radio" id="not_mhc_related" name="complex_type" value="not_mhc_related">
-                <label for="not_mhc_related">not_mhc_related</label><br>
-                <input type="radio" id="other" name="complex_type" value="other">
-                <label for="other">other</label><br>
-                Other <input type="text" id="other_description" name="other_description"/>
-        </form>
-        
-    </div>
-    <hr />
-    <div>
-        {{basic_information}}
-    </div>
     <section class="vertical-spacing-top-0-5">
         <div class="grid-container">
           <div class="column-full-width">
             <div class="inner">
-                <h2 class="heading-small">PDB Info</h2>
+                <h2 class="heading-small">PDB info</h2>
                 <textarea>{{pdb_info_text}}</textarea>
                 </div>
             </div>
@@ -131,7 +132,7 @@
         <div class="grid-container">
           <div class="column-full-width">
             <div class="inner">
-                <h2 class="heading-small">PDB File</h2>
+                <h2 class="heading-small">PDB file</h2>
                 <textarea>{{pdb_file}}</textarea>
                 </div>
             </div>

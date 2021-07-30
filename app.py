@@ -30,7 +30,7 @@ molecules, success, errors = filesystem.get('constants/shared/molecules')
 @app.get('/')
 def home_handler():
     scratch_json, success, errors = filesystem.get('scratch/hello')
-    return template.render('index', {'pdb_file':scratch_json})
+    return template.render('index', scratch_json)
 
 
 @app.get('/structures/search/<path:mhc_class>')
@@ -79,6 +79,12 @@ def structure_info_handler(pdb_code):
         'basic_information':basic_information
     }
     return template.render('structure_info', variables)
+
+
+
+@app.get('/design-system')
+def design_system_hander():
+    return template.render('design_system', {})
 
 
 

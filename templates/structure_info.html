@@ -6,8 +6,8 @@
         {
             width:100%;
             height:300px;
-            background-color: #334;
-            color: #ccc;
+            background-color: #0a0039;
+            color: #eef;
         }
         .textwrapper
         {
@@ -29,6 +29,7 @@
             <img src="https://cdn.rcsb.org/images/structures/{{pdb_image_folder}}/{{pdb_code}}/{{pdb_code}}_assembly-1.jpeg" height="500" width="500" />
         </div>
         <div>
+        <h3>Publication Details</h3>
             <strong>Publication title:</strong>
             {% if doi_url %}
                 <a href="{{doi_url}}" target="_new"> {{pdb_info.rcsb_primary_citation.title}}</a>
@@ -36,20 +37,30 @@
                  {{pdb_info.rcsb_primary_citation.title}}
             {% endif %}
         </div>
-        <div><strong>Resolution:</strong> {{pdb_info.rcsb_entry_info.resolution_combined}}</div>
         <div><strong>Publication date: </strong> {{pdb_info.rcsb_primary_citation.year}}</div>
+        <div><strong>Open Access?:</strong></div>
+        <div><strong>Publication PDF URL:</strong></div>
+
+
+
+        <h3>Structure information</h3>
+        <div><strong>Resolution:</strong> {{pdb_info.rcsb_entry_info.resolution_combined}}</div>
         <div><strong>Assembly count:</strong> {{assembly_count}}</div>
         <div><strong>Chain count:</strong> {{basic_information.structure_stats.total_chains}}</div>
         <div><strong>Chains:</strong> {{basic_information.structure_stats.chains|join(', ')}}</div>
+        
+        <h3>Complex information</h3>
         <form>
             <div><strong>Possible complex types:</strong></div>
                 {% for possible_complex in basic_information.possible_complexes_labels %}
                     <input type="radio" id="{{ possible_complex }}" name="complex_type" value="{{ possible_complex }}">
                     <label for="{{ possible_complex }}">{{ possible_complex }}</label><br>
                 {% endfor %}
-            <div><strong>Open Access?:</strong></div>
-            <div><strong>Publication PDF URL:</strong></div>
-            <div><strong>Not MHC related:</strong></div>
+                <input type="radio" id="not_mhc_related" name="complex_type" value="not_mhc_related">
+                <label for="not_mhc_related">not_mhc_related</label><br>
+                <input type="radio" id="other" name="complex_type" value="other">
+                <label for="other">other</label><br>
+                Other <input type="text" id="other_description" name="other_description"/>
         </form>
         
     </div>

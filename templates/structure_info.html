@@ -4,9 +4,11 @@
         textarea
         {
             width:100%;
-            height:300px;
+            height:350px;
             background-color: #0a0039;
             color: #eef;
+            font-family:'Courier Prime','Courier New', Courier, monospace;
+            font-size: 12pt;
         }
         .textwrapper
         {
@@ -18,6 +20,19 @@
         img.pdb-image {
             width:500px;
             height:500px;
+        }
+
+        .journal_name {
+            font-style: italic;
+        }
+
+        .journal_volume {
+            font-weight: 700
+        }
+
+        .oa_icon {
+            width:9px;
+            height:14px;
         }
 
     </style>
@@ -75,15 +90,25 @@
                         </tr>
                     </table>
                     <h3 class="heading-small vertical-spacing-top-0-5 vertical-spacing-bottom-0-25">Publication details</h3>
-                    <div class="body-copy-smallest">
+                    <div class="body-copy-small">
                         {% if doi_url %}
                             <a href="{{doi_url}}" target="_new"> {{pdb_info.rcsb_primary_citation.title}}</a>
                         {% else %}
                             {{pdb_info.rcsb_primary_citation.title}}
                         {% endif %}
-                        <div>{{pdb_info.rcsb_primary_citation.year}}</div>
-                        <div>Open Access?:</div>
-                        <div>Publication PDF URL:</div>
+                    </div>
+                    <div class="body-copy-smallest">
+                            {{pdb_info.rcsb_primary_citation.rcsb_authors|join(', ')}}, <span class="journal_name">{{pdb_info.rcsb_primary_citation.journal_abbrev}}</span> <span class="journal_volume">Vol. {{pdb_info.rcsb_primary_citation.journal_volume }}</span>
+                            Pages {{pdb_info.rcsb_primary_citation.page_first}}-{{pdb_info.rcsb_primary_citation.page_first}} ({{pdb_info.rcsb_primary_citation.year}})
+                    </div>
+                    <div class="body-copy-small vertical-spacing-top-0-5 vertical-spacing-bottom-0-25"><strong>Additional publication details:</strong></div>
+                    <div>    
+                    <form>
+                            <label class="body-copy-smallest" for="open_access"><object data="/static/oa_icon.svg" type="image/svg+xml" class="oa_icon"></object> Open Access?</label>
+                            <input type="checkbox" id="open_access" name="open_access" /><br>
+                            <label class="body-copy-smallest" for="pdf_url">PDF url </label><input type="text" id="pdf_url" name="pdf_url"/><br />
+                            <div class="vertical-spacing-top-0-25"><input type="button" value="submit" /></div>
+                        </form>
                     </div>
                     <h3 class="heading-small vertical-spacing-top-0-5 vertical-spacing-bottom-0-25">Complex details</h3>
                     <div class="body-copy-small"><strong>Possible complex types:</strong></div>
@@ -95,7 +120,7 @@
                         <input type="radio" id="not_mhc_related" name="complex_type" value="not_mhc_related">
                         <label class="body-copy-smallest" for="not_mhc_related">not_mhc_related</label><br>
                         <input type="radio" id="other" name="complex_type" value="other">
-                        <label class="body-copy-smallest" for="other">other (please enter) </label><input type="text" id="other_description" name="other_description"/>
+                        <label class="body-copy-smallest" for="other">other (please state) </label><input type="text" id="other_description" name="other_description"/>
                         <div class="vertical-spacing-top-0-25"><input type="button" value="submit" /></div>
                     </form>
                 </div>

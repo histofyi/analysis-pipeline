@@ -1,4 +1,27 @@
+<html>
+
+<head>
+    <style>
+        textarea
+        {
+            width:100%;
+            height:300px;
+            background-color: #334;
+            color: #ccc;
+        }
+        .textwrapper
+        {
+            border:1px solid #999999;
+            margin:5px 0;
+            padding:3px;
+        }
+
+    </style>
+</head>
+
 <body>
+    <div><-- <a href="/structures/search/class_i">structure list</a></div>
+
     <h1>Information for {{pdb_code | upper}}</h1>
     <div>
         <h2>{{pdb_info.struct.title}}</h2>
@@ -35,6 +58,9 @@
         {{basic_information}}
     </div>
     <hr />
-    <pre>{{pdb_info_text}}</pre>
-    <pre>{{pdb_file}}</pre>
+    <h3>PDB Info</div>
+    <textarea>{{pdb_info_text}}</textarea>
+    <h3>PDB File</div>
+    <textarea>{{pdb_file}}</textarea>
 </body>
+</html>

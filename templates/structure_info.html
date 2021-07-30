@@ -1,6 +1,5 @@
-<html>
-
-<head>
+{% extends "base.html" %}
+    {% block style %}
     <style>
         textarea
         {
@@ -16,38 +15,86 @@
             padding:3px;
         }
 
+        img.pdb-image {
+            width:500px;
+            height:500px;
+        }
+
     </style>
-</head>
+    {% endblock %}
 
-<body>
-    <div><-- <a href="/structures/search/class_i">structure list</a></div>
+    {% block main %}
 
-    <h1>Information for {{pdb_code | upper}}</h1>
-    <div>
-        <h2>{{pdb_info.struct.title}}</h2>
-        <div>
-            <img src="https://cdn.rcsb.org/images/structures/{{pdb_image_folder}}/{{pdb_code}}/{{pdb_code}}_assembly-1.jpeg" height="500" width="500" />
+    <section class="vertical-spacing-top-0-5 vertical-spacing-bottom">
+        <div class="grid-container">
+            <div class="column-full-width">
+              <div class="inner">
+                  <div class="body-copy-small"><a href="/structures/search/class_i" class="breadcrumbs-level-1">Structures</a> <span class="breadcrumbs-level-1">|</span> <a href="/structures/search/class_i" class="breadcrumbs-level-2">MHC Class I</a> <span class="breadcrumbs-level-2">|</span> {{pdb_code }}</div>
+                </div>
+            </div>
         </div>
-        <div>
-        <h3>Publication Details</h3>
-            <strong>Publication title:</strong>
-            {% if doi_url %}
-                <a href="{{doi_url}}" target="_new"> {{pdb_info.rcsb_primary_citation.title}}</a>
-            {% else %}
-                 {{pdb_info.rcsb_primary_citation.title}}
-            {% endif %}
+    </section>
+
+    <section class="proto-style-block typography">
+        <div class="grid-container">
+          <div class="column-full-width">
+            <div class="inner bottom-border">
+                <div class="heading-medium">{{pdb_code | upper}}</div>
+                <h1 class="heading-large vertical-spacing-bottom">{{pdb_info.struct.title}}</h1>
+                <div class="grid-container">
+                    <div class="column-one-half">
+                      <div class="inner vertical-spacing-top-0-5">
+                        <img class="pdb-image" src="https://cdn.rcsb.org/images/structures/{{pdb_image_folder}}/{{pdb_code}}/{{pdb_code}}_assembly-1.jpeg" />
+                      </div>
+                    </div>
+                    <div class="column-one-half">
+                      <div class="inner">
+                            <div class="body-copy-small vertical-spacing-top-0-5">
+                                <h3 class="heading-small vertical-spacing-bottom-0-5">Structure information</h3>
+                                <table>
+                                    <tr>
+                                        <td class="strong">Resolution:</td>
+                                        <td>{{pdb_info.rcsb_entry_info.resolution_combined|join(', ')}}&#8491;</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="strong">Assembly count:</td>
+                                        <td>{{assembly_count}}</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="strong">Chain count:</td>
+                                        <td>{{basic_information.structure_stats.total_chains}}</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="strong">Chains:</td>
+                                        <td>{{basic_information.structure_stats.chains|join(', ')}}</td>
+                                    </tr>
+                                </table>
+                            </div>
+                            <div class="body-copy-small vertical-spacing-top-0-5">
+                                <h3 class="heading-small vertical-spacing-bottom-0-5">Publication Details</h3>
+                                <div>
+                                    {% if doi_url %}
+                                        <a href="{{doi_url}}" target="_new"> {{pdb_info.rcsb_primary_citation.title}}</a>
+                                    {% else %}
+                                        {{pdb_info.rcsb_primary_citation.title}}
+                                    {% endif %}
+                                    <div>{{pdb_info.rcsb_primary_citation.year}}</div>
+                                    <div>Open Access?:</div>
+                                    <div>Publication PDF URL:</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>  
+                  </div>                
+                </div>
+            </div>
         </div>
-        <div><strong>Publication date: </strong> {{pdb_info.rcsb_primary_citation.year}}</div>
-        <div><strong>Open Access?:</strong></div>
-        <div><strong>Publication PDF URL:</strong></div>
+      </div>
+    </section>
 
 
 
-        <h3>Structure information</h3>
-        <div><strong>Resolution:</strong> {{pdb_info.rcsb_entry_info.resolution_combined}}</div>
-        <div><strong>Assembly count:</strong> {{assembly_count}}</div>
-        <div><strong>Chain count:</strong> {{basic_information.structure_stats.total_chains}}</div>
-        <div><strong>Chains:</strong> {{basic_information.structure_stats.chains|join(', ')}}</div>
+        
         
         <h3>Complex information</h3>
         <form>
@@ -68,10 +115,27 @@
     <div>
         {{basic_information}}
     </div>
-    <hr />
-    <h3>PDB Info</div>
-    <textarea>{{pdb_info_text}}</textarea>
-    <h3>PDB File</div>
-    <textarea>{{pdb_file}}</textarea>
-</body>
-</html>
+    <section class="vertical-spacing-top-0-5">
+        <div class="grid-container">
+          <div class="column-full-width">
+            <div class="inner">
+                <h2 class="heading-small">PDB Info</h2>
+                <textarea>{{pdb_info_text}}</textarea>
+                </div>
+            </div>
+        </div>
+    </section>
+
+
+    <section class="vertical-spacing-top-0-5">
+        <div class="grid-container">
+          <div class="column-full-width">
+            <div class="inner">
+                <h2 class="heading-small">PDB File</h2>
+                <textarea>{{pdb_file}}</textarea>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    {% endblock %}

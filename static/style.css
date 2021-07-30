@@ -572,7 +572,9 @@ p {
 
 strong,
 .strong {
-  font-family: "Poppins", -apple-system, BlinkMacSystemFont, "Helvetica Neue", Helvetica, Arial, sans-serif; }
+  font-family: "Poppins", -apple-system, BlinkMacSystemFont, "Helvetica Neue", Helvetica, Arial, sans-serif; 
+  font-weight:600
+}
 
 em {
   font-style: italic; }
@@ -910,3 +912,15 @@ img {
     border: 1px solid #9A9A9A;
     width: 8px;
     height: 8px; }
+
+td {
+  padding-right: 10px;
+}
+
+.breadcrumbs-level-1 {
+  opacity: 50%;
+}
+
+.breadcrumbs-level-2 {
+  opacity: 75%;
+}

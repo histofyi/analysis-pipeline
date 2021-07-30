@@ -1,0 +1,71 @@
+
+<!doctype html>
+
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+  <title>histo.fyi — {% block title %}An interactive exploration of the structure and function of MHC molecules{% endblock %}</title>
+{% block metadata %}
+  <meta name="description" content="">
+{% endblock %}
+  <meta name="author" content="Dr Christopher J. Thorpe">
+  <link href="/static/histo-32-color.png" rel="icon" type="image/png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Courier+Prime:wght@400;700&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/style.css">
+  {% block style %}{% endblock %}  
+</head>
+
+<body>
+
+<header class="header" role="banner">
+	<div class="grid-container">
+		<div class="column-full-width">
+			<div class="inner">
+                <a href="/" class="header-logo" aria-label="histo.fyi Logo">
+				    {% include "fragments/logo.html" %}
+                    <h1>histo.fyi</h1>
+                </a>
+				<nav class="primary-navigation">
+					<ul class="horizontal-list">
+                        {% include "sitespecific/navbar.html" %}
+					</ul>
+				</nav>      
+			</div>
+		</div>
+	</div>
+</header>
+
+  <main class="main">
+    <section class="proposition-phase">
+        <div class="grid-container">
+          <div class="column-full-width">
+            <div class="inner">
+              <div class="phase-banner">
+                <span class="phase-label is-alpha">Alpha</span>
+                <span class="phase-notice">This is a work in progress and likely to change. Your feedback is very welcome.</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+      
+      {% block main %}{% endblock %}
+  </main>
+
+  <footer class="footer">
+    <div class="grid-container">
+      <div class="column-full-width">
+        <div class="inner">
+            {% include "fragments/logo.html" %}
+        </div>
+      </div>
+    </div>
+  </footer>
+
+</body>
+
+</html>

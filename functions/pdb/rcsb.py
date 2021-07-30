@@ -18,6 +18,7 @@ file = filesystemProvider(None)
 
 amino_acids, success, errors = file.get('constants/shared/amino_acids')
 molecules, success, errors = file.get('constants/shared/molecules')
+complexes, success, errors = file.get('constants/shared/complexes')
 
 
 class RCSB():
@@ -73,8 +74,20 @@ class RCSB():
         return one_letter
 
 
+    def predict_possible_complexes(self, chain_count):
+        possible_complexes = {}
+        possible_complexes_labels = []
+
+        for item in complexes['complexes']:
+            if item['chain_count'] == chain_count:
+                possible_complexes = item['possible_complexes']
+                possible_complexes_labels = [option['label'] for option in item['possible_complexes']]
+        
+        return possible_complexes, possible_complexes_labels
+
+
+
     def generate_basic_information(self, structure, assembly_count):
-        complexes, success, errors = file.get('constants/shared/complexes')
         
         logging.warn("GENERATING BASIC INFORMATION")
         
@@ -93,50 +106,39 @@ class RCSB():
 
         chain_count = int(structure_stats['total_chains'])/int(structure_stats['assembly_count'])
 
-        possible_complexes = {}
-        possible_complexes_labels = []
-
-        for item in complexes['complexes']:
-            if item['chain_count'] == chain_count:
-                possible_complexes = item['possible_complexes']
-                possible_complexes_labels = [option['label'] for option in item['possible_complexes']]
-
+        possible_complexes, possible_complexes_labels = self.predict_possible_complexes(chain_count)
 
         chain_sequence_arrays = [[residue.resname for residue in chain if residue.resname not in self.hetgroups] for chain in structure.get_chains()]
         
-        one_letter_sequences = {}
-
-        i = 0
-        for chain in chain_sequence_arrays:
-            i += 1
-            one_letter_sequences['chain_' + str(i)] = ''.join([self.three_letter_to_one(residue).upper() for residue in chain])
-        
-        logging.warn(one_letter_sequences)
-
-
         i = 0
 
         unique_chains = []
         unique_chain_sequences = {}
+        unique_one_letter_sequences = {}
         unique_chain_lengths = []
         while i < chain_count:
             this_chain_sequence_array = chain_sequence_arrays[i]
             i += 1
             unique_chains.append('chain_' + str(i))
             unique_chain_sequences['chain_' + str(i)] = this_chain_sequence_array
+            unique_one_letter_sequences['chain_' + str(i)] = ''.join([self.three_letter_to_one(residue).upper() for residue in this_chain_sequence_array])
             unique_chain_lengths.append(len(this_chain_sequence_array))
 
-        logging.warn(possible_complexes)
 
         for possible_complex in possible_complexes:
             logging.warn(possible_complex)
+
 
 
         basic_information = {
             "structure_stats":structure_stats,
             "possible_complexes":possible_complexes,
             "possible_complexes_labels": possible_complexes_labels,
-            "chain_sequences":unique_chain_sequences
+            "chain_sequences":{
+                "unique_one_letter_sequences":unique_one_letter_sequences,
+                "unique_chains_three_letter":unique_chain_sequences,
+                "unique_chain_lengths":unique_chain_lengths
+            }
         }
 
         return basic_information

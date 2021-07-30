@@ -16,12 +16,16 @@ http = httpProvider()
 file = filesystemProvider(None)
 
 
+amino_acids, success, errors = file.get('constants/shared/amino_acids')
+molecules, success, errors = file.get('constants/shared/molecules')
+
+
 class RCSB():
 
     hetgroups = None
 
     def __init__(self):
-        self.hetgroups = ['HOH','IOD','PEG','NAG','NA','GOL','EDO','S04','15P','PG4',' NA','FME']
+        self.hetgroups = ['HOH','IOD','PEG','NAG','NA','GOL','EDO','S04','15P','PG4',' NA','FME',' CD','SEP']
 
     def fetch(self, pdb_code):
         filepath = 'structures/pdb_format/raw/{pdb_code}'.format(pdb_code = pdb_code)
@@ -58,8 +62,20 @@ class RCSB():
         return structure
 
 
+    def three_letter_to_one(self, residue):
+        if residue.upper() not in self.hetgroups:
+            try:
+                one_letter = amino_acids["natural"]["translations"]["three_letter"][residue.lower()]
+            except:
+                one_letter = 'z'
+        else:
+            one_letter = 'x'
+        return one_letter
+
+
     def generate_basic_information(self, structure, assembly_count):
         complexes, success, errors = file.get('constants/shared/complexes')
+        
         logging.warn("GENERATING BASIC INFORMATION")
         
         chains = [chain.id for chain in structure.get_chains()]
@@ -88,6 +104,16 @@ class RCSB():
 
         chain_sequence_arrays = [[residue.resname for residue in chain if residue.resname not in self.hetgroups] for chain in structure.get_chains()]
         
+        one_letter_sequences = {}
+
+        i = 0
+        for chain in chain_sequence_arrays:
+            i += 1
+            one_letter_sequences['chain_' + str(i)] = ''.join([self.three_letter_to_one(residue).upper() for residue in chain])
+        
+        logging.warn(one_letter_sequences)
+
+
         i = 0
 
         unique_chains = []

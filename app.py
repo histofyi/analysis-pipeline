@@ -8,6 +8,7 @@ import logging
 import functions.providers as providers
 import functions.template as template
 import functions.pdb as pdb
+import functions.lists as lists
 import functions
 
 
@@ -43,9 +44,9 @@ def structures_search_handler(mhc_class):
 
 
 
-@app.get('/structures/information/<string:pdb_code>/<string:structureset>/add')
-def add_to_structureset_handler(pdb_code,structureset):
-    logging.warn("ADD TO " + structureset)
+@app.get('/structures/information/<string:pdb_code>/<string:current_set>/add')
+def add_to_structureset_handler(pdb_code,current_set):
+    data, success, errors = lists.structureSet(current_set).add(pdb_code)
     return redirect(return_to(pdb_code))
 
 

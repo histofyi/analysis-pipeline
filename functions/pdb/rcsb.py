@@ -74,6 +74,23 @@ class RCSB():
         return one_letter
 
 
+    def chunk_one_letter_sequence(self, sequence, residues_per_line):
+        chunked_sequence = []
+        length = len(sequence)
+        line_count = (length/residues_per_line)
+        
+        while length > residues_per_line:
+            chunked_sequence.append(sequence[0:residues_per_line])
+            sequence = sequence[residues_per_line:]
+            length = len(sequence)
+        chunked_sequence.append(sequence)
+        logging.warn(length)
+        logging.warn(residues_per_line)
+        logging.warn(line_count)
+        logging.warn(chunked_sequence)
+        return chunked_sequence
+
+
     def predict_possible_complexes(self, chain_count):
         possible_complexes = {}
         possible_complexes_labels = []
@@ -116,6 +133,9 @@ class RCSB():
         unique_chain_sequences = {}
         unique_one_letter_sequences = {}
         unique_chain_lengths = []
+        chunked_one_letter_sequences = {}
+        chain_lengths = {}
+        chain_letters = {}
         while i < chain_count:
             this_chain_sequence_array = chain_sequence_arrays[i]
             i += 1
@@ -123,6 +143,8 @@ class RCSB():
             unique_chain_sequences['chain_' + str(i)] = this_chain_sequence_array
             unique_one_letter_sequences['chain_' + str(i)] = ''.join([self.three_letter_to_one(residue).upper() for residue in this_chain_sequence_array])
             unique_chain_lengths.append(len(this_chain_sequence_array))
+            chunked_one_letter_sequences['chain_' + str(i)] = self.chunk_one_letter_sequence(unique_one_letter_sequences['chain_' + str(i)],80) 
+            chain_lengths['chain_' + str(i)] = len(this_chain_sequence_array)
 
 
         for possible_complex in possible_complexes:
@@ -134,10 +156,12 @@ class RCSB():
             "structure_stats":structure_stats,
             "possible_complexes":possible_complexes,
             "possible_complexes_labels": possible_complexes_labels,
+            "chain_lengths":chain_lengths,
             "chain_sequences":{
                 "unique_one_letter_sequences":unique_one_letter_sequences,
                 "unique_chains_three_letter":unique_chain_sequences,
-                "unique_chain_lengths":unique_chain_lengths
+                "unique_chain_lengths":unique_chain_lengths,
+                "chunked_one_letter_sequences":chunked_one_letter_sequences
             }
         }
 

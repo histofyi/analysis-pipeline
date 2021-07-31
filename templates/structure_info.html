@@ -113,6 +113,7 @@
                     <div class="body-copy-small vertical-spacing-top-0-5 vertical-spacing-bottom-0-25"><strong>Additional publication details:</strong></div>
                     <div>    
                     <form>
+                            <input type="hidden" id="pdb_code" name="pdb_code" value="{{pdb_code}}" />
                             <label class="body-copy-smallest" for="open_access"><object data="/static/oa_icon.svg" type="image/svg+xml" class="oa_icon"></object> Open Access?</label>
                             <input type="checkbox" id="open_access" name="open_access" /><br>
                             <label class="body-copy-smallest" for="pdf_url">PDF url </label><input type="text" id="pdf_url" name="pdf_url"/><br />
@@ -122,6 +123,7 @@
                     <h3 class="heading-small vertical-spacing-top-0-5 vertical-spacing-bottom-0-25">Complex details</h3>
                     <div class="body-copy-small"><strong>Possible complex types:</strong></div>
                     <form >
+                        <input type="hidden" id="pdb_code" name="pdb_code" value="{{pdb_code}}" />
                         {% for possible_complex in basic_information.possible_complexes_labels %}
                             <input type="radio" id="{{ possible_complex }}" name="complex_type" value="{{ possible_complex }}">
                             <label class="body-copy-smallest" for="{{ possible_complex }}">{{ possible_complex }}</label><br>
@@ -150,26 +152,28 @@
     <section class="">
         <div class="grid-container">
             <form>
-            {% for chain in basic_information.chain_sequences.chunked_one_letter_sequences %}
-            <div class="column-one-quarter">
-                <div class="inner vertical-spacing-bottom">
-                    <div><strong>{{chain}} ({{basic_information.chain_lengths[chain]}}aa)</strong></div>
-                    <div>
-                        <select id="{{chain}}_chain_type" name="{{chain}}_chain_type">{% for chain_type in complexes.chains %}<option value="{{complexes.chains[chain_type].label}}">{{complexes.chains[chain_type].ui_text}}</option>{% endfor %}</select>
+                <input type="hidden" id="pdb_code" name="pdb_code" value="{{pdb_code}}" />
+                {% for chain in basic_information.chain_sequences.chunked_one_letter_sequences %}
+                <div class="column-one-quarter">
+                    <div class="inner vertical-spacing-bottom">
+                        <div><strong>{{chain}} ({{basic_information.chain_lengths[chain]}}aa)</strong></div>
+                        <div>
+                            <select id="{{chain}}_chain_type" name="{{chain}}_chain_type">{% for chain_type in complexes.chains %}<option value="{{complexes.chains[chain_type].label}}">{{complexes.chains[chain_type].ui_text}}</option>{% endfor %}</select>
+                            <input type="hidden" id="{{chain}}_length" name="{{chain}}_length" value="{{basic_information.chain_lengths[chain]}}" />
+                        </div>
                     </div>
                 </div>
-            </div>
-            <div class="column-three-quarters">
-                <div class="inner vertical-spacing-bottom"> 
-                    {% set chunked_sequence = basic_information.chain_sequences.chunked_one_letter_sequences[chain] %}
-                    {% for row in chunked_sequence %}
-                        <pre class="sequence">{{row}}</pre>
-                    {% endfor %}
-                    <br />
-                    <br />
-                </div>    
-            </div>
-            {% endfor %}
+                <div class="column-three-quarters">
+                    <div class="inner vertical-spacing-bottom"> 
+                        {% set chunked_sequence = basic_information.chain_sequences.chunked_one_letter_sequences[chain] %}
+                        {% for row in chunked_sequence %}
+                            <pre class="sequence">{{row}}</pre>
+                        {% endfor %}
+                        <br />
+                        <br />
+                    </div>    
+                </div>
+                {% endfor %}
             </form>
             <div class="column-full-width">
                 <div class="inner">

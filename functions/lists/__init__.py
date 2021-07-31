@@ -12,9 +12,9 @@ class structureSet():
     def __init__(self, setname):
         self.setname = setname
 
+
     def build_set_path(self):
         path = 'sets/structures/{setname}'.format(setname = self.setname)
-        logging.warn(path)
         return path
 
 
@@ -29,12 +29,14 @@ class structureSet():
             structureset, success, errors = file.put(self.build_set_path(), json.dumps(structureset))
         return structureset, success, errors
 
+
     def get(self):
         structureset, success, errors = file.get(self.build_set_path())
         if not structureset:
             structureset, success, errors = file.put(self.build_set_path(), json.dumps([]))
         return structureset, success, errors
 
+
     def remove(self, item):
-        return True
+        pass
     

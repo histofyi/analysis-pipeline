@@ -15,17 +15,18 @@ http = httpProvider()
 file = filesystemProvider(None)
 
 
-amino_acids, success, errors = file.get('constants/shared/amino_acids')
-molecules, success, errors = file.get('constants/shared/molecules')
-complexes, success, errors = file.get('constants/shared/complexes')
 
 
 class RCSB():
 
     hetgroups = None
+    amino_acids = None
+    complexes = None
 
     def __init__(self):
         self.hetgroups = ['HOH','IOD','PEG','NAG','NA','GOL','EDO','S04','15P','PG4',' NA','FME',' CD','SEP',' CL',' CA', 'SO4']
+        self.amino_acids, success, errors = file.get('constants/shared/amino_acids')
+        self.complexes, success, errors = file.get('constants/shared/complexes')
 
     def fetch(self, pdb_code):
         filepath = 'structures/pdb_format/raw/{pdb_code}'.format(pdb_code = pdb_code)
@@ -65,9 +66,9 @@ class RCSB():
     def three_letter_to_one(self, residue):
         if residue.upper() not in self.hetgroups:
             try:
-                one_letter = amino_acids["natural"]["translations"]["three_letter"][residue.lower()]
+                one_letter = self.amino_acids["natural"]["translations"]["three_letter"][residue.lower()]
             except:
-                logging.warn('NEW HET ATOM ' + residue)
+                #logging.warn('NEW HET ATOM ' + residue)
                 one_letter = 'z'
         else:
             one_letter = 'x'
@@ -91,7 +92,7 @@ class RCSB():
         possible_complexes = {}
         possible_complexes_labels = []
 
-        for item in complexes['complexes']:
+        for item in self.complexes['complexes']:
             if item['chain_count'] == chain_count:
                 possible_complexes = item['possible_complexes']
                 possible_complexes_labels = [option['label'] for option in item['possible_complexes']]

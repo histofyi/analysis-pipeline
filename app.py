@@ -9,12 +9,11 @@ import functions.providers as providers
 import functions.template as template
 import functions.pdb as pdb
 import functions.lists as lists
-import functions
+import functions.common as common
+import functions.histo as histo
 
 
 from api import api
-
-import ssl
 
 
 
@@ -50,11 +49,23 @@ def add_to_structureset_handler(pdb_code,current_set):
     return redirect(return_to(pdb_code))
 
 
+@app.post('/structures/information/<string:pdb_code>/<string:information_section>/update')
+def update_structure_information_handler(pdb_code,information_section):
+    variables = common.request_variables(None)
+    if variables:
+        if 'pdb_code' in variables:
+            del variables['pdb_code']
+        histo_info, success, errors = histo.structureInfo(pdb_code).put(information_section, json.dumps(variables))
+    return redirect(return_to(pdb_code))
+
+
+
 
 @app.get('/structures/information/<string:pdb_code>')
 def structure_info_handler(pdb_code):
-    rcsb = pdb.RCSB()
+    histo_info, success, errors = histo.structureInfo(pdb_code).get()
 
+    rcsb = pdb.RCSB()
     pdb_info = rcsb.get_info(pdb_code)
 
     pdb_file = rcsb.fetch(pdb_code)
@@ -88,7 +99,8 @@ def structure_info_handler(pdb_code):
         'pdb_image_folder':pdb_image_folder, 
         'doi_url':doi_url,
         'basic_information':basic_information,
-        'complexes':complexes
+        'complexes':complexes,
+        'histo_info':histo_info
     }
     return template.render('structure_info', variables)
 

@@ -35,6 +35,11 @@
             height:14px;
         }
 
+        pre.sequence {
+            font-family:'Courier Prime','Courier New', Courier, monospace;
+            font-size: 12pt;
+        }
+
     </style>
     {% endblock %}
 
@@ -55,7 +60,8 @@
           <div class="column-full-width">
                 <div class="inner">
                     <div class="heading-medium">{{pdb_code | upper}}</div>
-                    <h1 class="heading-large vertical-spacing-bottom">{{pdb_info.struct.title}}</h1>
+                    <h1 class="heading-large">{{pdb_info.struct.title}}</h1>
+                    <div class="body-copy-smallest vertical-spacing-bottom"><a href="/structures/information/{{pdb_code}}/interesting/add">Mark as interesting</a> | <a href="/structures/information/{{pdb_code}}/edgecases/add">Mark as edge case</a></div>
                 </div>
             </div>
         </div>
@@ -65,7 +71,10 @@
         <div class="grid-container bottom-border">
             <div class="column-one-half">
                 <div class="inner vertical-spacing-top-0-5">
-                    <img class="pdb-image" src="https://cdn.rcsb.org/images/structures/{{pdb_image_folder}}/{{pdb_code}}/{{pdb_code}}_assembly-1.jpeg" />
+                    <div>
+                        <img class="pdb-image" src="https://cdn.rcsb.org/images/structures/{{pdb_image_folder}}/{{pdb_code}}/{{pdb_code}}_assembly-1.jpeg" alt="Structure of {{pdb_code}}"/>
+                    </div>
+                    <div class="body-copy-smallest"><a href="https://www.rcsb.org/structure/{{pdb_code}}" target="_new">View {{pdb_code}} entry on RCSB</a> | <a href="https://www.rcsb.org/3d-view/{{pdb_code}}/1" target="_new">Visualise {{pdb_code}} entry on RCSB</a></div>
                 </div>
             </div>
             <div class="column-one-half">
@@ -133,17 +142,46 @@
             <div class="column-full-width">
                 <div class="inner">
                     <h2 class="heading-small">Chain sequences</h2>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="">
+        <div class="grid-container">
+            <form>
+            {% for chain in basic_information.chain_sequences.chunked_one_letter_sequences %}
+            <div class="column-one-quarter">
+                <div class="inner vertical-spacing-bottom">
+                    <div><strong>{{chain}} ({{basic_information.chain_lengths[chain]}}aa)</strong></div>
                     <div>
-                        {{basic_information.chain_sequences.unique_one_letter_sequences}}
+                        <select id="{{chain}}_chain_type" name="{{chain}}_chain_type">{% for chain_type in complexes.chains %}<option value="{{complexes.chains[chain_type].label}}">{{complexes.chains[chain_type].ui_text}}</option>{% endfor %}</select>
                     </div>
+                </div>
+            </div>
+            <div class="column-three-quarters">
+                <div class="inner vertical-spacing-bottom"> 
+                    {% set chunked_sequence = basic_information.chain_sequences.chunked_one_letter_sequences[chain] %}
+                    {% for row in chunked_sequence %}
+                        <pre class="sequence">{{row}}</pre>
+                    {% endfor %}
+                    <br />
+                    <br />
+                </div>    
+            </div>
+            {% endfor %}
+            </form>
+            <div class="column-full-width">
+                <div class="inner">
+                    <div class="vertical-spacing-bottom-0-25"><input type="button" value="submit" /></div>
                 </div>
             </div>
         </div>
     </section>
 
     <section class="vertical-spacing-top-0-5">
-        <div class="grid-container">
-          <div class="column-full-width">
+        <div class="grid-container top-border">
+          <div class="column-full-width vertical-spacing-top-0-5">
             <div class="inner">
                 <h2 class="heading-small">PDB info</h2>
                 <textarea>{{pdb_info_text}}</textarea>
@@ -163,5 +201,8 @@
             </div>
         </div>
     </section>
+
+
+    
 
     {% endblock %}

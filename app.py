@@ -1,4 +1,4 @@
-from flask import Flask, request
+from flask import Flask, request, redirect
 import toml
 import json
 import logging
@@ -23,8 +23,8 @@ app.config.from_file('config.toml', toml.load)
 
 filesystem = providers.filesystemProvider(app.config['BASEDIR'])
 
-
-molecules, success, errors = filesystem.get('constants/shared/molecules')
+def return_to(pdb_code):
+    return '/structures/information/{pdb_code}'.format(pdb_code=pdb_code)
 
 
 @app.get('/')
@@ -33,15 +33,24 @@ def home_handler():
     return template.render('index', scratch_json)
 
 
-@app.get('/structures/search/<path:mhc_class>')
+@app.get('/structures/search/<string:mhc_class>')
 def structures_search_handler(mhc_class):
+    molecules, success, errors = filesystem.get('constants/shared/molecules')
     query_name = mhc_class + '_sequence_query'
     query, success, errors = filesystem.get('constants/rcsb/'+ query_name)
     search_data = pdb.RCSB().search(query)
     return template.render('structure_search', {'search_data':search_data,'molecule_metadata':molecules[mhc_class],'count':len(search_data)})
 
 
-@app.get('/structures/information/<path:pdb_code>')
+
+@app.get('/structures/information/<string:pdb_code>/<string:structureset>/add')
+def add_to_structureset_handler(pdb_code,structureset):
+    logging.warn("ADD TO " + structureset)
+    return redirect(return_to(pdb_code))
+
+
+
+@app.get('/structures/information/<string:pdb_code>')
 def structure_info_handler(pdb_code):
     rcsb = pdb.RCSB()
 
@@ -66,6 +75,7 @@ def structure_info_handler(pdb_code):
 
     basic_information = rcsb.generate_basic_information(structure, assembly_count)
 
+    complexes, success, errors = filesystem.get('constants/shared/complexes')
 
     
     variables = {
@@ -76,7 +86,8 @@ def structure_info_handler(pdb_code):
         'pdb_info_text':json.dumps(pdb_info, sort_keys=True, indent=4), 
         'pdb_image_folder':pdb_image_folder, 
         'doi_url':doi_url,
-        'basic_information':basic_information
+        'basic_information':basic_information,
+        'complexes':complexes
     }
     return template.render('structure_info', variables)
 

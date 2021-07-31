@@ -1,4 +1,3 @@
-from functions.providers import filesystem
 import json
 
 from Bio.PDB import *
@@ -26,7 +25,7 @@ class RCSB():
     hetgroups = None
 
     def __init__(self):
-        self.hetgroups = ['HOH','IOD','PEG','NAG','NA','GOL','EDO','S04','15P','PG4',' NA','FME',' CD','SEP']
+        self.hetgroups = ['HOH','IOD','PEG','NAG','NA','GOL','EDO','S04','15P','PG4',' NA','FME',' CD','SEP',' CL',' CA', 'SO4']
 
     def fetch(self, pdb_code):
         filepath = 'structures/pdb_format/raw/{pdb_code}'.format(pdb_code = pdb_code)
@@ -68,6 +67,7 @@ class RCSB():
             try:
                 one_letter = amino_acids["natural"]["translations"]["three_letter"][residue.lower()]
             except:
+                logging.warn('NEW HET ATOM ' + residue)
                 one_letter = 'z'
         else:
             one_letter = 'x'
@@ -84,10 +84,6 @@ class RCSB():
             sequence = sequence[residues_per_line:]
             length = len(sequence)
         chunked_sequence.append(sequence)
-        logging.warn(length)
-        logging.warn(residues_per_line)
-        logging.warn(line_count)
-        logging.warn(chunked_sequence)
         return chunked_sequence
 
 
@@ -105,8 +101,6 @@ class RCSB():
 
 
     def generate_basic_information(self, structure, assembly_count):
-        
-        logging.warn("GENERATING BASIC INFORMATION")
         
         chains = [chain.id for chain in structure.get_chains()]
 
@@ -145,10 +139,6 @@ class RCSB():
             unique_chain_lengths.append(len(this_chain_sequence_array))
             chunked_one_letter_sequences['chain_' + str(i)] = self.chunk_one_letter_sequence(unique_one_letter_sequences['chain_' + str(i)],80) 
             chain_lengths['chain_' + str(i)] = len(this_chain_sequence_array)
-
-
-        for possible_complex in possible_complexes:
-            logging.warn(possible_complex)
 
 
 

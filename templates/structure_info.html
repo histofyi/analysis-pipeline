@@ -111,14 +111,19 @@
                             Pages {{pdb_info.rcsb_primary_citation.page_first}}-{{pdb_info.rcsb_primary_citation.page_first}} ({{pdb_info.rcsb_primary_citation.year}})
                     </div>
                     <div class="body-copy-small vertical-spacing-top-0-5 vertical-spacing-bottom-0-25"><strong>Additional publication details:</strong></div>
-                    <div>    
-                    <form>
+                    <div>
+                        {% if histo_info.publication %}
+                            <div>{% if histo_info.publication.open_access %}<object data="/static/oa_icon.svg" type="image/svg+xml" class="oa_icon"></object>{% endif %} <a href="{{histo_info.publication.pdf_url}}" target="_new">View PDF</a></a> </div>
+                        {% else %}
+                        <form action="/structures/information/{{pdb_code}}/publication/update" method="POST">
+                            <input type="text" id="params" name="params" value="[&quot;pdb_code&quot;,&quot;open_access&quot;,&quot;pdf_url&quot;]">
                             <input type="hidden" id="pdb_code" name="pdb_code" value="{{pdb_code}}" />
                             <label class="body-copy-smallest" for="open_access"><object data="/static/oa_icon.svg" type="image/svg+xml" class="oa_icon"></object> Open Access?</label>
                             <input type="checkbox" id="open_access" name="open_access" /><br>
                             <label class="body-copy-smallest" for="pdf_url">PDF url </label><input type="text" id="pdf_url" name="pdf_url"/><br />
-                            <div class="vertical-spacing-top-0-25"><input type="button" value="submit" /></div>
+                            <div class="vertical-spacing-top-0-25"><input type="submit" value="submit" /></div>
                         </form>
+                        {% endif %}
                     </div>
                     <h3 class="heading-small vertical-spacing-top-0-5 vertical-spacing-bottom-0-25">Complex details</h3>
                     <div class="body-copy-small"><strong>Possible complex types:</strong></div>
@@ -132,7 +137,7 @@
                         <label class="body-copy-smallest" for="not_mhc_related">not_mhc_related</label><br>
                         <input type="radio" id="other" name="complex_type" value="other">
                         <label class="body-copy-smallest" for="other">other (please state) </label><input type="text" id="other_description" name="other_description"/>
-                        <div class="vertical-spacing-top-0-25"><input type="button" value="submit" /></div>
+                        <div class="vertical-spacing-top-0-25"><input type="submit" value="submit" /></div>
                     </form>
                 </div>
             </div>

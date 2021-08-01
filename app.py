@@ -44,6 +44,10 @@ def structures_search_handler(mhc_class):
 
 @app.post("/structures/information/<string:pdb_code>/assignchains")
 def assign_structure_chains(pdb_code):
+    mhc_class = None
+    length_name = None
+    peptide_sequence = None
+
     variables = common.request_variables(['chain_count'])
     chain_count = int(variables['chain_count'])
     params = []
@@ -53,6 +57,7 @@ def assign_structure_chains(pdb_code):
         params.append('chain_'+ this_chain + '_length')
         params.append('chain_'+ this_chain + '_assignments')
         params.append('chain_'+ this_chain + '_chain_type')
+        params.append('chain_'+ this_chain + '_sequence')
         i += 1
     variables = common.request_variables(params)
     variables['chain_count'] = chain_count
@@ -66,7 +71,28 @@ def assign_structure_chains(pdb_code):
         info[this_chain_name]['length'] = variables[this_chain_name + '_length']
         info[this_chain_name]['assignments'] = variables[this_chain_name + '_assignments']
         info[this_chain_name]['chain_type'] = variables[this_chain_name + '_chain_type']
+        info[this_chain_name]['sequence'] = variables[this_chain_name + '_sequence']
+        data, success, errors = lists.structureSet('chains/' + variables[this_chain_name + '_chain_type']).add(pdb_code)
+
+        if 'peptide' in variables[this_chain_name + '_chain_type']:
+            mhc_class = variables[this_chain_name + '_chain_type'].replace('_peptide','')
+            peptide_lengths, success, errors = filesystem.get('constants/shared/peptide_lengths')
+            peptide_length = int(variables[this_chain_name + '_length'])
+            logging.warn("PEPTIDE KLAXON for " + this_chain_name)
+            if peptide_length < 20:
+                for peptide_type in peptide_lengths:
+                    if peptide_lengths[peptide_type]['length'] == peptide_length:
+                        length_name = peptide_type
+                        peptide_sequence = variables[this_chain_name + '_sequence'].lower()
+            else:
+                length_name = "overlength"
+            data, success, errors = lists.structureSet('peptides/' + mhc_class + '/lengths/' + length_name).add(pdb_code)
+            data, success, errors = lists.structureSet('peptides/' + mhc_class + '/sequences/' + peptide_sequence).add(pdb_code)
         i += 1
+    
+    logging.warn(mhc_class)
+    logging.warn(length_name)
+    logging.warn(peptide_sequence)
 
     histo_info, success, errors = histo.structureInfo(pdb_code).put('chains', json.dumps(info))
     return redirect(return_to(pdb_code))
@@ -91,6 +117,12 @@ def update_structure_information_handler(pdb_code,information_section):
         histo_info, success, errors = histo.structureInfo(pdb_code).put(information_section, json.dumps(variables))
         if 'complex_type' in variables:
             data, success, errors = lists.structureSet(variables['complex_type']).add(pdb_code)
+        if 'open_access' in variables:
+            data, success, errors = lists.structureSet('open_access').add(pdb_code)
+        if 'paywalled' in variables:
+            data, success, errors = lists.structureSet('paywalled').add(pdb_code)
+        if 'missing_publication' in variables:
+            data, success, errors = lists.structureSet('missing_publication').add(pdb_code)
     return redirect(return_to(pdb_code))
 
 

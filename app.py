@@ -42,15 +42,48 @@ def structures_search_handler(mhc_class):
     return template.render('structure_search', {'search_data':search_data,'molecule_metadata':molecules[mhc_class],'count':len(search_data)})
 
 
+@app.post("/structures/information/<string:pdb_code>/assignchains")
+def assign_structure_chains(pdb_code):
+    variables = common.request_variables(['chain_count'])
+    chain_count = int(variables['chain_count'])
+    params = []
+    i = 1
+    while i <= chain_count:
+        this_chain = str(i)
+        params.append('chain_'+ this_chain + '_length')
+        params.append('chain_'+ this_chain + '_assignments')
+        params.append('chain_'+ this_chain + '_chain_type')
+        i += 1
+    variables = common.request_variables(params)
+    variables['chain_count'] = chain_count
+    info = {}
+
+    i = 1
+    while i <= chain_count:
+        i 
+        this_chain_name = 'chain_' + str(i)
+        info[this_chain_name] = {}
+        info[this_chain_name]['length'] = variables[this_chain_name + '_length']
+        info[this_chain_name]['assignments'] = variables[this_chain_name + '_assignments']
+        info[this_chain_name]['chain_type'] = variables[this_chain_name + '_chain_type']
+        i += 1
+
+    histo_info, success, errors = histo.structureInfo(pdb_code).put('chains', json.dumps(info))
+    return redirect(return_to(pdb_code))
+
+
 
 @app.get('/structures/information/<string:pdb_code>/<string:current_set>/add')
 def add_to_structureset_handler(pdb_code,current_set):
+    logging.warn("ADD TO SET " + current_set)
     data, success, errors = lists.structureSet(current_set).add(pdb_code)
     return redirect(return_to(pdb_code))
 
 
+
 @app.post('/structures/information/<string:pdb_code>/<string:information_section>/update')
 def update_structure_information_handler(pdb_code,information_section):
+    logging.warn("UPDATING INFORMATION " + information_section)
     variables = common.request_variables(None)
     if variables:
         if 'pdb_code' in variables:
@@ -59,6 +92,7 @@ def update_structure_information_handler(pdb_code,information_section):
         if 'complex_type' in variables:
             data, success, errors = lists.structureSet(variables['complex_type']).add(pdb_code)
     return redirect(return_to(pdb_code))
+
 
 
 

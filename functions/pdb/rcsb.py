@@ -164,6 +164,7 @@ class RCSB():
             "structure_stats":structure_stats,
             "possible_complexes":possible_complexes,
             "possible_complexes_labels": possible_complexes_labels,
+            "unique_chain_count": len(unique_chains),
             "chain_lengths":chain_lengths,
             "chain_label_sets":chain_label_sets,
             "chain_sequences":{

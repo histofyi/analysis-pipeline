@@ -127,7 +127,7 @@
                     </div>
                     <h3 class="heading-small vertical-spacing-top-0-5 vertical-spacing-bottom-0-25">Complex details</h3>
                     {% if histo_info.complex_type %}
-                        <div>{{complexes.complex_labels[histo_info.complex_type.complex_type]}}</div>
+                        <div>{{complexes.complex_labels[histo_info.complex_type.complex_type]|safe}}</div>
                     {% else %}
                         <div class="body-copy-small"><strong>Possible complex types:</strong></div>
                         <form action="/structures/information/{{pdb_code}}/complex_type/update" method="POST">
@@ -161,9 +161,10 @@
 
     <section class="">
         <div class="grid-container">
-            <form>
+            <form action="/structures/information/{{pdb_code}}/assignchains" method="post">
+
                 <input type="hidden" id="pdb_code" name="pdb_code" value="{{pdb_code}}" />
-                <input type="hidden" id="chain_count" name="chain_count" value="{{pdb_code}}" />
+                <input type="text" id="chain_count" name="chain_count" value="{{basic_information.unique_chain_count}}" />
                 {% for chain in basic_information.chain_sequences.chunked_one_letter_sequences %}
                 <div class="column-one-quarter">
                     <div class="inner vertical-spacing-bottom">
@@ -171,9 +172,9 @@
                         <div>
                             <select id="{{chain}}_chain_type" name="{{chain}}_chain_type">{% for chain_type in complexes.chains %}<option value="{{complexes.chains[chain_type].label}}">{{complexes.chains[chain_type].ui_text}}</option>{% endfor %}</select>
                             <br />
-                            <label class="body-copy-smallest" for="chain_{{chain}}_assignments">Labels</label>
-                            </label><input type="text" id = "chain_{{chain}}_assignments" name="chain_{{chain}}_assignments" value={{basic_information.chain_label_sets[chain] | join(',')}} />
-                            <input type="hidden" id="chain_{{chain}}_length" name="chain_{{chain}}_length" value="{{basic_information.chain_lengths[chain]}}" />
+                            <label class="body-copy-smallest" for="{{chain}}_assignments">Labels</label>
+                            </label><input type="text" id = "{{chain}}_assignments" name="{{chain}}_assignments" value={{basic_information.chain_label_sets[chain] | join(',')}} />
+                            <input type="hidden" id="{{chain}}_length" name="{{chain}}_length" value="{{basic_information.chain_lengths[chain]}}" />
                         </div>
                     </div>
                 </div>
@@ -189,12 +190,12 @@
                     </div>    
                 </div>
                 {% endfor %}
-            </form>
             <div class="column-full-width">
                 <div class="inner">
-                    <div class="vertical-spacing-bottom-0-25"><input type="button" value="submit" /></div>
+                    <div class="vertical-spacing-bottom-0-25"><input type="submit" value="submit" /></div>
                 </div>
             </div>
+            </form>
         </div>
     </section>
 

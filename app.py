@@ -56,6 +56,8 @@ def update_structure_information_handler(pdb_code,information_section):
         if 'pdb_code' in variables:
             del variables['pdb_code']
         histo_info, success, errors = histo.structureInfo(pdb_code).put(information_section, json.dumps(variables))
+        if 'complex_type' in variables:
+            data, success, errors = lists.structureSet(variables['complex_type']).add(pdb_code)
     return redirect(return_to(pdb_code))
 
 

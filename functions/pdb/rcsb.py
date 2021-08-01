@@ -24,7 +24,7 @@ class RCSB():
     complexes = None
 
     def __init__(self):
-        self.hetgroups = ['HOH','IOD','PEG','NAG','NA','GOL','EDO','S04','15P','PG4',' NA','FME',' CD','SEP',' CL',' CA', 'SO4']
+        self.hetgroups = ['HOH','IOD','PEG','NAG','NA','GOL','EDO','S04','15P','PG4',' NA','FME',' CD','SEP',' CL',' CA', 'SO4','ACT',' MG']
         self.amino_acids, success, errors = file.get('constants/shared/amino_acids')
         self.complexes, success, errors = file.get('constants/shared/complexes')
 
@@ -68,7 +68,7 @@ class RCSB():
             try:
                 one_letter = self.amino_acids["natural"]["translations"]["three_letter"][residue.lower()]
             except:
-                #logging.warn('NEW HET ATOM ' + residue)
+                logging.warn('NEW HET ATOM ' + residue)
                 one_letter = 'z'
         else:
             one_letter = 'x'
@@ -120,6 +120,23 @@ class RCSB():
 
         possible_complexes, possible_complexes_labels = self.predict_possible_complexes(chain_count)
 
+        logging.warn("BUILDING CHAIN LABEL SETS")
+
+        chain_label_sets = {}
+
+        i = 1
+
+        for chain in structure.get_chains():
+            chain_number = 'chain_' + str(i)
+            if not chain_number in chain_label_sets:
+                chain_label_sets[chain_number] = [chain.id]
+            else:
+                chain_label_sets[chain_number].append(chain.id)
+            if i < chain_count:
+                i += 1
+            else:
+                i = 1
+
         chain_sequence_arrays = [[residue.resname for residue in chain if residue.resname not in self.hetgroups] for chain in structure.get_chains()]
         
         i = 0
@@ -148,6 +165,7 @@ class RCSB():
             "possible_complexes":possible_complexes,
             "possible_complexes_labels": possible_complexes_labels,
             "chain_lengths":chain_lengths,
+            "chain_label_sets":chain_label_sets,
             "chain_sequences":{
                 "unique_one_letter_sequences":unique_one_letter_sequences,
                 "unique_chains_three_letter":unique_chain_sequences,

@@ -1,13 +1,19 @@
 from ..providers import filesystemProvider
 import json
+import datetime
 
 import logging
+
 
 file = filesystemProvider(None)
 
 class structureSet():
 
     setname = None
+    default_structure = {
+                            "last_updated":None,
+                            "set": []
+                        }
 
     def __init__(self, setname):
         self.setname = setname
@@ -24,8 +30,10 @@ class structureSet():
             structureset = json.loads(structureset)
         except:
             structureset = structureset
-        if item not in structureset:
-            structureset.append(item)
+        
+        if item not in structureset['set']:
+            structureset['set'].append(item)
+            structureset['last_updated'] = datetime.datetime.now().isoformat()
             structureset, success, errors = file.put(self.build_set_path(), json.dumps(structureset))
         return structureset, success, errors
 
@@ -33,7 +41,7 @@ class structureSet():
     def get(self):
         structureset, success, errors = file.get(self.build_set_path())
         if not structureset:
-            structureset, success, errors = file.put(self.build_set_path(), json.dumps([]))
+            structureset, success, errors = file.put(self.build_set_path(), json.dumps(self.default_structure))
         return structureset, success, errors
 
 

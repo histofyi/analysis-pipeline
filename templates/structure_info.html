@@ -163,13 +163,16 @@
         <div class="grid-container">
             <form>
                 <input type="hidden" id="pdb_code" name="pdb_code" value="{{pdb_code}}" />
+                <input type="hidden" id="chain_count" name="chain_count" value="{{pdb_code}}" />
                 {% for chain in basic_information.chain_sequences.chunked_one_letter_sequences %}
                 <div class="column-one-quarter">
                     <div class="inner vertical-spacing-bottom">
                         <div><strong>{{chain}} ({{basic_information.chain_lengths[chain]}}aa)</strong></div>
                         <div>
                             <select id="{{chain}}_chain_type" name="{{chain}}_chain_type">{% for chain_type in complexes.chains %}<option value="{{complexes.chains[chain_type].label}}">{{complexes.chains[chain_type].ui_text}}</option>{% endfor %}</select>
-                            <input type="text" id = "chain_{{chain}}_assignments" name="chain_{{chain}}_assignments" value={{basic_information.chain_label_sets[chain] | join(',')}} />
+                            <br />
+                            <label class="body-copy-smallest" for="chain_{{chain}}_assignments">Labels</label>
+                            </label><input type="text" id = "chain_{{chain}}_assignments" name="chain_{{chain}}_assignments" value={{basic_information.chain_label_sets[chain] | join(',')}} />
                             <input type="hidden" id="chain_{{chain}}_length" name="chain_{{chain}}_length" value="{{basic_information.chain_lengths[chain]}}" />
                         </div>
                     </div>

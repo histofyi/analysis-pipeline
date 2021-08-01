@@ -90,10 +90,7 @@ def assign_structure_chains(pdb_code):
             data, success, errors = lists.structureSet('peptides/' + mhc_class + '/sequences/' + peptide_sequence).add(pdb_code)
         i += 1
     
-    logging.warn(mhc_class)
-    logging.warn(length_name)
-    logging.warn(peptide_sequence)
-
+    data, success, errors = lists.structureSet('chain_assignment_complete').add(pdb_code)
     histo_info, success, errors = histo.structureInfo(pdb_code).put('chains', json.dumps(info))
     return redirect(return_to(pdb_code))
 

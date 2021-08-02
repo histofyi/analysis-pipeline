@@ -9,6 +9,6 @@
     {% if nav == navitem %}
         <li><a class="is-active" href="/{{navitem}}">{{navitem|title}}</a></li>
     {% else %}
-        <li><a href="/navitem">{{navitem|title}}</a></li>
+        <li><a href="/{{navitem}}">{{navitem|title}}</a></li>
     {% endif %}
 {% endfor %}

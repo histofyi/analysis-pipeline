@@ -33,7 +33,7 @@ def timesince(dt, default="just now"):
 
     now = datetime.utcnow()
     diff = now - dt
-    
+
     periods = (
         (diff.days / 365, "year", "years"),
         (diff.days / 30, "month", "months"),
@@ -43,6 +43,9 @@ def timesince(dt, default="just now"):
         (diff.seconds / 60, "minute", "minutes"),
         (diff.seconds, "second", "seconds"),
     )
+
+    if '-1' in str(diff):
+        return "just now"
 
     for period, singular, plural in periods:
         

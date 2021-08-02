@@ -172,6 +172,14 @@ def structure_info_handler(pdb_code):
 
 
 
+@app.get('/sets')
+def sets_list_handler():
+    return template.render('sets', {'nav':'sets'})
+
+
+
+
+
 @app.get('/design-system')
 def design_system_hander():
     return template.render('design_system', {})

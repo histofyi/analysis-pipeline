@@ -6,6 +6,7 @@ import logging
 import os
 import sys
 sys.path.insert(0, os.path.dirname(os.path.abspath(os.path.dirname(__file__))))
+
 from datetime import datetime
 
 import functions.providers as providers
@@ -201,6 +202,18 @@ def structure_info_handler(pdb_code):
     return template.render('structure_info', variables)
 
 
+@app.get('/sets/<string:slug>')
+def sets_display_handler(slug):
+    rcsb = pdb.RCSB()
+    structureset, success, errors = lists.structureSet(slug).get()
+    structureset['pdb_info'] = {}
+    structureset['histo_info'] = {}
+    for pdb_code in structureset['set']:
+        histo_info, success, errors = histo.structureInfo(pdb_code).get()
+        structureset['histo_info'][pdb_code] = histo_info
+        structureset['pdb_info'][pdb_code] = rcsb.get_info(pdb_code)['struct']
+    return template.render('set', {'nav':'sets','set':structureset})
+
 
 @app.get('/sets')
 def sets_list_handler():
@@ -215,10 +228,6 @@ def sets_list_handler():
         sets[category] = {}
         for set in set_list[category]:
             sets[category][set], success, errors = lists.structureSet(set).get()
-            set_length = len(sets[category][set]['set'])
-            sets[category][set]['length'] = set_length
-            sets[category][set]['last_updated'] = datetime.fromisoformat(sets[category][set]['last_updated'])
-            sets[category][set]['label'] = set.replace('_',' ').title()
     return template.render('sets', {'nav':'sets','sets':sets})
 
 

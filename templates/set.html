@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+
+{% block main %}
+
+
+<section class="vertical-spacing-top">
+  <div class="grid-container">
+    <div class="column-full-width">
+      <div class="inner">
+        <h1 class="vertical-spacing-bottom-0-25">{{set.ui_text}}</h1>
+        <div>Last updated {{set.last_updated|timesince}} | {{set.length}} items</div>
+        
+        <div class="vertical-spacing-top">
+          {% for structure in set.set %}
+          <div class="vertical-spacing-top-0-25"><strong><a href="/structures/information/{{structure}}">{{structure}}</a></strong> : {{set['pdb_info'][structure].title}}</div>
+          <div class="vertical-spacing-bottom-0-5">
+            {{set['pdb_info'][structure].pdbx_descriptor}}
+          </div>
+          <div class="vertical-spacing-bottom-0-5">
+            {{set['histo_info'][structure]}}
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+
+{% endblock %}

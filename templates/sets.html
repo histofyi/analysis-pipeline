@@ -25,7 +25,7 @@
             {% for set in sets[category] %}
                 {% set this_set = sets[category][set]%}
                 <div class="vertical-spacing-bottom-0-25">
-                    <h3 class="heading-small vertical-spacing-bottom-0-25 vertical-spacing-top">{{this_set.label}}</h3>
+                    <h3 class="heading-small vertical-spacing-bottom-0-25 vertical-spacing-top"><a href="/sets/{{this_set.slug}}">{{this_set.ui_text}}</a></h3>
                     <div>Last updated {{this_set.last_updated|timesince}} | {{this_set.length}} items</div>
                 </div>
             {% endfor %}

@@ -41,7 +41,14 @@ class structureSet():
     def get(self):
         structureset, success, errors = file.get(self.build_set_path())
         if not structureset:
-            structureset, success, errors = file.put(self.build_set_path(), json.dumps(self.default_structure))
+            payload = self.default_structure
+            payload['last_updated'] = datetime.datetime.now().isoformat()
+            structureset, success, errors = file.put(self.build_set_path(), json.dumps(payload))
+        
+        structureset['length'] = len(structureset['set'])
+        structureset['last_updated'] = datetime.datetime.fromisoformat(structureset['last_updated'])
+        structureset['ui_text'] = self.setname.replace('_',' ').title()
+        structureset['slug'] = self.setname
         return structureset, success, errors
 
 

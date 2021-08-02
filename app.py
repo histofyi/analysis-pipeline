@@ -3,7 +3,10 @@ import toml
 import json
 import logging
 
-
+import os
+import sys
+sys.path.insert(0, os.path.dirname(os.path.abspath(os.path.dirname(__file__))))
+from datetime import datetime
 
 import functions.providers as providers
 import functions.template as template
@@ -16,9 +19,36 @@ import functions.histo as histo
 from api import api
 
 
-
 app = Flask(__name__)
 app.config.from_file('config.toml', toml.load)
+
+
+@app.template_filter()
+def timesince(dt, default="just now"):
+    """
+    Returns string representing "time since" e.g.
+    3 days ago, 5 hours ago etc.
+    """
+
+    now = datetime.utcnow()
+    diff = now - dt
+    
+    periods = (
+        (diff.days / 365, "year", "years"),
+        (diff.days / 30, "month", "months"),
+        (diff.days / 7, "week", "weeks"),
+        (diff.days, "day", "days"),
+        (diff.seconds / 3600, "hour", "hours"),
+        (diff.seconds / 60, "minute", "minutes"),
+        (diff.seconds, "second", "seconds"),
+    )
+
+    for period, singular, plural in periods:
+        
+        if period:
+            return "%d %s ago" % (period, singular if period == 1 else plural)
+
+    return default
 
 
 filesystem = providers.filesystemProvider(app.config['BASEDIR'])
@@ -178,7 +208,7 @@ def sets_list_handler():
         'publications':['open_access','paywalled','missing_publication'],
         'structures':[],
         'editorial':['interesting'],
-        'curatorial':['edgecases','exclude','incorrect_chain_labels ']
+        'curatorial':['edgecases','exclude','incorrect_chain_labels']
     }
     sets = {}
     for category in set_list:
@@ -187,6 +217,8 @@ def sets_list_handler():
             sets[category][set], success, errors = lists.structureSet(set).get()
             set_length = len(sets[category][set]['set'])
             sets[category][set]['length'] = set_length
+            sets[category][set]['last_updated'] = datetime.fromisoformat(sets[category][set]['last_updated'])
+            sets[category][set]['label'] = set.replace('_',' ').title()
     return template.render('sets', {'nav':'sets','sets':sets})
 
 

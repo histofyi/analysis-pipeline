@@ -5,7 +5,7 @@
 
 <section class="vertical-spacing-top">
   <div class="grid-container">
-    <div class="column-full-width bottom-border">
+    <div class="column-full-width">
       <div class="inner">
         <h1 class="vertical-spacing-bottom">Sets</h1>
         <p>
@@ -16,54 +16,24 @@
   </div>
 </section>
 
-
+{% for category in sets %}
 <section class="vertical-spacing-top">
     <div class="grid-container">
       <div class="column-full-width">
-        <div class="inner">
-          <h2 class="vertical-spacing-bottom">Complexes</h1>
-          <p>
-            MHC Class I with peptide
-          </p>
-          <p>
-            MHC Class I with peptide and &alpha;/&beta; T cell receptor
-          </p>
-          <p>
-            MHC Class I with peptide and &alpha;/&beta; NK receptor
-          </p>
-          <p>
-            MHC Class I with peptide and accessory molecule
-          </p>
+        <div class="inner top-border">
+          <h2 class="vertical-spacing-top heading-medium">{{category|title}}</h1>
+            {% for set in sets[category] %}
+                {% set this_set = sets[category][set]%}
+                <div class="vertical-spacing-bottom-0-25">
+                    <h3 class="heading-small vertical-spacing-bottom-0-25 vertical-spacing-top">{{this_set.label}}</h3>
+                    <div>Last updated {{this_set.last_updated|timesince}} | {{this_set.length}} items</div>
+                </div>
+            {% endfor %}
         </div>
       </div>
     </div>
 </section>
-
-
-
-<section class="vertical-spacing-top">
-    <div class="grid-container">
-      <div class="column-full-width">
-        <div class="inner">
-          <h2 class="vertical-spacing-bottom">Publications</h1>
-          <p>
-            Open access
-          </p>
-          <p>
-            Paywalled
-          </p>
-          <p>
-            Missing publication details
-          </p>
-        </div>
-      </div>
-    </div>
-  </section>
-
-
-
-
-
+{% endfor %}
 
 
 {% endblock %}

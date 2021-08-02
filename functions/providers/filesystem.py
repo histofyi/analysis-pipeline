@@ -50,9 +50,13 @@ class filesystemProvider():
             _file = self.get_file_handle(filename, format, 'x')
         if _file: 
             success = True
-            _file.write(payload)
-            _file.close()     
-            data = payload
+            if payload:
+                _file.write(payload)
+                _file.close()
+            if format == 'json':
+                data = json.loads(payload)
+            else:     
+                data = payload
             return data, True, []   
         else:
             return None, False, ['cannot_get_or_create']

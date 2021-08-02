@@ -156,6 +156,7 @@ def structure_info_handler(pdb_code):
 
     
     variables = {
+        'nav':'structures',
         'pdb_file':pdb_file, 
         'pdb_code':pdb_code, 
         'pdb_info':pdb_info, 

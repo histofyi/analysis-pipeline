@@ -1,4 +1,14 @@
 <li><span class="is-site-name" href="/">Pipeline</a></span>
-<li><a class="is-active" href="/">Home</a></li>
-<li><a class="" href="/structures">Structures</a></li>
-<li><a class="" href="/weeknotes">Weeknotes</a></li>
+{% if not nav %}
+    <li><a class="is-active" href="/">Home</a></li>
+{% else %}
+    <li><a href="/">Home</a></li>
+{% endif %}
+{% set navitems = ['structures','sets','peptides','weeknotes'] %}
+{% for navitem in navitems %}
+    {% if nav == navitem %}
+        <li><a class="is-active" href="/{{navitem}}">{{navitem|title}}</a></li>
+    {% else %}
+        <li><a href="/navitem">{{navitem|title}}</a></li>
+    {% endif %}
+{% endfor %}

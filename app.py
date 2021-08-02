@@ -174,7 +174,20 @@ def structure_info_handler(pdb_code):
 
 @app.get('/sets')
 def sets_list_handler():
-    return template.render('sets', {'nav':'sets'})
+    set_list = {
+        'publications':['open_access','paywalled','missing_publication'],
+        'structures':[],
+        'editorial':['interesting'],
+        'curatorial':['edgecases','exclude','incorrect_chain_labels ']
+    }
+    sets = {}
+    for category in set_list:
+        sets[category] = {}
+        for set in set_list[category]:
+            sets[category][set], success, errors = lists.structureSet(set).get()
+            set_length = len(sets[category][set]['set'])
+            sets[category][set]['length'] = set_length
+    return template.render('sets', {'nav':'sets','sets':sets})
 
 
 

@@ -250,8 +250,6 @@ def structure_info_handler(pdb_code):
     # load the structure into BioPython
     structure = rcsb.load_structure(pdb_code)
 
-    logging.warn(structure)
-
     # try to resolve the DOI in the rcsb data
     try:
         doi_url = rcsb.resolve_doi(pdb_info["rcsb_primary_citation"]["pdbx_database_id_doi"])

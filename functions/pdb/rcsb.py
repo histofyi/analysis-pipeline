@@ -26,7 +26,7 @@ class RCSB():
     peptide_cutoff = None
 
     def __init__(self):
-        self.hetgroups = ['HOH','IOD','PEG','NAG','NA','GOL','EDO','S04','15P','PG4',' NA','FME',' CD','SEP',' CL',' CA', 'SO4','ACT',' MG']
+        self.hetgroups = ['HOH','IOD','PEG','NAG','NA','GOL','EDO','S04','15P','PG4',' NA','FME',' CD','SEP',' CL',' CA', 'SO4','ACT',' MG','Q81',' NI']
         self.amino_acids, success, errors = file.get('constants/shared/amino_acids')
         self.complexes, success, errors = file.get('constants/shared/complexes')
         self.peptide_cutoff = 30
@@ -136,10 +136,19 @@ class RCSB():
             
 
     def predict_assigned_chains(self, structure, assembly_count):
+        # get the basic stats on the structure
         structure_stats = self.get_structure_stats(structure, assembly_count)
+
+        # given the number of unique chains, get a set of all the possible complexes
         possible_complexes, possible_complex_labels = self.suggest_possible_complexes(structure_stats['chain_count'])
+
+        # initialise some variables
         possible_chains = {}
-        possible_assignments = {}
+        chain_assignments = {}
+        possible_class = ''
+
+
+        # first generate a set of all possible chain types in all the possible complexes
         for complex in possible_complexes:
             for item in complex:
                 if item == 'label':
@@ -148,50 +157,112 @@ class RCSB():
                     if complex[item] not in possible_chains and 'peptide' not in complex[item]:
                         possible_chains[complex[item]] = self.complexes['chains'][complex[item]]
 
+
+        # then start working on the chains within the comples
         for chain in structure_stats['chainset']:
             current_chain = structure_stats['chainset'][chain]
             current_chain['id'] = chain
 
             # Look for peptide chains, they'll be the easiest to assign as they're short
             if current_chain['sequence']['length'] < self.peptide_cutoff:
-                if not 'peptide' in possible_assignments:
-                    possible_assignments['peptide'] = {'chains':[],'sequences':[],'lengths':[]}
-                possible_assignments['peptide']['chains'].append(current_chain['id'])
-                possible_assignments['peptide']['sequences'].append(current_chain['sequence']['one_letter_sequence_string'])
-                possible_assignments['peptide']['lengths'].append(current_chain['sequence']['length'])
-                logging.warn("Chain " + current_chain['id'] + " is likely to be peptide")
+                if not 'peptide' in chain_assignments:
+                    chain_assignments['peptide'] = {'chains':[],'sequences':[],'lengths':[]}
+                chain_assignments['peptide']['chains'].append(current_chain['id'])
+                chain_assignments['peptide']['sequences'].append(current_chain['sequence']['one_letter_sequence_string'])
+                chain_assignments['peptide']['lengths'].append(current_chain['sequence']['length'])
+                chain_assignments['peptide']['confidence'] = 1.0
 
+            # then iterate through all the possible chains and calculate the Levenshtein ratio for all the possible chains vs the current actual chain
             for possible_chain_label in possible_chains:
                 possible_chain = possible_chains[possible_chain_label]
-                if possible_chain['example']:
+                if 'example' in possible_chain:
+                    # first check there's an example sequence in the possible chain to compare against. In future this should be an array of sequences
                     if len(possible_chain['example']) > 1:
                         ratio, distance = levenshtein_ratio_and_distance(possible_chain['example'], current_chain['sequence']['one_letter_sequence_string'])
+                        # next see if the score is above the acceptable distance 
                         if ratio > possible_chain['acceptable_distance']:
-                            logging.warn("Chain " + current_chain['id'] + " is likely to be " + possible_chain_label)
-                            logging.warn(ratio)
-                
+                            if not possible_chain_label in chain_assignments:
+                                # and if this is the case and that chain is not in the assignments already, then add it to them
+                                chain_assignments[possible_chain_label] = {'chains':[],'sequences':[],'lengths':[]}
+                            chain_assignments[possible_chain_label]['confidence'] = ratio
+                            chain_assignments[possible_chain_label]['lengths'].append(current_chain['sequence']['length'])
+                            chain_assignments[possible_chain_label]['chains'].append(current_chain['id'])
+                            chain_assignments[possible_chain_label]['sequences'].append(current_chain['sequence']['one_letter_sequence_string'])
+                            chain_assignments[possible_chain_label]['label'] = possible_chain_label
+                            # if we see a good match for one of the Class I or Class II chains, we can assign that complex
+                            if 'class_i_' in possible_chain_label:
+                                possible_class = 'class_i'
+                            elif 'class_ii_' in possible_chain_label:
+                                possible_class = 'class_ii'
+        # we can now reassign the chain marked as 'peptide' into either a Class I or Class II bound peptide        
+        if 'peptide' in chain_assignments:
+            chain_assignments[possible_class +'_peptide'] = chain_assignments['peptide']
+            chain_assignments[possible_class +'_peptide']['label'] = possible_class +'_peptide'
+            del chain_assignments['peptide']
 
+        # next up scoring and assigning the complexes                
+        complex_hits = {}
 
+        # iterate through the possible complexes to look for matches
+        for complex in possible_complexes:
+            score = 0
+            itemcount = 0
+            matches = []
+            for item in complex:
+                if item == 'label':
+                    label = complex['label']
+                else:
+                    if complex[item] in chain_assignments:
+                        # if we find a matching label, we assign the confidence score of the individual chain to be part of an aggregate score
+                        score += chain_assignments[complex[item]]['confidence']
+                        # add it to the list of chain matches
+                        matches.append(complex[item])
+                    # and iterate the number of chains
+                    itemcount += 1
+
+            # for now, we're going to avoid non-classical assignments as they're a bit more complex        
+            if not 'non_classical' in label:
+                complex_hits[label] = {
+                    'matches':matches,
+                    'score':score,
+                    'itemcount':itemcount,
+                    'confidence':float(score)/float(itemcount)
+                }            
+
+        # finally we're looking for the best scoring complex as something to recommend, we're not automatically assigning yet
+        # TODO automatically assign for the high confidence matches
+        best_score = 0
+        best_match = ''
+        for item in complex_hits:
+            confidence = complex_hits[item]['confidence']
+            if confidence > 0.5:
+                if confidence > best_score:
+                    best_score = confidence
+                    best_match = item
 
         variables = {
             'possible_complexes':possible_complexes,
-            'possible_assignments':possible_assignments,
-            'possible_chains': possible_chains,
-            'structure_stats':structure_stats
+            'chain_assignments':chain_assignments,
+            'structure_stats':structure_stats,
+            'best_match': {
+                'best_match': best_match,
+                'confidence': best_score
+            },
+            'complex_hits':complex_hits
         }
         return variables
 
 
 
+
+
     def generate_basic_information(self, structure, assembly_count):
-        logging.warn(structure)        
 
         structure_stats = self.get_structure_stats(structure, assembly_count)
 
         
         possible_complexes, possible_complexes_labels = self.suggest_possible_complexes(structure_stats['chain_count'])
 
-        logging.warn("BUILDING CHAIN LABEL SETS")
 
         chain_label_sets = {}
 

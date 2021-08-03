@@ -44,6 +44,7 @@ def timesince(dt, default="just now"):
         (diff.seconds, "second", "seconds"),
     )
 
+    # TODO get this working properly
     if '-1' in str(diff):
         return "just now"
 

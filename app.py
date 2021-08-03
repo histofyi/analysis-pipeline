@@ -113,6 +113,35 @@ def structures_search_handler(mhc_class):
     return template.render('structure_sets', {'nav':'sets','set':structureset, 'view_type':'condensed'})
 
 
+@app.get('/structures/analyse_chains/<string:pdb_code>')
+def analysechains_handler(pdb_code):
+    rcsb = pdb.RCSB()
+    complexes, success, errors = filesystem.get('constants/shared/complexes')
+
+    # get the rcscb held data, the rscb json data and the pdb data
+    pdb_info = rcsb.get_info(pdb_code)
+
+    pdb_file = rcsb.fetch(pdb_code)
+
+
+    assembly_count = pdb_info['rcsb_entry_info']['assembly_count']
+
+    structure = rcsb.load_structure(pdb_code)
+
+    structure_stats = rcsb.predict_assigned_chains(structure, assembly_count)
+    
+
+    variables = {
+            'pdb_code': pdb_code,
+            'structure_stats': structure_stats
+    }
+    
+    return variables
+
+
+
+
+
 @app.post("/structures/information/<string:pdb_code>/assignchains")
 def assign_structure_chains(pdb_code):
     mhc_class = None
@@ -220,6 +249,8 @@ def structure_info_handler(pdb_code):
 
     # load the structure into BioPython
     structure = rcsb.load_structure(pdb_code)
+
+    logging.warn(structure)
 
     # try to resolve the DOI in the rcsb data
     try:

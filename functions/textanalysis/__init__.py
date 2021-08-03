@@ -1,5 +1,5 @@
 import numpy as np
-
+import logging
 
 def levenshtein_ratio_and_distance(s, t):
     """ levenshtein_ratio_and_distance:
@@ -17,6 +17,7 @@ def levenshtein_ratio_and_distance(s, t):
     # Initialize matrix of zeros
     rows = len(s)+1
     cols = len(t)+1
+
     distance = np.zeros((rows,cols),dtype = int)
 
     # Populate matrix of zeros with the indeces of each character of both strings

@@ -10,6 +10,7 @@ import logging
 from ..providers import httpProvider
 from ..providers import filesystemProvider
 
+from ..textanalysis import levenshtein_ratio_and_distance
 
 http = httpProvider()
 file = filesystemProvider(None)
@@ -22,11 +23,13 @@ class RCSB():
     hetgroups = None
     amino_acids = None
     complexes = None
+    peptide_cutoff = None
 
     def __init__(self):
         self.hetgroups = ['HOH','IOD','PEG','NAG','NA','GOL','EDO','S04','15P','PG4',' NA','FME',' CD','SEP',' CL',' CA', 'SO4','ACT',' MG']
         self.amino_acids, success, errors = file.get('constants/shared/amino_acids')
         self.complexes, success, errors = file.get('constants/shared/complexes')
+        self.peptide_cutoff = 30
 
     def fetch(self, pdb_code):
         filepath = 'structures/pdb_format/raw/{pdb_code}'.format(pdb_code = pdb_code)
@@ -76,10 +79,10 @@ class RCSB():
 
 
     def chunk_one_letter_sequence(self, sequence, residues_per_line):
+        # splits sequence into blocks
         chunked_sequence = []
         length = len(sequence)
-        line_count = (length/residues_per_line)
-        
+
         while length > residues_per_line:
             chunked_sequence.append(sequence[0:residues_per_line])
             sequence = sequence[residues_per_line:]
@@ -88,37 +91,105 @@ class RCSB():
         return chunked_sequence
 
 
-    def predict_possible_complexes(self, chain_count):
+    def suggest_possible_complexes(self, chain_count):
         possible_complexes = {}
         possible_complexes_labels = []
-
         for item in self.complexes['complexes']:
             if item['chain_count'] == chain_count:
                 possible_complexes = item['possible_complexes']
                 possible_complexes_labels = [option['label'] for option in item['possible_complexes']]
-        
         return possible_complexes, possible_complexes_labels
 
 
 
-    def generate_basic_information(self, structure, assembly_count):
-        
-        chains = [chain.id for chain in structure.get_chains()]
-
-
-        structure_stats = {
-            'chains': chains,
-            'total_chains': len(chains),
-            'assembly_count': assembly_count
+    def get_structure_stats(self, structure, assembly_count):
+        chainset = {}
+        chainlist = [chain.id for chain in structure.get_chains()]
+        chains = [chain for chain in structure.get_chains()]
+        total_chains = len(chains)
+        chain_count = int(total_chains)/int(assembly_count)
+        for chain in chains:
+            chainset[chain.id] = {
+                'sequence':self.get_sequence(chain)
+        }   
+        return {
+            'chainlist': chainlist,
+            'total_chains': total_chains,
+            'assembly_count': assembly_count,
+            'chain_count':chain_count,
+            'chainset':chainset
         }
 
-        structures = []
+
+    def get_sequence(self,chain):
+        chain_sequence_array = [residue.resname for residue in chain]
+        clean_chain_sequence_array = [residue.resname for residue in chain if residue.resname not in self.hetgroups]
+        one_letter_sequence_string = ''.join([self.three_letter_to_one(residue).upper() for residue in clean_chain_sequence_array])
+        chunked_one_letter_sequence_array = self.chunk_one_letter_sequence(one_letter_sequence_string,80) 
+        return {
+            #'chain_sequence_array':chain_sequence_array,
+            #'clean_chain_sequence_array': clean_chain_sequence_array,
+            'one_letter_sequence_string': one_letter_sequence_string,
+            #'chunked_one_letter_sequence_array': chunked_one_letter_sequence_array
+            'length': len(one_letter_sequence_string)
+        }
+            
+
+    def predict_assigned_chains(self, structure, assembly_count):
+        structure_stats = self.get_structure_stats(structure, assembly_count)
+        possible_complexes, possible_complex_labels = self.suggest_possible_complexes(structure_stats['chain_count'])
+        possible_chains = {}
+        possible_assignments = {}
+        for complex in possible_complexes:
+            for item in complex:
+                if item == 'label':
+                    label = complex['label']
+                else:
+                    if complex[item] not in possible_chains and 'peptide' not in complex[item]:
+                        possible_chains[complex[item]] = self.complexes['chains'][complex[item]]
+
+        for chain in structure_stats['chainset']:
+            current_chain = structure_stats['chainset'][chain]
+            current_chain['id'] = chain
+
+            # Look for peptide chains, they'll be the easiest to assign as they're short
+            if current_chain['sequence']['length'] < self.peptide_cutoff:
+                if not 'peptide' in possible_assignments:
+                    possible_assignments['peptide'] = {'chains':[],'sequences':[],'lengths':[]}
+                possible_assignments['peptide']['chains'].append(current_chain['id'])
+                possible_assignments['peptide']['sequences'].append(current_chain['sequence']['one_letter_sequence_string'])
+                possible_assignments['peptide']['lengths'].append(current_chain['sequence']['length'])
+                logging.warn("Chain " + current_chain['id'] + " is likely to be peptide")
+
+            for possible_chain_label in possible_chains:
+                possible_chain = possible_chains[possible_chain_label]
+                if possible_chain['example']:
+                    if len(possible_chain['example']) > 1:
+                        ratio, distance = levenshtein_ratio_and_distance(possible_chain['example'], current_chain['sequence']['one_letter_sequence_string'])
+                        if ratio > possible_chain['acceptable_distance']:
+                            logging.warn("Chain " + current_chain['id'] + " is likely to be " + possible_chain_label)
+                            logging.warn(ratio)
+                
 
 
 
-        chain_count = int(structure_stats['total_chains'])/int(structure_stats['assembly_count'])
+        variables = {
+            'possible_complexes':possible_complexes,
+            'possible_assignments':possible_assignments,
+            'possible_chains': possible_chains,
+            'structure_stats':structure_stats
+        }
+        return variables
 
-        possible_complexes, possible_complexes_labels = self.predict_possible_complexes(chain_count)
+
+
+    def generate_basic_information(self, structure, assembly_count):
+        logging.warn(structure)        
+
+        structure_stats = self.get_structure_stats(structure, assembly_count)
+
+        
+        possible_complexes, possible_complexes_labels = self.suggest_possible_complexes(structure_stats['chain_count'])
 
         logging.warn("BUILDING CHAIN LABEL SETS")
 
@@ -132,7 +203,7 @@ class RCSB():
                 chain_label_sets[chain_number] = [chain.id]
             else:
                 chain_label_sets[chain_number].append(chain.id)
-            if i < chain_count:
+            if i < structure_stats['chain_count']:
                 i += 1
             else:
                 i = 1
@@ -148,7 +219,7 @@ class RCSB():
         chunked_one_letter_sequences = {}
         chain_lengths = {}
         chain_letters = {}
-        while i < chain_count:
+        while i < structure_stats['chain_count']:
             this_chain_sequence_array = chain_sequence_arrays[i]
             i += 1
             unique_chains.append('chain_' + str(i))

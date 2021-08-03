@@ -196,33 +196,42 @@ def update_structure_information_handler(pdb_code,information_section):
 
 @app.get('/structures/information/<string:pdb_code>')
 def structure_info_handler(pdb_code):
+    # get the constants about complexes
+    complexes, success, errors = filesystem.get('constants/shared/complexes')
+
+
+    # get or create the histo dataset for this structure
     histo_info, success, errors = histo.structureInfo(pdb_code).get()
 
     rcsb = pdb.RCSB()
+
+    # get the rcscb held data, the rscb json data and the pdb data
     pdb_info = rcsb.get_info(pdb_code)
 
     pdb_file = rcsb.fetch(pdb_code)
 
+    # the rcsb pdb images are held in directories based on the middle two letters of the PDB code
     pdb_image_folder = pdb_code[1:3]
 
 
     assembly_count = pdb_info['rcsb_entry_info']['assembly_count']
 
-
+    # load the structure into BioPython
     structure = rcsb.load_structure(pdb_code)
 
+    # try to resolve the DOI in the rcsb data
     try:
         doi_url = rcsb.resolve_doi(pdb_info["rcsb_primary_citation"]["pdbx_database_id_doi"])
     except:
+        # TODO handle this better
         doi_url = None
     
-    
-
+    # generate some basic information about the structure 
+    # TODO refactor this
     basic_information = rcsb.generate_basic_information(structure, assembly_count)
 
-    complexes, success, errors = filesystem.get('constants/shared/complexes')
 
-    
+    # build variables for the UI
     variables = {
         'nav':'structures',
         'pdb_file':pdb_file, 

@@ -9,6 +9,10 @@ def levenshtein_ratio_and_distance(s, t):
         For all i and j, distance[i,j] will contain the Levenshtein
         distance between the first i characters of s and the
         first j characters of t
+        
+        Adapted from
+        
+        https://www.datacamp.com/community/tutorials/fuzzy-string-python
     """
     # Initialize matrix of zeros
     rows = len(s)+1

@@ -4,3 +4,4 @@ boto3
 python-doi
 toml
 biopython==1.72 #see if there are still problems in splitting file in higher versions
+numpy

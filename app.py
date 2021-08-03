@@ -14,6 +14,7 @@ import functions.template as template
 import functions.pdb as pdb
 import functions.lists as lists
 import functions.common as common
+import functions.textanalysis as textanalysis
 import functions.histo as histo
 
 

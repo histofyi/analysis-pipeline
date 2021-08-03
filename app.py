@@ -67,13 +67,51 @@ def home_handler():
     return template.render('index', scratch_json)
 
 
+@app.get('/structures')
+def structures_handler():
+    return template.render('structures', {})
+
+
 @app.get('/structures/search/<string:mhc_class>')
 def structures_search_handler(mhc_class):
     molecules, success, errors = filesystem.get('constants/shared/molecules')
+    chain_assignment_complete, success, errors = lists.structureSet('chain_assignment_complete').get()
+    exclude, success, errors = lists.structureSet('exclude').get()
+    incorrect_chain_labels, success, errors = lists.structureSet('incorrect_chain_labels').get()
+    edgecases, success, errors = lists.structureSet('edgecases').get()
+    
     query_name = mhc_class + '_sequence_query'
     query, success, errors = filesystem.get('constants/rcsb/'+ query_name)
+    
     search_data = pdb.RCSB().search(query)
-    return template.render('structure_search', {'search_data':search_data,'molecule_metadata':molecules[mhc_class],'count':len(search_data)})
+    filtered_set = []
+
+    logging.warn(chain_assignment_complete['set'])
+    logging.warn(exclude['set'])
+    logging.warn(incorrect_chain_labels['set'])
+    for structure in search_data:
+        seen_structure = False
+        logging.warn(structure)
+        if structure in chain_assignment_complete['set']:
+            seen_structure = True
+        if structure in exclude['set']:
+            seen_structure = True
+        if structure in incorrect_chain_labels['set']:
+            seen_structure = True
+        if structure in edgecases['set']:
+            seen_structure = True
+        if not seen_structure:
+            filtered_set.append(structure)        
+    slug = mhc_class + '_search'
+
+    structureset = {
+        'set':filtered_set,
+        'length':len(filtered_set),
+        'last_updated':datetime.now(),
+        'slug':slug,
+        'ui_text':slug.replace('_',' ').title()
+    }
+    return template.render('structure_sets', {'nav':'sets','set':structureset, 'view_type':'condensed'})
 
 
 @app.post("/structures/information/<string:pdb_code>/assignchains")

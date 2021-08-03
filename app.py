@@ -86,9 +86,6 @@ def structures_search_handler(mhc_class):
     search_data = pdb.RCSB().search(query)
     filtered_set = []
 
-    logging.warn(chain_assignment_complete['set'])
-    logging.warn(exclude['set'])
-    logging.warn(incorrect_chain_labels['set'])
     for structure in search_data:
         seen_structure = False
         logging.warn(structure)
@@ -178,7 +175,6 @@ def add_to_structureset_handler(pdb_code,current_set):
 
 @app.post('/structures/information/<string:pdb_code>/<string:information_section>/update')
 def update_structure_information_handler(pdb_code,information_section):
-    logging.warn("UPDATING INFORMATION " + information_section)
     variables = common.request_variables(None)
     if variables:
         if 'pdb_code' in variables:

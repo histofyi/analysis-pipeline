@@ -26,7 +26,7 @@ class RCSB():
     peptide_cutoff = None
 
     def __init__(self):
-        self.hetgroups = ['HOH','IOD','PEG','NAG','NA','GOL','EDO','S04','15P','PG4',' NA','FME',' CD','SEP',' CL',' CA', 'SO4','ACT',' MG','Q81',' NI']
+        self.hetgroups = ['HOH','IOD','PEG','NAG','NA','GOL','EDO','S04','15P','PG4',' NA','FME',' CD','SEP',' CL',' CA', 'SO4','ACT',' MG','Q81',' NI','2LJ','P6G','MAN','FUC',' CO']
         self.amino_acids, success, errors = file.get('constants/shared/amino_acids')
         self.complexes, success, errors = file.get('constants/shared/complexes')
         self.peptide_cutoff = 30
@@ -130,7 +130,7 @@ class RCSB():
             #'chain_sequence_array':chain_sequence_array,
             #'clean_chain_sequence_array': clean_chain_sequence_array,
             'one_letter_sequence_string': one_letter_sequence_string,
-            #'chunked_one_letter_sequence_array': chunked_one_letter_sequence_array
+            'chunked_one_letter_sequence_array': chunked_one_letter_sequence_array,
             'length': len(one_letter_sequence_string)
         }
             
@@ -167,8 +167,10 @@ class RCSB():
             if current_chain['sequence']['length'] < self.peptide_cutoff:
                 if not 'peptide' in chain_assignments:
                     chain_assignments['peptide'] = {'chains':[],'sequences':[],'lengths':[]}
+                    chain_assignments['peptide']['chunked_sequence'] = current_chain['sequence']['chunked_one_letter_sequence_array'],
                 chain_assignments['peptide']['chains'].append(current_chain['id'])
                 chain_assignments['peptide']['sequences'].append(current_chain['sequence']['one_letter_sequence_string'])
+                chain_assignments['peptide']['chunked_sequence'] = current_chain['sequence']['chunked_one_letter_sequence_array'],
                 chain_assignments['peptide']['lengths'].append(current_chain['sequence']['length'])
                 chain_assignments['peptide']['confidence'] = 1.0
 
@@ -184,6 +186,7 @@ class RCSB():
                             if not possible_chain_label in chain_assignments:
                                 # and if this is the case and that chain is not in the assignments already, then add it to them
                                 chain_assignments[possible_chain_label] = {'chains':[],'sequences':[],'lengths':[]}
+                                chain_assignments[possible_chain_label]['chunked_sequence'] = current_chain['sequence']['chunked_one_letter_sequence_array'],
                             chain_assignments[possible_chain_label]['confidence'] = ratio
                             chain_assignments[possible_chain_label]['lengths'].append(current_chain['sequence']['length'])
                             chain_assignments[possible_chain_label]['chains'].append(current_chain['id'])
@@ -240,6 +243,9 @@ class RCSB():
                     best_score = confidence
                     best_match = item
 
+        #unique_chain_set = self.cluster_alike_chains(structure, assembly_count)
+
+
         variables = {
             'possible_complexes':possible_complexes,
             'chain_assignments':chain_assignments,
@@ -249,8 +255,81 @@ class RCSB():
                 'confidence': best_score
             },
             'complex_hits':complex_hits
+            #'unique_chain_set':unique_chain_set
         }
         return variables
+
+
+
+
+    def cluster_alike_chains(self,structure, assembly_count):
+        structure_stats = self.get_structure_stats(structure, assembly_count)
+        unique_chain_set = {}
+        logging.warn(assembly_count)
+        if int(assembly_count) == 1:
+            logging.warn("ONLY ONE ASSEMBLY")
+            i = 1
+            for chain in structure_stats['chainset']:
+                chainset = {}
+                chainset['chains'] = [chain]
+                chainset['chunked_sequence'] = structure_stats['chainset'][chain]['sequence']['chunked_one_letter_sequence_array']
+                this_sequence = structure_stats['chainset'][chain]['sequence']['one_letter_sequence_string']
+                chainset['lengths'] = [len(this_sequence)]
+                chainset['sequences'] = [this_sequence]
+                unique_chain_set['chain_' + str(i)] = chainset
+
+                i += 1
+        else:        
+            matched = []
+            matches = []
+            for first_chain in structure_stats['chainset']:
+                first_sequence = structure_stats['chainset'][first_chain]['sequence']['one_letter_sequence_string']
+                for second_chain in structure_stats['chainset']:
+                    if second_chain != first_chain:
+                        this_sequence = structure_stats['chainset'][second_chain]['sequence']['one_letter_sequence_string']
+                        found_match = False
+                        if first_chain not in matched and second_chain not in matched:
+                            if this_sequence == first_sequence:
+                                found_match = True
+                            else:
+                                if len(this_sequence) > len(first_sequence):
+                                    length_score = float(len(first_sequence)) / float(len(this_sequence))
+                                else:
+                                    length_score = float(len(this_sequence)) / float(len(first_sequence))
+                                if length_score > 0.8:
+                                    ratio, distance = levenshtein_ratio_and_distance(first_sequence, this_sequence)
+                                    if ratio > 0.9:
+                                        found_match = True
+                            if found_match:
+                                matched.append(first_chain)
+                                matched.append(second_chain)
+                                for match in matches:
+                                    if match:
+                                        if first_chain in match:
+                                            if second_chain not in match:
+                                                match.append(second_chain)              
+                                else:
+                                    matches.append([first_chain,second_chain])
+            unique_chain_set = {}
+            i = 1
+            for match in matches:
+                chainset = {}
+                first_match = match[0]
+                
+                chainset['chains'] = match
+                chainset['chunked_sequence'] = structure_stats['chainset'][first_match]['sequence']['chunked_one_letter_sequence_array']
+                chainset['lengths'] = []
+                chainset['sequences'] = []
+                unique_chain_set['chain_' + str(i)] = chainset
+                for chain in match:
+                    this_sequence = structure_stats['chainset'][chain]['sequence']['one_letter_sequence_string']
+                    chainset['sequences'].append(this_sequence)
+                    chainset['lengths'].append(len(this_sequence))
+                i += 1
+
+        logging.warn(unique_chain_set)
+        return unique_chain_set
+
 
 
 

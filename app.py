@@ -1,4 +1,6 @@
 from flask import Flask, request, redirect
+from flask_caching import Cache
+
 import toml
 import json
 import logging
@@ -21,8 +23,16 @@ import functions.histo as histo
 from api import api
 
 
+config = {
+    "DEBUG": True,          # some Flask specific configs
+    "CACHE_TYPE": "SimpleCache",  # Flask-Caching related configs
+    "CACHE_DEFAULT_TIMEOUT": 300
+}
+
 app = Flask(__name__)
 app.config.from_file('config.toml', toml.load)
+app.config.from_mapping(config)
+cache = Cache(app)
 
 
 @app.template_filter()
@@ -63,6 +73,11 @@ def return_to(pdb_code):
     return '/structures/information/{pdb_code}'.format(pdb_code=pdb_code)
 
 
+@app.before_request
+def before_request():
+    logging.warn(request.full_path)
+
+
 @app.get('/')
 def home_handler():
     scratch_json, success, errors = filesystem.get('scratch/hello')
@@ -72,6 +87,18 @@ def home_handler():
 @app.get('/structures')
 def structures_handler():
     return template.render('structures', {})
+
+
+
+@app.get('/structures/<string:pdb_code>/approve/best_match')
+def structure_approve_attribute_handler(pdb_code):
+    variables = common.request_variables(['return_to'])
+    histo_info, success, errors = histo.structureInfo(pdb_code).get()
+    complex_type = {'complex_type':histo_info['best_match']['best_match']}
+    histo_info, success, errors = histo.structureInfo(pdb_code).put('complex_type', complex_type)
+    return redirect(variables['return_to'])
+
+
 
 
 @app.get('/structures/search/<string:mhc_class>')
@@ -125,8 +152,6 @@ def structures_automatic_assignment_handler(mhc_class):
     exclude_length = len(exclude['set'])
     automatically_matched_length = len(automatically_matched['set'])
     error_length = len(error['set'])
-
-    
 
 
     number_of_records = 25
@@ -309,7 +334,6 @@ def assign_structure_chains(pdb_code):
 
 @app.get('/structures/information/<string:pdb_code>/<string:current_set>/add')
 def add_to_structureset_handler(pdb_code,current_set):
-    logging.warn("ADD TO SET " + current_set)
     data, success, errors = lists.structureSet(current_set).add(pdb_code)
     return redirect(return_to(pdb_code))
 
@@ -368,8 +392,10 @@ def structure_info_handler(pdb_code):
         # TODO handle this better
         doi_url = None
     
+    
     # generate some basic information about the structure 
     # TODO refactor this
+    
     basic_information = rcsb.generate_basic_information(structure, assembly_count)
 
 
@@ -379,7 +405,6 @@ def structure_info_handler(pdb_code):
         'pdb_file':pdb_file, 
         'pdb_code':pdb_code, 
         'pdb_info':pdb_info, 
-        'assembly_count': assembly_count,
         'pdb_info_text':json.dumps(pdb_info, sort_keys=True, indent=4), 
         'pdb_image_folder':pdb_image_folder, 
         'doi_url':doi_url,
@@ -390,16 +415,19 @@ def structure_info_handler(pdb_code):
     return template.render('structure_info', variables)
 
 
-@app.get('/sets/<string:slug>')
-def sets_display_handler(slug):
-    rcsb = pdb.RCSB()
+@cache.memoize(timeout=300)
+def get_hydrated_structure_set(slug):
     structureset, success, errors = lists.structureSet(slug).get()
-    structureset['pdb_info'] = {}
     structureset['histo_info'] = {}
     for pdb_code in structureset['set']:
         histo_info, success, errors = histo.structureInfo(pdb_code).get()
         structureset['histo_info'][pdb_code] = histo_info
-        structureset['pdb_info'][pdb_code] = rcsb.get_info(pdb_code)['struct']
+    return structureset
+
+
+@app.get('/sets/<string:slug>')
+def sets_display_handler(slug):
+    structureset = get_hydrated_structure_set(slug)
     return template.render('set', {'nav':'sets','set':structureset})
 
 
@@ -407,7 +435,7 @@ def sets_display_handler(slug):
 def sets_list_handler():
     set_list = {
         'publications':['open_access','paywalled','missing_publication'],
-        'structures':[],
+        'structures':['class_i_with_peptide','probable_class_i_with_peptide'],
         'editorial':['interesting'],
         'curatorial':['edgecases','exclude','incorrect_chain_labels']
     }

@@ -64,7 +64,7 @@
                 <div class="inner">
                     <div class="heading-medium">{{pdb_code | upper}}</div>
                     <h1 class="heading-large">{{pdb_info.struct.title}}</h1>
-                    <div class="body-copy-smallest vertical-spacing-bottom"><a href="/structures/information/{{pdb_code}}/interesting/add">Mark as interesting</a> | <a href="/structures/information/{{pdb_code}}/edgecases/add">Mark as edge case</a> | <a href="/structures/information/{{pdb_code}}/incorrect_chain_labels/add">Mark as incorrect chain labels</a> | <a href="/structures/information/{{pdb_code}}/exclude/add">Exclude this structure</a> | <a href="/structures/information/{{pdb_code}}/chain_assignment_complete/add">Mark as chain_assignment_complete</a> </div>
+                    <div class="body-copy-smallest vertical-spacing-bottom"><a href="/structures/information/{{pdb_code}}/interesting/add">Mark as interesting</a> | <a href="/structures/information/{{pdb_code}}/edgecases/add">Mark as edge case</a> | <a href="/structures/information/{{pdb_code}}/exclude/add">Mark as excluded</a></div>
                 </div>
             </div>
         </div>
@@ -86,19 +86,19 @@
                     <table class="body-copy-smallest">
                         <tr>
                             <td class="strong">Resolution:</td>
-                            <td>{{pdb_info.rcsb_entry_info.resolution_combined|join(', ')}}&#8491;</td>
+                            <td>{{histo_info.rcsb_info.entry_info.resolution_combined|join(', ')}}&#8491;</td>
                         </tr>
                         <tr>
                             <td class="strong">Assembly count:</td>
-                            <td>{{assembly_count}}</td>
+                            <td>{{ histo_info.structure_stats.structure_stats.assembly_count }}</td>
                         </tr>
                         <tr>
                             <td class="strong">Chain count:</td>
-                            <td>{{basic_information.structure_stats.total_chains}}</td>
+                            <td>{{ histo_info.structure_stats.structure_stats.chain_count|int }}</td>
                         </tr>
                         <tr>
                             <td class="strong">Chains:</td>
-                            <td>{{basic_information.structure_stats.chains|join(', ')}}</td>
+                            <td>{{ histo_info.structure_stats.structure_stats.chainlist|join(', ') }}</td>
                         </tr>
                     </table>
                     <h3 class="heading-small vertical-spacing-top-0-5 vertical-spacing-bottom-0-25">Publication details</h3>
@@ -167,6 +167,7 @@
         </div>
     </section>
 
+
     <section class="vertical-spacing-top-0-5">
         <div class="grid-container">
             <div class="column-full-width">
@@ -179,18 +180,19 @@
 
     <section class="">
         <div class="grid-container">
-            {% if histo_info.chains %}
-            {% for chain in basic_information.chain_sequences.chunked_one_letter_sequences %}
+            {% if histo_info.structure_stats.chain_assignments %}
+            {% for chain in histo_info.structure_stats.chain_assignments %}
+            {% set this_chain = histo_info.structure_stats.chain_assignments[chain] %}
             <div class="column-one-quarter">
                 <div class="inner vertical-spacing-bottom">
-                    <div><strong>{{chain}} ({{basic_information.chain_lengths[chain]}}aa)</strong></div>
-                        <div>{{complexes.chains[histo_info.chains[chain].chain_type].ui_text|safe}}</div>
-                        <div>Chains {{histo_info.chains[chain].assignments}}</div>
+                    <div><strong>{{chain}} ({{this_chain.lenths}}aa)</strong></div>
+                        <div>{{complexes.chains[chain].ui_text|safe}}</div>
+                        <div>Chains {{this_chain.chains}}</div>
                 </div>
             </div>
             <div class="column-three-quarters">
                 <div class="inner vertical-spacing-bottom"> 
-                    {% set chunked_sequence = basic_information.chain_sequences.chunked_one_letter_sequences[chain] %}
+                    {% set chunked_sequence = this_chain.chunked_sequence[0] %}
                     {% for row in chunked_sequence %}
                         <pre class="sequence">{{row}}</pre>
                     {% endfor %}

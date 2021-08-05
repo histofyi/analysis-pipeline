@@ -59,15 +59,18 @@ def timesince(dt, default="just now"):
     if '-1' in str(diff):
         return "just now"
 
-    for period, singular, plural in periods:
-        
+    for period, singular, plural in periods:        
         if period:
             return "%d %s ago" % (period, singular if period == 1 else plural)
 
     return default
 
 
+
+
 filesystem = providers.filesystemProvider(app.config['BASEDIR'])
+
+
 
 def return_to(pdb_code):
     return '/structures/information/{pdb_code}'.format(pdb_code=pdb_code)
@@ -392,7 +395,7 @@ def structure_info_handler(pdb_code):
         # TODO handle this better
         doi_url = None
     
-    
+
     # generate some basic information about the structure 
     # TODO refactor this
     

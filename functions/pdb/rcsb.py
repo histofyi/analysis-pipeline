@@ -343,57 +343,10 @@ class RCSB():
         possible_complexes, possible_complexes_labels = self.suggest_possible_complexes(structure_stats['chain_count'])
 
 
-        chain_label_sets = {}
-
-        i = 1
-
-        for chain in structure.get_chains():
-            chain_number = 'chain_' + str(i)
-            if not chain_number in chain_label_sets:
-                chain_label_sets[chain_number] = [chain.id]
-            else:
-                chain_label_sets[chain_number].append(chain.id)
-            if i < structure_stats['chain_count']:
-                i += 1
-            else:
-                i = 1
-
-        chain_sequence_arrays = [[residue.resname for residue in chain if residue.resname not in self.hetgroups] for chain in structure.get_chains()]
-        
-        i = 0
-
-        unique_chains = []
-        unique_chain_sequences = {}
-        unique_one_letter_sequences = {}
-        unique_chain_lengths = []
-        chunked_one_letter_sequences = {}
-        chain_lengths = {}
-        chain_letters = {}
-        while i < structure_stats['chain_count']:
-            this_chain_sequence_array = chain_sequence_arrays[i]
-            i += 1
-            unique_chains.append('chain_' + str(i))
-            unique_chain_sequences['chain_' + str(i)] = this_chain_sequence_array
-            unique_one_letter_sequences['chain_' + str(i)] = ''.join([self.three_letter_to_one(residue).upper() for residue in this_chain_sequence_array])
-            unique_chain_lengths.append(len(this_chain_sequence_array))
-            chunked_one_letter_sequences['chain_' + str(i)] = self.chunk_one_letter_sequence(unique_one_letter_sequences['chain_' + str(i)],80) 
-            chain_lengths['chain_' + str(i)] = len(this_chain_sequence_array)
-
-
-
         basic_information = {
             "structure_stats":structure_stats,
             "possible_complexes":possible_complexes,
             "possible_complexes_labels": possible_complexes_labels,
-            "unique_chain_count": len(unique_chains),
-            "chain_lengths":chain_lengths,
-            "chain_label_sets":chain_label_sets,
-            "chain_sequences":{
-                "unique_one_letter_sequences":unique_one_letter_sequences,
-                "unique_chains_three_letter":unique_chain_sequences,
-                "unique_chain_lengths":unique_chain_lengths,
-                "chunked_one_letter_sequences":chunked_one_letter_sequences
-            }
         }
 
         return basic_information

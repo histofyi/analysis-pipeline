@@ -1,0 +1,7 @@
+{% if view_type == 'condensed' %}
+<div class="vertical-spacing-top-0-25">
+    {% for structure in set.set %}
+        <a href="/structures/information/{{structure}}">{{structure}}</a>
+    {% endfor %}
+</div>
+{% endif %}

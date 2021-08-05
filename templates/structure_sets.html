@@ -3,21 +3,15 @@
 {% block main %}
 
 
-<section class="proto-style-block typography vertical-spacing-top">
+<section class="vertical-spacing-top">
   <div class="grid-container">
     <div class="column-full-width">
-      <div class="inner bottom-border">
+      <div class="inner">
         <h1 class="vertical-spacing-bottom-0-25">{{set.ui_text}}</h1>
         <div>Last updated {{set.last_updated|timesince}} | {{set.length}} items</div>
         
         <div class="vertical-spacing-top">
-            {% if view_type == 'condensed' %}
-                <div class="vertical-spacing-top-0-25">
-                    {% for structure in set.set %}
-                        <a href="/structures/information/{{structure}}">{{structure}}</a>
-                    {% endfor %}
-                </div>
-            {% endif %}
+            {% include "fragments/structureset.html" %}
         </div>
       </div>
     </div>

@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+
+
+{% block style %}
+    <style>
+        textarea
+        {
+            width:100%;
+            height:350px;
+            background-color: #ffffff;
+            color: #333;
+            font-family:'Courier Prime','Courier New', Courier, monospace;
+            font-size: 12pt;
+        }
+
+        .wide_input {
+            width:50%;
+            font-size: 14pt;
+            padding: 10px;
+        }
+        
+
+    </style>
+    {% endblock %}
+
+
+{% block main %}
+
+
+<section class="vertical-spacing-top">
+  <div class="grid-container">
+    <div class="column-full-width">
+      <div class="inner">
+        <h1 class="vertical-spacing-bottom">Create a set</h1>
+        <form action="/sets/create" method="POST">
+            <div>
+                <input type="text" name="set_ui_text" id="set_ui_text" class="wide_input"/>
+            </div>
+            <br />
+            <textarea name="set_members" id="set_members" rows="10" width="100%"></textarea>
+        
+        </form>
+      </div>
+    </div>
+  </div>
+</section>
+
+{% endblock %}

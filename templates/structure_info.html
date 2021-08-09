@@ -75,6 +75,8 @@
         <div class="grid-container bottom-border">
             <div class="column-one-half">
                 <div class="inner">
+                    {{unmatched}}
+                    {% if not unmatched %}
                     <script src="https://cdnjs.cloudflare.com/ajax/libs/3Dmol/1.4.0/3Dmol-min.js"></script>
 
                     <div style="height: 600px; width: 550px; position: relative;" id="viewer" ></div>  
@@ -101,6 +103,9 @@
                             });
 
                     </script>
+                    {% else %}
+                    <img class="pdb-image" src="https://cdn.rcsb.org/images/structures/{{pdb_image_folder}}/{{pdb_code}}/{{pdb_code}}_assembly-1.jpeg" alt="Structure of {{pdb_code}}"/>
+                    {% endif %}
                     <div class="body-copy-smallest"><a href="https://www.rcsb.org/structure/{{pdb_code}}" target="_new">View {{pdb_code}} entry on RCSB</a> | <a href="https://www.rcsb.org/3d-view/{{pdb_code}}/1" target="_new">Visualise {{pdb_code}} entry on RCSB</a></div>
                 </div>
             </div>
@@ -169,7 +174,11 @@
                     </div>
                     <h3 class="heading-small vertical-spacing-top-0-5 vertical-spacing-bottom-0-25">Complex details</h3>
                     {% if histo_info.complex_type %}
-                        <div>{{complexes.complex_labels[histo_info.complex_type.complex_type]|safe}}</div>
+                        {% if histo_info.complex_type.complex_type in complexes.complex_labels %}
+                            <div>{{complexes.complex_labels[histo_info.complex_type.complex_type]|safe}}</div>
+                        {% else %}
+                            <div>{{histo_info.complex_type.complex_type}}</div>
+                        {% endif %}
                     {% else %}
                         <div class="body-copy-small"><strong>Possible complex types:</strong></div>
                         <form action="/structures/information/{{pdb_code}}/complex_type/update" method="POST">

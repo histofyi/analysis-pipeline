@@ -365,6 +365,13 @@ def update_structure_information_handler(pdb_code,information_section):
 
 @app.get('/structures/information/<string:pdb_code>')
 def structure_info_handler(pdb_code):
+    unmatched, success, errors = lists.structureSet('unmatched').get()
+    unmatched_structure = False
+    logging.warn(unmatched['set'])
+    if pdb_code in unmatched['set']:
+        unmatched_structure = True
+        logging.warn("MATCH")
+
     # get the constants about complexes
     complexes, success, errors = filesystem.get('constants/shared/complexes')
 
@@ -413,9 +420,22 @@ def structure_info_handler(pdb_code):
         'doi_url':doi_url,
         'basic_information':basic_information,
         'complexes':complexes,
-        'histo_info':histo_info
+        'histo_info':histo_info,
+        'unmatched':unmatched_structure
     }
     return template.render('structure_info', variables)
+
+
+
+@app.get('/sets/create')
+def sets_create_form_handler():
+    return template.render('sets_create', {})
+
+
+@app.get('/sets/create')
+def sets_create_action_handler():
+    #TODO ensure set doesn't already exist
+    return template.render('sets_create', {})
 
 
 @cache.memoize(timeout=300)
@@ -428,9 +448,26 @@ def get_hydrated_structure_set(slug):
     return structureset
 
 
+
+
 @app.get('/sets/<string:slug>')
 def sets_display_handler(slug):
     structureset = get_hydrated_structure_set(slug)
+    unnatural = []
+    short = []
+    for pdb_code in structureset['set']:
+        histo_info = structureset['histo_info'][pdb_code]
+        for chain in histo_info['structure_stats']['chain_assignments']:
+            if chain == 'class_i_peptide':
+                peptide_sequence = histo_info['structure_stats']['chain_assignments'][chain]['sequences'][0]
+                if 'Z' in peptide_sequence:
+                    unnatural.append(pdb_code)
+                if len(peptide_sequence) < 8:
+                    short.append(pdb_code)
+    logging.warn('unnatural')
+    logging.warn(unnatural)
+    logging.warn('short')
+    logging.warn(short)
     return template.render('set', {'nav':'sets','set':structureset})
 
 

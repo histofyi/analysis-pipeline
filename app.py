@@ -435,6 +435,11 @@ def sets_create_form_handler():
 @app.get('/sets/create')
 def sets_create_action_handler():
     #TODO ensure set doesn't already exist
+    already_exists = lists.structureSet(slug).check_exists()
+    if not already_exists:
+        logging.warn('create the set')
+    else:
+        logging.warn('already exists. do nothing')
     return template.render('sets_create', {})
 
 

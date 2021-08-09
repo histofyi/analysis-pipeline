@@ -42,3 +42,12 @@ def request_variables(params, ignore_empty_strings=True):
         variables = clean_variables
 
     return variables
+
+
+
+def slugify(string):
+    return string.replace(' ','_')
+    
+
+def de_slugify(slug):
+    return slug.replace('_',' ')

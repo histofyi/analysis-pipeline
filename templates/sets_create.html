@@ -15,8 +15,8 @@
 
         .wide_input {
             width:50%;
-            font-size: 14pt;
-            padding: 10px;
+            font-size: 12pt;
+            padding: 5px;
         }
         
 
@@ -34,9 +34,11 @@
         <h1 class="vertical-spacing-bottom">Create a set</h1>
         <form action="/sets/create" method="POST">
             <div>
+                <label for="set_ui_text">Set title (UI text)</label><br />
                 <input type="text" name="set_ui_text" id="set_ui_text" class="wide_input"/>
             </div>
             <br />
+            <label for="set_members">Set members (JSON array format)</label><br />
             <textarea name="set_members" id="set_members" rows="10" width="100%"></textarea>
         
         </form>

@@ -9,12 +9,22 @@ class filesystemProvider():
         if basedir is not None:
             self.basedir = basedir
 
+
     def build_filepath(self, filename, format):
         filepath = self.basedir +'/' + filename + '.' + format
         return filepath
     
+
     def get_file_handle(self, filename, format, mode):
         return open(self.build_filepath(filename, format), mode)
+
+
+    def check_exists(self, filename, format):
+        try:
+            _file = self.get_file_handle(filename, format, 'r')
+            return True
+        except:
+            return False
 
 
     def get(self,filename,format='json'):

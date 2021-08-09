@@ -24,6 +24,11 @@ class structureSet():
         return path
 
 
+    def check_exists(self):
+        exists = file.check_exists(self.build_set_path())
+        return exists
+
+
     def add(self, item):
         structureset, success, errors = self.get()
         try:

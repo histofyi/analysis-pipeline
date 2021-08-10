@@ -432,15 +432,37 @@ def sets_create_form_handler():
     return template.render('sets_create', {})
 
 
-@app.get('/sets/create')
+@app.post('/sets/create')
 def sets_create_action_handler():
-    #TODO ensure set doesn't already exist
+    params = ['set_ui_text','set_members']
+    errors = []
+    slug = None
+    members = None
+    variables = common.request_variables(params)
+    if variables['set_ui_text'] is not None:
+        slug = common.slugify(variables['set_ui_text'])
+    else:
+        errors.append('no_ui_text')
+    logging.warn(slug)
+    if variables['set_members'] is not None:
+        try:
+            if '\'' in variables['set_members']:
+                variables['set_members'] = variables['set_members'].replace('\'','"')
+            members = json.loads(variables['set_members'])
+        except:
+            errors.append('not_json')
+    else:
+        errors.append('no_members')
+    logging.warn(members)
+    logging.warn(errors)
     already_exists = lists.structureSet(slug).check_exists()
     if not already_exists:
         logging.warn('create the set')
+        errors = None
     else:
+        errors.append('already_exists')
         logging.warn('already exists. do nothing')
-    return template.render('sets_create', {})
+    return template.render('sets_create', {'variables':variables,'errors':errors})
 
 
 @cache.memoize(timeout=300)

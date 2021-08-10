@@ -1,0 +1,1 @@
+from .split_assemblies import split_assemblies

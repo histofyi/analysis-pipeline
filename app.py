@@ -18,6 +18,7 @@ import functions.lists as lists
 import functions.common as common
 import functions.textanalysis as textanalysis
 import functions.histo as histo
+import functions.structure as structure
 
 
 from api import api
@@ -260,6 +261,12 @@ def analysechains_handler(pdb_code):
     return variables
 
 
+@app.get('/structures/split_assemblies/<string:pdb_code>')
+def split_assemblies(pdb_code):
+    histo_info, success, errors = histo.structureInfo(pdb_code).get()
+    current_assembly = pdb.RCSB().load_structure(pdb_code)
+    split_information = structure.split_assemblies(histo_info, current_assembly, pdb_code)
+    return split_information
 
 
 
@@ -405,6 +412,11 @@ def structure_info_handler(pdb_code):
         'unmatched':unmatched_structure
     }
     return template.render('structure_info', variables)
+
+
+@app.get('/sets/intersection')
+def sets_intersection_handler():
+    return template.render('sets_intersection', {'setlist':{}})
 
 
 

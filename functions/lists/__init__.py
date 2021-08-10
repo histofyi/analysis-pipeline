@@ -69,6 +69,7 @@ class structureSet():
         structureset['length'] = len(structureset['set'])
         structureset['ui_text'] = self.setname.replace('_',' ').title()
         structureset['slug'] = self.setname
+        structureset['last_updated'] = datetime.datetime.fromisoformat(structureset['last_updated'])
         return structureset, success, errors
 
 

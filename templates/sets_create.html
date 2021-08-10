@@ -35,12 +35,12 @@
         <form action="/sets/create" method="POST">
             <div>
                 <label for="set_ui_text">Set title (UI text)</label><br />
-                <input type="text" name="set_ui_text" id="set_ui_text" class="wide_input"/>
+                <input type="text" name="set_ui_text" id="set_ui_text" class="wide_input" {% if variables.set_ui_text %} value="{{variables.set_ui_text}}"{% endif %} />
             </div>
             <br />
             <label for="set_members">Set members (JSON array format)</label><br />
-            <textarea name="set_members" id="set_members" rows="10" width="100%"></textarea>
-        
+            <textarea name="set_members" id="set_members" rows="10" width="100%">{% if variables.set_members %}{{variables.set_members}}{% endif %}</textarea>
+            <div class="vertical-spacing-top-0-25"><input type="submit" value="submit" /></div>
         </form>
       </div>
     </div>

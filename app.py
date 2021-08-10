@@ -43,6 +43,12 @@ def timesince(start_time):
     return common.timesince(start_time)
 
 
+@app.template_filter()
+def deslugify(slug):
+    return common.de_slugify(slug)
+
+
+
 def return_to(pdb_code):
     return '/structures/information/{pdb_code}'.format(pdb_code=pdb_code)
 

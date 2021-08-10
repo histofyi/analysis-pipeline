@@ -46,8 +46,8 @@ def request_variables(params, ignore_empty_strings=True):
 
 
 def slugify(string):
-    return string.replace(' ','_')
+    return string.replace(' ','_').lower()
     
 
 def de_slugify(slug):
-    return slug.replace('_',' ')
+    return slug.replace('_',' ').title()

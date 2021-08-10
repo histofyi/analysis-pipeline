@@ -34,42 +34,13 @@ app.config.from_file('config.toml', toml.load)
 app.config.from_mapping(config)
 cache = Cache(app)
 
-
-@app.template_filter()
-def timesince(dt, default="just now"):
-    """
-    Returns string representing "time since" e.g.
-    3 days ago, 5 hours ago etc.
-    """
-
-    now = datetime.utcnow()
-    diff = now - dt
-
-    periods = (
-        (diff.days / 365, "year", "years"),
-        (diff.days / 30, "month", "months"),
-        (diff.days / 7, "week", "weeks"),
-        (diff.days, "day", "days"),
-        (diff.seconds / 3600, "hour", "hours"),
-        (diff.seconds / 60, "minute", "minutes"),
-        (diff.seconds, "second", "seconds"),
-    )
-
-    # TODO get this working properly
-    if '-1' in str(diff):
-        return "just now"
-
-    for period, singular, plural in periods:        
-        if period:
-            return "%d %s ago" % (period, singular if period == 1 else plural)
-
-    return default
-
-
-
-
 filesystem = providers.filesystemProvider(app.config['BASEDIR'])
 
+
+
+@app.template_filter()
+def timesince(start_time):
+    return common.timesince(start_time)
 
 
 def return_to(pdb_code):
@@ -79,6 +50,10 @@ def return_to(pdb_code):
 @app.before_request
 def before_request():
     logging.warn(request.full_path)
+
+
+
+
 
 
 @app.get('/')
@@ -429,40 +404,49 @@ def structure_info_handler(pdb_code):
 
 @app.get('/sets/create')
 def sets_create_form_handler():
-    return template.render('sets_create', {})
+    return template.render('sets_create', {'variables':{},'structureset':None,'errors':['no_data']})
 
 
 @app.post('/sets/create')
 def sets_create_action_handler():
     params = ['set_ui_text','set_members']
-    errors = []
+    variables = {}
+    errors = None
     slug = None
     members = None
+    structureset = None
     variables = common.request_variables(params)
-    if variables['set_ui_text'] is not None:
-        slug = common.slugify(variables['set_ui_text'])
+    if 'set_ui_text' in variables:
+        if variables['set_ui_text'] is not None:
+            slug = common.slugify(variables['set_ui_text'])
+            logging.warn(slug)
+        else:
+            errors.append('no_ui_text')
     else:
         errors.append('no_ui_text')
-    logging.warn(slug)
-    if variables['set_members'] is not None:
-        try:
-            if '\'' in variables['set_members']:
-                variables['set_members'] = variables['set_members'].replace('\'','"')
-            members = json.loads(variables['set_members'])
-        except:
-            errors.append('not_json')
+    if 'set_members' in variables:
+        if variables['set_members'] is not None:
+            try:
+                if '\'' in variables['set_members']:
+                    variables['set_members'] = variables['set_members'].replace('\'','"')
+                members = json.loads(variables['set_members'])
+                members = [member.lower() for member in members]
+                logging.warn(members)
+            except:
+                errors.append('not_json')
+        else:
+            errors.append('no_members')
     else:
         errors.append('no_members')
-    logging.warn(members)
+    if errors is None:
+        already_exists = lists.structureSet(slug).check_exists()
+        if not already_exists:
+            structureset, success, errors = lists.structureSet(slug).put(members)
+        else:
+            structureset, success, errors = lists.structureSet(slug).get()
+            errors.append('already_exists')
     logging.warn(errors)
-    already_exists = lists.structureSet(slug).check_exists()
-    if not already_exists:
-        logging.warn('create the set')
-        errors = None
-    else:
-        errors.append('already_exists')
-        logging.warn('already exists. do nothing')
-    return template.render('sets_create', {'variables':variables,'errors':errors})
+    return template.render('sets_create', {'variables':variables,'errors':errors,'structureset':structureset,'errors':errors})
 
 
 @cache.memoize(timeout=300)

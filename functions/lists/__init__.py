@@ -43,6 +43,23 @@ class structureSet():
         return structureset, success, errors
 
 
+    def put(self, set, force=False):
+        structureset, success, errors = self.get()
+        try:
+            structureset = json.loads(structureset)
+        except:
+            structureset = structureset
+        
+        if len(structureset['set']) == 0 or force == True:
+            structureset['set'] = set
+            structureset['last_updated'] = datetime.datetime.now().isoformat()
+            structureset['length'] = len(set)
+            structureset, success, errors = file.put(self.build_set_path(), json.dumps(structureset))
+        else:
+            errors.append('structureset_already_has_members')
+        return structureset, success, errors    
+
+
     def get(self):
         structureset, success, errors = file.get(self.build_set_path())
         if not structureset:

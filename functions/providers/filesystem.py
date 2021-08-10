@@ -19,7 +19,7 @@ class filesystemProvider():
         return open(self.build_filepath(filename, format), mode)
 
 
-    def check_exists(self, filename, format):
+    def check_exists(self, filename, format='json'):
         try:
             _file = self.get_file_handle(filename, format, 'r')
             return True

@@ -48,6 +48,14 @@ def timesince(start_time):
 def deslugify(slug):
     return common.de_slugify(slug)
 
+@app.template_filter()
+def prettify_json(this_json):
+    try:
+        return json.dumps(this_json, sort_keys=True, indent=4)
+    except:
+        return this_json
+
+
 
 
 def return_to(pdb_code):
@@ -263,10 +271,18 @@ def analysechains_handler(pdb_code):
 
 @app.get('/structures/split_assemblies/<string:pdb_code>')
 def split_assemblies(pdb_code):
+    complexes, success, errors = filesystem.get('constants/shared/complexes')
     histo_info, success, errors = histo.structureInfo(pdb_code).get()
-    current_assembly = pdb.RCSB().load_structure(pdb_code)
-    split_information = structure.split_assemblies(histo_info, current_assembly, pdb_code)
-    return split_information
+    if 'split_info' not in histo_info:
+        current_assembly = pdb.RCSB().load_structure(pdb_code)
+        split_information = structure.split_assemblies(histo_info, current_assembly, pdb_code)
+        histo_info, success, errors = histo.structureInfo(pdb_code).put('split_info', split_information)
+    variables = {
+        'pdb_code': pdb_code,
+        'histo_info': histo_info,
+        'complexes':complexes
+    }
+    return template.render('structure_assembly_splitting', variables)
 
 
 

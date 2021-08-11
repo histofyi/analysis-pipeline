@@ -26,34 +26,49 @@ def fetch_pdb_data(pdb_code):
 
     rcsb_info = {}
     rcsb_info['primary_citation'] = pdb_info['rcsb_primary_citation']
-    rcsb_info['struct'] = pdb_info['struct']
-    rcsb_info['entry_info'] = pdb_info['rcsb_entry_info']
+    rcsb_info['description'] = pdb_info['struct']['pdbx_descriptor']
+    rcsb_info['resolution_combined'] = pdb_info['rcsb_entry_info']['resolution_combined']
     rcsb_info['title'] = pdb_info['struct']['title']
+    rcsb_info['assembly_count'] = pdb_info['rcsb_entry_info']['assembly_count']
+    rcsb_info['pdb_code'] = pdb_code
     histo_info, success, errors = structureInfo(pdb_code).put('rcsb_info', rcsb_info)
 
-    return histo_info
+    data = {
+        'histo_info': histo_info
+    }
+
+    return data, success, errors
 
 
 def automatic_assignment(pdb_code):
 
     rcsb = RCSB()
-
     histo_info, success, errors = structureInfo(pdb_code).get()
-    
 
-    assembly_count = pdb_info['rcsb_entry_info']['assembly_count']
+    assembly_count = histo_info['rcsb_info']['assembly_count']
 
     structure = rcsb.load_structure(pdb_code)
 
     alike_chains = None
-    try:
+    if not alike_chains:
+
         structure_stats = rcsb.predict_assigned_chains(structure, assembly_count)
 
+        alike_chains = rcsb.cluster_alike_chains(structure, assembly_count)
+        
+        histo_info, success, errors = structureInfo(pdb_code).put('alike_chains', alike_chains)
+
         best_match = structure_stats['best_match']
+
         histo_info, success, errors = structureInfo(pdb_code).put('best_match', best_match)
-        del structure_stats['best_match']
-        #TODO see if this breaks not being here
-        #histo_info, success, errors = histo.structureInfo(pdb_code).put('structure_stats', structure_stats)
+
+        chain_assignments = structure_stats['chain_assignments']
+
+        histo_info, success, errors = structureInfo(pdb_code).put('chain_assignments', chain_assignments)
+
+        basic_info = structure_stats['basic_info']
+
+        histo_info, success, errors = structureInfo(pdb_code).put('basic_info', basic_info)
 
         if best_match['confidence'] > 0.8:
             del structure_stats['complex_hits']
@@ -62,22 +77,16 @@ def automatic_assignment(pdb_code):
             data, success, errors = structureSet('probable_' + best_match['best_match']).add(pdb_code)
         else:
             data, success, errors = structureSet('unmatched').add(pdb_code)
-            alike_chains = rcsb.cluster_alike_chains(structure, assembly_count)
-            histo_info, success, errors = structureInfo(pdb_code).put('alike_chains', alike_chains)
 
         data, success, errors = structureSet('automatically_matched').add(pdb_code)
 
-    except:
-        data, success, errors = structureSet('error').add(pdb_code)
+#    except:
+#       data, success, errors = structureSet('error').add(pdb_code)
 
-    variables = {
-            'pdb_code': pdb_code,
-            'alike_chains':alike_chains,
-            'best_match': best_match,
-            'histo_info': histo_info,
-            'rcsb_info': rcsb_info
+    data = {
+            'histo_info': histo_info
     }
-    return variables
+    return data, success, errors
 
 
 

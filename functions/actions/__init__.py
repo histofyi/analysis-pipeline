@@ -1,1 +1,1 @@
-from .structure_pipeline import automatic_assignment
+from .structure_pipeline import automatic_assignment, fetch_pdb_data

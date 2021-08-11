@@ -132,10 +132,10 @@ class RCSB():
 
     def predict_assigned_chains(self, structure, assembly_count):
         # get the basic stats on the structure
-        structure_stats = self.get_structure_stats(structure, assembly_count)
+        basic_info = self.get_structure_stats(structure, assembly_count)
 
         # given the number of unique chains, get a set of all the possible complexes
-        possible_complexes, possible_complex_labels = self.suggest_possible_complexes(structure_stats['chain_count'])
+        possible_complexes, possible_complex_labels = self.suggest_possible_complexes(basic_info['chain_count'])
 
         # initialise some variables
         possible_chains = {}
@@ -247,11 +247,11 @@ class RCSB():
                     best_match = item
 
         # remove this keyed item as we're not going to be using it
-        del structure_stats['chainset']
+        del basic_info['chainset']
 
         variables = {
             'chain_assignments':chain_assignments,
-            'structure_stats':structure_stats,
+            'basic_info':basic_info,
             'best_match': {
                 'best_match': best_match,
                 'confidence': best_score

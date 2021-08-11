@@ -90,6 +90,51 @@ def structures_handler():
     return template.render('structures', {})
 
 
+
+
+
+# Step 1
+@app.get('/structures/pipeline/fetch/<string:pdb_code>')
+def fetch_pdb_data_handler(pdb_code):
+    data, success, errors = actions.fetch_pdb_data(pdb_code)
+    return data['histo_info']
+
+
+# Step 2
+@app.get('/structures/pipeline/assign/<string:pdb_code>')
+def automatic_assignment_handler(pdb_code):
+    data, success, errors = actions.automatic_assignment(pdb_code)
+    return data
+
+
+# Step 4
+#@app.get('/structures/pipeline/split/<string:pdb_code>')
+
+
+# Step 5
+#@app.get('/structures/pipeline/align/<string:pdb_code>')
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+### REFACTOR ALL BELOW THE FOLD TO THIN CONTROLLERS AND REMOVING UNUSED CODE/HANDLERS ###
+
+
 # need to see how this is used now, possibly refactor
 @app.get('/structures/<string:pdb_code>/approve/best_match')
 def structure_approve_best_match_handler(pdb_code):

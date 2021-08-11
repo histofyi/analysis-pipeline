@@ -1,6 +1,9 @@
 from ..histo import structureInfo
 from ..pdb import RCSB
 from ..lists import structureSet
+from ..structure import split_assemblies, align_structure
+
+import logging
 
 ### Pipeline for categorising new structures
 #
@@ -89,13 +92,61 @@ def automatic_assignment(pdb_code):
     return data, success, errors
 
 
+def split_structure(pdb_code):
+    histo_info, success, errors = structureInfo(pdb_code).get()
+    if 'split_info' not in histo_info:
+        current_assembly = RCSB().load_structure(pdb_code)
+        split_information = split_assemblies(histo_info, current_assembly, pdb_code)
+        histo_info, success, errors = structureInfo(pdb_code).put('split_info', split_information)
+    data = {
+        'histo_info': histo_info
+    }
+    return data, success, errors
 
 
-def split_complexes():
-    pass
-
-def align_structures():
-    pass
+def align_structures(pdb_code):
+    histo_info, success, errors = structureInfo(pdb_code).get()
+    align_info = {}
+    mhc_alpha_chains = []
+    #mhc_beta_chains = []
+    aligned_assignment = ''
+    for chain in histo_info['chain_assignments']:
+        if 'class_i_alpha' in histo_info['chain_assignments'][chain]['label']:
+            logging.warn('CLASS I ALPHA FOUND')
+            mhc_alpha_chains = histo_info['chain_assignments'][chain]['chains']
+            aligned_assignment = 'class_i_alpha'
+    errors = []
+    if 'split_info' in histo_info:
+        logging.warn("HAS SPLIT INFO")
+        i = 1
+        for complex in histo_info['split_info']['complexes']:
+            logging.warn(complex)
+            for chain in mhc_alpha_chains:
+                logging.warn(chain)
+                if chain in complex['chains']:
+                    complex_number = 'complex_' + str(i)
+                    current_alignment = {
+                        'aligned_chain': chain,
+                        'chain_assignment': aligned_assignment,
+                        'filename': complex['filename']
+                    }
+                    try:
+                        align_information = align_structure('class_i', pdb_code, str(i), chain)
+                        if align_information:
+                            current_alignment['rms'] = align_information
+                        else:
+                            current_alignment['errors'] = ['unable_to_load']
+                    except:
+                        current_alignment['errors'] = ['unable_to_align']
+                    align_info[complex_number] = current_alignment
+            i += 1
+        histo_info, success, errors = structureInfo(pdb_code).put('align_info', align_info)  
+    else:
+        align_info = {'error':'structure_not_split'}  
+    data = {
+        'histo_info': histo_info
+    }
+    return data, success, errors
 
 
 

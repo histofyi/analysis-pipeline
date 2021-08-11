@@ -108,11 +108,17 @@ def automatic_assignment_handler(pdb_code):
 
 
 # Step 4
-#@app.get('/structures/pipeline/split/<string:pdb_code>')
+@app.get('/structures/pipeline/split/<string:pdb_code>')
+def split_structure_handler(pdb_code):
+    data, success, errors = actions.split_structure(pdb_code)
+    return data
 
 
 # Step 5
-#@app.get('/structures/pipeline/align/<string:pdb_code>')
+@app.get('/structures/pipeline/align/<string:pdb_code>')
+def align_structures_handler(pdb_code):
+    data, success, errors = actions.align_structures(pdb_code)
+    return data
 
 
 

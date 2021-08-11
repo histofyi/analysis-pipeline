@@ -7,7 +7,7 @@ import logging
 
 
 
-def align_structures(mhc_class,pdb_code, complex_number, target_chain_id):
+def align_structure(mhc_class,pdb_code, complex_number, target_chain_id):
     rcsb = RCSB()
     baseline = rcsb.load_structure(mhc_class, directory = 'structures/pdb_format/orientations')
     complex_filename = '{pdb_code}_{complex_number}'.format(pdb_code = pdb_code, complex_number = complex_number)

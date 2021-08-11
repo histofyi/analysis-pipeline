@@ -14,12 +14,12 @@ def split_assemblies(histo_info, current_assembly, pdb_code):
     split_information = None
     if histo_info['best_match']['confidence'] > 0.9:
         split_information = {}
-        chains = histo_info['structure_stats']['chain_assignments']
-        split_information['assembly_count'] = histo_info['structure_stats']['structure_stats']['assembly_count']
+        chains = histo_info['chain_assignments']
+        assembly_count = histo_info['basic_info']['assembly_count']
         i = 0
         complex_array = []
         chain_labels = [chain for chain in chains]
-        while i < split_information['assembly_count']:
+        while i < assembly_count:
             this_complex = []
             for chain in chain_labels:
                 this_complex.append(chains[chain]['chains'][i])

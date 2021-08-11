@@ -1,1 +1,1 @@
-from .structure_pipeline import automatic_assignment, fetch_pdb_data
+from .structure_pipeline import automatic_assignment, fetch_pdb_data, split_structure, align_structures

@@ -249,8 +249,40 @@ def split_assemblies(pdb_code):
 def align_complexes(pdb_code):
     complexes, success, errors = filesystem.get('constants/shared/complexes')
     histo_info, success, errors = histo.structureInfo(pdb_code).get()
-    align_information = structure.align_structures('class_i', pdb_code, '1', 'A')
-    return 'Attempting to align baseline clas_i with ' + pdb_code
+    align_info = {}
+    mhc_alpha_chains = []
+    #mhc_beta_chains = []
+    aligned_assignment = ''
+    for chain in histo_info['chains']:
+        if 'class_i_alpha' in histo_info['chains'][chain]['chain_type']:
+            mhc_alpha_chains = histo_info['chains'][chain]['assignments']
+            aligned_assignment = 'class_i_alpha'
+    errors
+    if 'split_info' in histo_info:
+        i = 1
+        for complex in histo_info['split_info']['complexes']:
+            for chain in mhc_alpha_chains:
+                if chain in complex['chains']:
+                    complex_number = 'complex_' + str(i)
+                    current_alignment = {
+                        'aligned_chain': chain,
+                        'chain_assignment': aligned_assignment,
+                        'filename': complex['filename']
+                    }
+                    try:
+                        align_information = structure.align_structures('class_i', pdb_code, str(i), chain)
+                        if align_information:
+                            current_alignment['rms'] = align_information
+                        else:
+                            current_alignment['errors'] = ['unable_to_load']
+                    except:
+                        current_alignment['errors'] = ['unable_to_align']
+                    align_info[complex_number] = current_alignment
+            i += 1
+        histo_info, success, errors = histo.structureInfo(pdb_code).put('align_info', align_info)  
+    else:
+        align_info = {'error':'structure_not_split'}  
+    return align_info
 
 
 @app.post("/structures/information/<string:pdb_code>/assignchains")

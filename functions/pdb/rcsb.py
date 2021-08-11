@@ -58,8 +58,8 @@ class RCSB():
         return pdb_info
 
 
-    def load_structure(self, pdb_code):
-        filepath = 'structures/pdb_format/raw/{pdb_code}'.format(pdb_code = pdb_code)
+    def load_structure(self, pdb_code, directory='structures/pdb_format/raw'):
+        filepath = '{directory}/{pdb_code}'.format(pdb_code = pdb_code, directory = directory)
         full_filepath = file.build_filepath(filepath,'pdb')
         parser = PDBParser(PERMISSIVE=1)
         structure = parser.get_structure('mhc', full_filepath)
@@ -156,6 +156,12 @@ class RCSB():
                 else:
                     if complex[item] not in possible_chains and 'peptide' not in complex[item]:
                         possible_chains[complex[item]] = self.complexes['chains'][complex[item]]
+
+
+        # then group the alike chains to reduce the computational space
+        alike_chains = self.cluster_alike_chains(structure, assembly_count)
+
+        logging.warn(alike_chains)
 
 
         # then start working on the chains within the comples
@@ -263,11 +269,12 @@ class RCSB():
 
 
     def cluster_alike_chains(self,structure, assembly_count):
+        ### Performs a clustering of similar chains (on sequence basis) in the structure ###
+        # First get the basic stats on the structure
         structure_stats = self.get_structure_stats(structure, assembly_count)
         unique_chain_set = {}
-        logging.warn(assembly_count)
+        # if there's only one assembly, then just assign the chains, no clustering needed
         if int(assembly_count) == 1:
-            logging.warn("ONLY ONE ASSEMBLY")
             i = 1
             for chain in structure_stats['chainset']:
                 chainset = {}
@@ -279,27 +286,36 @@ class RCSB():
                 unique_chain_set['chain_' + str(i)] = chainset
 
                 i += 1
-        else:        
+        else:
+            # if more than one assembly we need to start creating clusters of matched chains        
             matched = []
             matches = []
+            # we're doing pairwise matches of chains now
             for first_chain in structure_stats['chainset']:
                 first_sequence = structure_stats['chainset'][first_chain]['sequence']['one_letter_sequence_string']
                 for second_chain in structure_stats['chainset']:
+                    # first of all, make sure we're not matching the same chain!
                     if second_chain != first_chain:
                         this_sequence = structure_stats['chainset'][second_chain]['sequence']['one_letter_sequence_string']
+                        # reset the found_match variable
                         found_match = False
+                        # then checking we're not doing work already done
                         if first_chain not in matched and second_chain not in matched:
+                            # first see if the sequences match, this is the most common case and least expensive calculation
                             if this_sequence == first_sequence:
                                 found_match = True
                             else:
+                                # sadly not, then we're going to look and see if the sequences are roughly the same length before we do the more expensive fuzzy matching calculation
                                 if len(this_sequence) > len(first_sequence):
                                     length_score = float(len(first_sequence)) / float(len(this_sequence))
                                 else:
                                     length_score = float(len(this_sequence)) / float(len(first_sequence))
-                                if length_score > 0.8:
+                                # if they're roughly the same length, calculate the Levenshtein distance/ratio
+                                if length_score > 0.9:
                                     ratio, distance = levenshtein_ratio_and_distance(first_sequence, this_sequence)
                                     if ratio > 0.9:
                                         found_match = True
+                            # if through any of these methods we've found a match, we append the items into the relevant sets
                             if found_match:
                                 matched.append(first_chain)
                                 matched.append(second_chain)
@@ -310,6 +326,7 @@ class RCSB():
                                                 match.append(second_chain)              
                                 else:
                                     matches.append([first_chain,second_chain])
+            # now we've found the matches, we can build a dictionary of the matched chains
             unique_chain_set = {}
             i = 1
             for match in matches:
@@ -326,8 +343,7 @@ class RCSB():
                     chainset['sequences'].append(this_sequence)
                     chainset['lengths'].append(len(this_sequence))
                 i += 1
-
-        logging.warn(unique_chain_set)
+        # and finally, return it
         return unique_chain_set
 
 

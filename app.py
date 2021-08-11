@@ -68,6 +68,14 @@ def before_request():
 
 
 
+@cache.memoize(timeout=300)
+def get_hydrated_structure_set(slug):
+    structureset, success, errors = lists.structureSet(slug).get()
+    structureset['histo_info'] = {}
+    for pdb_code in structureset['set']:
+        histo_info, success, errors = histo.structureInfo(pdb_code).get()
+        structureset['histo_info'][pdb_code] = histo_info
+    return structureset
 
 
 
@@ -82,7 +90,6 @@ def structures_handler():
     return template.render('structures', {})
 
 
-
 @app.get('/structures/<string:pdb_code>/approve/best_match')
 def structure_approve_attribute_handler(pdb_code):
     variables = common.request_variables(['return_to'])
@@ -90,8 +97,6 @@ def structure_approve_attribute_handler(pdb_code):
     complex_type = {'complex_type':histo_info['best_match']['best_match']}
     histo_info, success, errors = histo.structureInfo(pdb_code).put('complex_type', complex_type)
     return redirect(variables['return_to'])
-
-
 
 
 @app.get('/structures/search/<string:mhc_class>')
@@ -165,8 +170,6 @@ def structures_automatic_assignment_handler(pdb_code):
         histo_info, success, errors = histo.structureInfo(pdb_code).put('best_match', best_match)
         del structure_stats['best_match']
         histo_info, success, errors = histo.structureInfo(pdb_code).put('structure_stats', structure_stats)
-
-        logging.warn(best_match)
 
         if best_match['confidence'] > 0.8:
             del structure_stats['complex_hits']
@@ -321,9 +324,6 @@ def update_structure_information_handler(pdb_code,information_section):
     return redirect(return_to(pdb_code))
 
 
-
-
-
 @app.get('/structures/information/<string:pdb_code>')
 def structure_info_handler(pdb_code):
     unmatched, success, errors = lists.structureSet('unmatched').get()
@@ -440,14 +440,7 @@ def sets_create_action_handler():
     return template.render('sets_create', {'variables':variables,'errors':errors,'structureset':structureset,'errors':errors})
 
 
-@cache.memoize(timeout=300)
-def get_hydrated_structure_set(slug):
-    structureset, success, errors = lists.structureSet(slug).get()
-    structureset['histo_info'] = {}
-    for pdb_code in structureset['set']:
-        histo_info, success, errors = histo.structureInfo(pdb_code).get()
-        structureset['histo_info'][pdb_code] = histo_info
-    return structureset
+
 
 
 

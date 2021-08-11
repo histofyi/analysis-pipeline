@@ -20,6 +20,8 @@ import functions.textanalysis as textanalysis
 import functions.histo as histo
 import functions.structure as structure
 
+import functions.actions as actions
+
 
 from api import api
 
@@ -38,6 +40,7 @@ cache = Cache(app)
 filesystem = providers.filesystemProvider(app.config['BASEDIR'])
 
 
+### Template filters ###
 
 @app.template_filter()
 def timesince(start_time):
@@ -48,12 +51,11 @@ def timesince(start_time):
 def deslugify(slug):
     return common.de_slugify(slug)
 
+
 @app.template_filter()
 def prettify_json(this_json):
-    try:
-        return json.dumps(this_json, sort_keys=True, indent=4)
-    except:
-        return this_json
+    return common.prettify_json(this_json)
+
 
 @app.template_filter()
 def pdb_image_folder(pdb_code):
@@ -62,12 +64,6 @@ def pdb_image_folder(pdb_code):
 
 def return_to(pdb_code):
     return '/structures/information/{pdb_code}'.format(pdb_code=pdb_code)
-
-
-@app.before_request
-def before_request():
-    logging.warn(request.full_path)
-
 
 
 @cache.memoize(timeout=300)
@@ -96,7 +92,7 @@ def structures_handler():
 
 # need to see how this is used now, possibly refactor
 @app.get('/structures/<string:pdb_code>/approve/best_match')
-def structure_approve_attribute_handler(pdb_code):
+def structure_approve_best_match_handler(pdb_code):
     variables = common.request_variables(['return_to'])
     histo_info, success, errors = histo.structureInfo(pdb_code).get()
     complex_type = {'complex_type':histo_info['best_match']['best_match']}
@@ -147,59 +143,7 @@ def structures_search_handler(mhc_class):
 # make this a linked first point of call for new structures
 @app.get('/structures/assign_automatically/<string:pdb_code>')
 def structures_automatic_assignment_handler(pdb_code):
-
-    rcsb = pdb.RCSB()
-
-    histo_info, success, errors = histo.structureInfo(pdb_code).get()
-    
-    pdb_info = rcsb.get_info(pdb_code)
-    rcsb_info = {}
-    rcsb_info['primary_citation'] = pdb_info['rcsb_primary_citation']
-    rcsb_info['struct'] = pdb_info['struct']
-    rcsb_info['entry_info'] = pdb_info['rcsb_entry_info']
-    rcsb_info['title'] = pdb_info['struct']['title']
-    histo_info, success, errors = histo.structureInfo(pdb_code).put('rcsb_info', rcsb_info)
-
-
-    pdb_file = rcsb.fetch(pdb_code)
-
-    assembly_count = pdb_info['rcsb_entry_info']['assembly_count']
-
-    structure = rcsb.load_structure(pdb_code)
-
-    alike_chains = None
-    try:
-        structure_stats = rcsb.predict_assigned_chains(structure, assembly_count)
-
-        best_match = structure_stats['best_match']
-        histo_info, success, errors = histo.structureInfo(pdb_code).put('best_match', best_match)
-        del structure_stats['best_match']
-        #TODO see if this breaks not being here
-        #histo_info, success, errors = histo.structureInfo(pdb_code).put('structure_stats', structure_stats)
-
-        if best_match['confidence'] > 0.8:
-            del structure_stats['complex_hits']
-            data, success, errors = lists.structureSet(best_match['best_match']).add(pdb_code)
-        elif best_match['confidence'] > 0.5:
-            data, success, errors = lists.structureSet('probable_' + best_match['best_match']).add(pdb_code)
-        else:
-            data, success, errors = lists.structureSet('unmatched').add(pdb_code)
-            alike_chains = rcsb.cluster_alike_chains(structure, assembly_count)
-            histo_info, success, errors = histo.structureInfo(pdb_code).put('alike_chains', alike_chains)
-
-        data, success, errors = lists.structureSet('automatically_matched').add(pdb_code)
-
-    except:
-        data, success, errors = lists.structureSet('error').add(pdb_code)
-
-    variables = {
-            'pdb_code': pdb_code,
-#            'structure_stats': structure_stats,
-            'alike_chains':alike_chains,
-            'best_match': best_match,
-            'histo_info': histo_info,
-            'rcsb_info': rcsb_info
-    }
+    variables = actions.automatic_assignment(pdb_code)
     return variables
 
 
@@ -282,7 +226,12 @@ def align_complexes(pdb_code):
         histo_info, success, errors = histo.structureInfo(pdb_code).put('align_info', align_info)  
     else:
         align_info = {'error':'structure_not_split'}  
-    return align_info
+    variables = {
+        'pdb_code': pdb_code,
+        'histo_info': histo_info,
+        'complexes':complexes
+    }
+    return template.render('structure_alignment', variables)
 
 
 @app.post("/structures/information/<string:pdb_code>/assignchains")

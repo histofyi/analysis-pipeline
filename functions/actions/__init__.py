@@ -1,0 +1,1 @@
+from .structure_pipeline import automatic_assignment

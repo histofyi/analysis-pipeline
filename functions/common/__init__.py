@@ -88,3 +88,10 @@ def timesince(start_time):
             *((num_minutes, 's') if num_minutes > 1 else (num_minutes, '')))
 
     return 'a few seconds ago'
+
+
+def prettify_json(this_json):
+    try:
+        return json.dumps(this_json, sort_keys=True, indent=4)
+    except:
+        return this_json

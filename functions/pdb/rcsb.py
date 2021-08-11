@@ -213,8 +213,8 @@ class RCSB():
                 if item == 'label':
                     label = complex['label']
                 else:
-                    if 'peptide' in complex[item]:
-                        # if there's something marked as a peptide, it's likely to be a peptide, so we'll add it to the matches so it can be part of the aggregate score
+                    if '_peptide' == complex[item]:
+                        # if there's something marked as a peptide but without a class (as we couldn't assign either alpha or beta chain), it's likely to be a peptide, so we'll add it to the matches so it can be part of the aggregate score
                         score += 1
                         matches.append(complex[item])
                     if complex[item] in chain_assignments:

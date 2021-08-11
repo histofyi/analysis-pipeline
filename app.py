@@ -55,7 +55,9 @@ def prettify_json(this_json):
     except:
         return this_json
 
-
+@app.template_filter()
+def pdb_image_folder(pdb_code):
+    return pdb_code[1:3]
 
 
 def return_to(pdb_code):
@@ -100,6 +102,7 @@ def structure_approve_attribute_handler(pdb_code):
     complex_type = {'complex_type':histo_info['best_match']['best_match']}
     histo_info, success, errors = histo.structureInfo(pdb_code).put('complex_type', complex_type)
     return redirect(variables['return_to'])
+
 
 # search for new structures. Need options to hide already matched structures
 @app.get('/structures/search/<string:mhc_class>')
@@ -171,7 +174,8 @@ def structures_automatic_assignment_handler(pdb_code):
         best_match = structure_stats['best_match']
         histo_info, success, errors = histo.structureInfo(pdb_code).put('best_match', best_match)
         del structure_stats['best_match']
-        histo_info, success, errors = histo.structureInfo(pdb_code).put('structure_stats', structure_stats)
+        #TODO see if this breaks not being here
+        #histo_info, success, errors = histo.structureInfo(pdb_code).put('structure_stats', structure_stats)
 
         if best_match['confidence'] > 0.8:
             del structure_stats['complex_hits']
@@ -190,7 +194,7 @@ def structures_automatic_assignment_handler(pdb_code):
 
     variables = {
             'pdb_code': pdb_code,
-            'structure_stats': structure_stats,
+#            'structure_stats': structure_stats,
             'alike_chains':alike_chains,
             'best_match': best_match,
             'histo_info': histo_info,
@@ -327,7 +331,7 @@ def update_structure_information_handler(pdb_code,information_section):
     return redirect(return_to(pdb_code))
 
 
-@app.get('/api/v1/structure/information/<string:pdb_code>')
+@app.get('/api/v1/structures/information/<string:pdb_code>')
 @app.get('/structures/information/<string:pdb_code>')
 def structure_info_handler(pdb_code):
     unmatched, success, errors = lists.structureSet('unmatched').get()
@@ -379,15 +383,14 @@ def structure_info_handler(pdb_code):
         'unmatched':unmatched_structure
     }
     if 'api' in str(request.url_rule):
-        for this_key in variables['histo_info']['structure_stats']:
-            logging.warn(this_key)
+        if 'structure_stats' in histo_info['structure_stats']:
+            logging.warn("DUPLICATION")
         return variables
     else:
         variables['pdb_info'] = pdb_info
         variables['pdb_file'] = pdb_file
         variables['complexes'] = complexes
-        variables['basic_information'] = basic_information
-        variables['pdb_image_folder'] = pdb_image_folder
+        variables['possible_complexes_labels'] = basic_information['possible_complexes_labels']
         return template.render('structure_info', variables)
 
 

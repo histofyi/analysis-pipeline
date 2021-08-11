@@ -256,8 +256,8 @@ class RCSB():
                 'best_match': best_match,
                 'confidence': best_score
             },
+            #'unique_chain_set':alike_chains,
             'complex_hits':complex_hits,
-            'unique_chain_set':alike_chains
         }
         return variables
 

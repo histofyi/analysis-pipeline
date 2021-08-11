@@ -75,7 +75,6 @@
         <div class="grid-container bottom-border">
             <div class="column-one-half">
                 <div class="inner">
-                    {{unmatched}}
                     {% if not unmatched %}
                     <script src="https://cdnjs.cloudflare.com/ajax/libs/3Dmol/1.4.0/3Dmol-min.js"></script>
 
@@ -104,7 +103,8 @@
 
                     </script>
                     {% else %}
-                    <img class="pdb-image" src="https://cdn.rcsb.org/images/structures/{{pdb_image_folder}}/{{pdb_code}}/{{pdb_code}}_assembly-1.jpeg" alt="Structure of {{pdb_code}}"/>
+                    <div class="body-copy-smallest">This structure has not yet been assigned to a complex type</div>
+                    <img class="pdb-image" src="https://cdn.rcsb.org/images/structures/{{pdb_code|pdb_image_folder}}/{{pdb_code}}/{{pdb_code}}_assembly-1.jpeg" alt="Structure of {{pdb_code}}"/>
                     {% endif %}
                     <div class="body-copy-smallest"><a href="https://www.rcsb.org/structure/{{pdb_code}}" target="_new">View {{pdb_code}} entry on RCSB</a> | <a href="https://www.rcsb.org/3d-view/{{pdb_code}}/1" target="_new">Visualise {{pdb_code}} entry on RCSB</a></div>
                 </div>
@@ -183,7 +183,7 @@
                         <div class="body-copy-small"><strong>Possible complex types:</strong></div>
                         <form action="/structures/information/{{pdb_code}}/complex_type/update" method="POST">
                             <input type="hidden" id="pdb_code" name="pdb_code" value="{{pdb_code}}" />
-                            {% for possible_complex in basic_information.possible_complexes_labels %}
+                            {% for possible_complex in possible_complexes_labels %}
                                 <input type="radio" name="complex_type" value="{{ possible_complex }}">
                                 <label class="body-copy-smallest" for="complex_type">{{ possible_complex }}</label><br>
                             {% endfor %}
@@ -244,41 +244,7 @@
             </div>
             {% endfor %}
             {% else %}
-            <form action="/structures/information/{{pdb_code}}/assignchains" method="post">
-                <input type="hidden" id="pdb_code" name="pdb_code" value="{{pdb_code}}" />
-                <input type="hidden" id="chain_count" name="chain_count" value="{{basic_information.unique_chain_count}}" />
-                {% for chain in basic_information.chain_sequences.chunked_one_letter_sequences %}
-                <div class="column-one-quarter">
-                    <div class="inner vertical-spacing-bottom">
-                        <div><strong>{{chain}} ({{basic_information.chain_lengths[chain]}}aa)</strong></div>
-                        <div>
-                            <select id="{{chain}}_chain_type" name="{{chain}}_chain_type">{% for chain_type in complexes.chains %}<option value="{{complexes.chains[chain_type].label}}">{{complexes.chains[chain_type].ui_text}}</option>{% endfor %}</select>
-                            <br />
-                            <label class="body-copy-smallest" for="{{chain}}_assignments">Labels</label>
-                            </label><input type="text" id = "{{chain}}_assignments" name="{{chain}}_assignments" value={{basic_information.chain_label_sets[chain] | join(',')}} />
-                            <input type="hidden" id="{{chain}}_length" name="{{chain}}_length" value="{{basic_information.chain_lengths[chain]}}" />
-                            <input type="hidden" id="{{chain}}_sequence" name="{{chain}}_sequence" value="{{basic_information.chain_sequences.unique_one_letter_sequences[chain]}}" />
-                        </div>
-                    </div>
-                </div>
-                <div class="column-three-quarters">
-                    <div class="inner vertical-spacing-bottom"> 
-                        {% set chunked_sequence = basic_information.chain_sequences.chunked_one_letter_sequences[chain] %}
-                        {% for row in chunked_sequence %}
-                            <pre class="sequence">{{row}}</pre>
-                        {% endfor %}
-                        <br />
-                        <br />
-                        <br />
-                    </div>    
-                </div>
-                {% endfor %}
-            <div class="column-full-width">
-                <div class="inner">
-                    <div class="vertical-spacing-bottom-0-25"><input type="submit" value="submit" /></div>
-                </div>
-            </div>
-            </form>
+            DO SOMETHING TO CREATE THE CHAIN ASSIGNMENTS
             {% endif %}
         </div>
     </section>

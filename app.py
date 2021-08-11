@@ -133,115 +133,65 @@ def structures_search_handler(mhc_class):
     return template.render('structure_sets', {'nav':'sets','set':structureset, 'view_type':'condensed'})
 
 
-@app.get('/structures/assign_automatically/<string:mhc_class>')
-def structures_automatic_assignment_handler(mhc_class):
-    query_name = mhc_class + '_sequence_query'
-    query, success, errors = filesystem.get('constants/rcsb/'+ query_name)
-    exclude, success, errors = lists.structureSet('exclude').get()
-    automatically_matched, success, errors = lists.structureSet('automatically_matched').get()
-    error, success, errors = lists.structureSet('error').get()
-
-
-    exclude_length = len(exclude['set'])
-    automatically_matched_length = len(automatically_matched['set'])
-    error_length = len(error['set'])
-
-
-    number_of_records = 25
+@app.get('/structures/assign_automatically/<string:pdb_code>')
+def structures_automatic_assignment_handler(pdb_code):
 
 
     rcsb = pdb.RCSB()
 
+
+    histo_info, success, errors = histo.structureInfo(pdb_code).get()
+    
+    pdb_info = rcsb.get_info(pdb_code)
     rcsb_info = {}
+    rcsb_info['primary_citation'] = pdb_info['rcsb_primary_citation']
+    rcsb_info['struct'] = pdb_info['struct']
+    rcsb_info['entry_info'] = pdb_info['rcsb_entry_info']
+    rcsb_info['title'] = pdb_info['struct']['title']
+    histo_info, success, errors = histo.structureInfo(pdb_code).put('rcsb_info', rcsb_info)
 
-    search_data = rcsb.search(query)
-    
-    stats = {
-        'exclude_length':exclude_length,
-        'automatically_matched_length':automatically_matched_length,
-        'error_length':error_length,
-        'found_length': len(search_data)
+
+    pdb_file = rcsb.fetch(pdb_code)
+
+    assembly_count = pdb_info['rcsb_entry_info']['assembly_count']
+
+    structure = rcsb.load_structure(pdb_code)
+
+    alike_chains = None
+    try:
+        structure_stats = rcsb.predict_assigned_chains(structure, assembly_count)
+
+        best_match = structure_stats['best_match']
+        histo_info, success, errors = histo.structureInfo(pdb_code).put('best_match', best_match)
+        del structure_stats['best_match']
+        histo_info, success, errors = histo.structureInfo(pdb_code).put('structure_stats', structure_stats)
+
+        logging.warn(best_match)
+
+        if best_match['confidence'] > 0.8:
+            del structure_stats['complex_hits']
+            data, success, errors = lists.structureSet(best_match['best_match']).add(pdb_code)
+        elif best_match['confidence'] > 0.5:
+            data, success, errors = lists.structureSet('probable_' + best_match['best_match']).add(pdb_code)
+        else:
+            data, success, errors = lists.structureSet('unmatched').add(pdb_code)
+            alike_chains = rcsb.cluster_alike_chains(structure, assembly_count)
+            isto_info, success, errors = histo.structureInfo(pdb_code).put('alike_chains', alike_chains)
+
+        data, success, errors = lists.structureSet('automatically_matched').add(pdb_code)
+
+    except:
+        data, success, errors = lists.structureSet('error').add(pdb_code)
+
+    variables = {
+            'pdb_code': pdb_code,
+            'structure_stats': structure_stats,
+            'alike_chains':alike_chains,
+            'best_match': best_match,
+            'histo_info': histo_info,
+            'rcsb_info': rcsb_info
     }
-
-    filtered_set = []
-
-    for structure in search_data:
-        seen_structure = False
-        if structure in exclude['set']:
-            seen_structure = True
-        if structure in automatically_matched['set']:
-            seen_structure = True
-        if structure in error['set']:
-            seen_structure = True
-        if not seen_structure:
-            filtered_set.append(structure)
-
-    filtered_set_length = len(filtered_set)
-
-    remaining = filtered_set_length - number_of_records
-    if remaining < 0:
-        remaining = 0
-
-
-    short_search = filtered_set[0:number_of_records]
-
-
-
-
-    search_set = {}
-
-    for pdb_code in short_search:
-        histo_info, success, errors = histo.structureInfo(pdb_code).get()
-        search_set[pdb_code] = {}
-        if 'complex_type' in histo_info:
-            search_set[pdb_code]['manual_assignment'] = histo_info['complex_type']['complex_type']
-        
-        pdb_info = rcsb.get_info(pdb_code)
-        rcsb_info = {}
-        rcsb_info['primary_citation'] = pdb_info['rcsb_primary_citation']
-        rcsb_info['struct'] = pdb_info['struct']
-        rcsb_info['entry_info'] = pdb_info['rcsb_entry_info']
-        rcsb_info['title'] = pdb_info['struct']['title']
-        histo_info, success, errors = histo.structureInfo(pdb_code).put('rcsb_info', rcsb_info)
-
-
-        pdb_file = rcsb.fetch(pdb_code)
-
-        assembly_count = pdb_info['rcsb_entry_info']['assembly_count']
-
-        structure = rcsb.load_structure(pdb_code)
-
-
-        try:
-            structure_stats = rcsb.predict_assigned_chains(structure, assembly_count)
-
-            best_match = structure_stats['best_match']
-            histo_info, success, errors = histo.structureInfo(pdb_code).put('best_match', best_match)
-            del structure_stats['best_match']
-            histo_info, success, errors = histo.structureInfo(pdb_code).put('structure_stats', structure_stats)
-
-            logging.warn(best_match)
-
-            if best_match['confidence'] > 0.8:
-                del structure_stats['complex_hits']
-                search_set[pdb_code]['best_matching'] = True
-                data, success, errors = lists.structureSet(best_match['best_match']).add(pdb_code)
-            elif best_match['confidence'] > 0.5:
-                search_set[pdb_code]['matching'] = True
-                data, success, errors = lists.structureSet('probable_' + best_match['best_match']).add(pdb_code)
-            else:
-                data, success, errors = lists.structureSet('unmatched').add(pdb_code)
-
-            search_set[pdb_code]['best_match'] = best_match
-            data, success, errors = lists.structureSet('automatically_matched').add(pdb_code)
-
-        except:
-            search_set[pdb_code]['error'] = True
-            data, success, errors = lists.structureSet('error').add(pdb_code)
-
-    
-    return template.render('structure_matching', {'search': short_search, 'search_set':search_set, 'rcsb_info':rcsb_info, 'filtered_set_length': remaining, 'stats':stats})
-
+    return variables
 
 
 @app.get('/structures/analyse_chains/<string:pdb_code>')
@@ -284,6 +234,13 @@ def split_assemblies(pdb_code):
     }
     return template.render('structure_assembly_splitting', variables)
 
+
+@app.get('/structures/align_complexes/<string:pdb_code>')
+def align_complexes(pdb_code):
+    complexes, success, errors = filesystem.get('constants/shared/complexes')
+    histo_info, success, errors = histo.structureInfo(pdb_code).get()
+    #align_information = structure.align_structures(pdb_code, '1')
+    return 'Attempting to align 3hla with ' + pdb_code
 
 
 @app.post("/structures/information/<string:pdb_code>/assignchains")

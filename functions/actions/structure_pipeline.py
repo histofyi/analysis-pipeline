@@ -24,11 +24,14 @@ import logging
 def fetch_pdb_data(pdb_code):
     rcsb = RCSB()
 
+    # gets the PDB file and the PDB info from RCSB
     pdb_file = rcsb.fetch(pdb_code)
     pdb_info = rcsb.get_info(pdb_code)
 
+    # gets the initial histo_info file
     histo_info, success, errors = structureInfo(pdb_code).get()
 
+    # create a dictionary of just the RCSB info we need
     rcsb_info = {}
     rcsb_info['primary_citation'] = pdb_info['rcsb_primary_citation']
     rcsb_info['description'] = pdb_info['struct']['pdbx_descriptor']
@@ -36,6 +39,8 @@ def fetch_pdb_data(pdb_code):
     rcsb_info['title'] = pdb_info['struct']['title']
     rcsb_info['assembly_count'] = pdb_info['rcsb_entry_info']['assembly_count']
     rcsb_info['pdb_code'] = pdb_code
+
+    # persist it to the histo_info file
     histo_info, success, errors = structureInfo(pdb_code).put('rcsb_info', rcsb_info)
 
     data = {
@@ -46,21 +51,24 @@ def fetch_pdb_data(pdb_code):
 
 
 def automatic_assignment(pdb_code):
-
     rcsb = RCSB()
+
+    # gets the histo_info file with the RCSB data from Step 1
     histo_info, success, errors = structureInfo(pdb_code).get()
 
+    # pull out the assembly count
     assembly_count = histo_info['rcsb_info']['assembly_count']
 
+    # load the structure into BioPDB
     structure = rcsb.load_structure(pdb_code)
 
-    alike_chains = None
-    if not alike_chains:
-
+    try:
+        # predict some initial chain assignments
         structure_stats = rcsb.predict_assigned_chains(structure, assembly_count)
 
-        alike_chains = rcsb.cluster_alike_chains(structure, assembly_count)
-        
+        # get a set of the alike chains
+        alike_chains = structure_stats['alike_chains']
+
         histo_info, success, errors = structureInfo(pdb_code).put('alike_chains', alike_chains)
 
         best_match = structure_stats['best_match']
@@ -85,8 +93,8 @@ def automatic_assignment(pdb_code):
 
         data, success, errors = structureSet('automatically_matched').add(pdb_code)
 
-#    except:
-#       data, success, errors = structureSet('error').add(pdb_code)
+    except:
+        data, success, errors = structureSet('error').add(pdb_code)
 
     data = {
             'histo_info': histo_info

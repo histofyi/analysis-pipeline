@@ -218,14 +218,22 @@
             {% set this_chain = histo_info.structure_stats.chain_assignments[chain] %}
             <div class="column-one-quarter">
                 <div class="inner vertical-spacing-bottom">
-                    <div><strong>{{chain}} ({{this_chain.lenths}}aa)</strong></div>
+                    <div><strong>{{chain}} ({{this_chain.lengths[0]}}aa)</strong></div>
+                        {% if chain == 'unassigned' %}
+                        <div>Unassigned - form time</div>
+                        {% else %}
+                        {% if chain == '_peptide' %}
+                        <div>Unassigned peptide - form time</div>
+                        {% else %}
                         <div>{{complexes.chains[chain].ui_text|safe}}</div>
+                        {% endif %}
+                        {% endif %}
                         <div>Chains {{this_chain.chains}}</div>
                 </div>
             </div>
             <div class="column-three-quarters">
                 <div class="inner vertical-spacing-bottom"> 
-                    {% set chunked_sequence = this_chain.chunked_sequence[0] %}
+                    {% set chunked_sequence = this_chain.chunked_sequence %}
                     {% for row in chunked_sequence %}
                         <pre class="sequence">{{row}}</pre>
                     {% endfor %}

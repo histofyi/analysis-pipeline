@@ -16,8 +16,6 @@ http = httpProvider()
 file = filesystemProvider(None)
 
 
-
-
 class RCSB():
 
     hetgroups = None
@@ -122,13 +120,10 @@ class RCSB():
 
 
     def get_sequence(self,chain):
-        chain_sequence_array = [residue.resname for residue in chain]
         clean_chain_sequence_array = [residue.resname for residue in chain if residue.resname not in self.hetgroups]
         one_letter_sequence_string = ''.join([self.three_letter_to_one(residue).upper() for residue in clean_chain_sequence_array])
         chunked_one_letter_sequence_array = self.chunk_one_letter_sequence(one_letter_sequence_string,80) 
         return {
-            #'chain_sequence_array':chain_sequence_array,
-            #'clean_chain_sequence_array': clean_chain_sequence_array,
             'one_letter_sequence_string': one_letter_sequence_string,
             'chunked_one_letter_sequence_array': chunked_one_letter_sequence_array,
             'length': len(one_letter_sequence_string)
@@ -161,53 +156,50 @@ class RCSB():
         # then group the alike chains to reduce the computational space
         alike_chains = self.cluster_alike_chains(structure, assembly_count)
 
-        logging.warn(alike_chains)
-
 
         # then start working on the chains within the comples
-        for chain in structure_stats['chainset']:
-            current_chain = structure_stats['chainset'][chain]
+        for chain in alike_chains:
+            current_chain = alike_chains[chain]
             current_chain['id'] = chain
-
+            chain_assigned = False
             # Look for peptide chains, they'll be the easiest to assign as they're short
-            if current_chain['sequence']['length'] < self.peptide_cutoff:
+            if current_chain['lengths'][0] < self.peptide_cutoff:
                 if not 'peptide' in chain_assignments:
-                    chain_assignments['peptide'] = {'chains':[],'sequences':[],'lengths':[]}
-                    chain_assignments['peptide']['chunked_sequence'] = current_chain['sequence']['chunked_one_letter_sequence_array'],
-                chain_assignments['peptide']['chains'].append(current_chain['id'])
-                chain_assignments['peptide']['sequences'].append(current_chain['sequence']['one_letter_sequence_string'])
-                chain_assignments['peptide']['chunked_sequence'] = current_chain['sequence']['chunked_one_letter_sequence_array'],
-                chain_assignments['peptide']['lengths'].append(current_chain['sequence']['length'])
+                    chain_assignments['peptide'] = {'chains':current_chain['chains'],'sequences':current_chain['sequences'],'lengths':current_chain['lengths']}
+                    chain_assignments['peptide']['chunked_sequence'] = current_chain['chunked_sequence'][0],
                 chain_assignments['peptide']['confidence'] = 1.0
-
-            # then iterate through all the possible chains and calculate the Levenshtein ratio for all the possible chains vs the current actual chain
-            for possible_chain_label in possible_chains:
-                possible_chain = possible_chains[possible_chain_label]
-                if 'example' in possible_chain:
+                chain_assigned = True
+            else:
+                # then iterate through all the possible chains and calculate the Levenshtein ratio for all the possible chains vs the current actual chain
+                for possible_chain_label in possible_chains:
+                    possible_chain = possible_chains[possible_chain_label]
                     # first check there's an example sequence in the possible chain to compare against. In future this should be an array of sequences
-                    if len(possible_chain['example']) > 1:
-                        ratio, distance = levenshtein_ratio_and_distance(possible_chain['example'], current_chain['sequence']['one_letter_sequence_string'])
-                        # next see if the score is above the acceptable distance 
-                        if ratio > possible_chain['acceptable_distance']:
-                            if not possible_chain_label in chain_assignments:
-                                # and if this is the case and that chain is not in the assignments already, then add it to them
-                                chain_assignments[possible_chain_label] = {'chains':[],'sequences':[],'lengths':[]}
-                                chain_assignments[possible_chain_label]['chunked_sequence'] = current_chain['sequence']['chunked_one_letter_sequence_array'],
-                            chain_assignments[possible_chain_label]['confidence'] = ratio
-                            chain_assignments[possible_chain_label]['lengths'].append(current_chain['sequence']['length'])
-                            chain_assignments[possible_chain_label]['chains'].append(current_chain['id'])
-                            chain_assignments[possible_chain_label]['sequences'].append(current_chain['sequence']['one_letter_sequence_string'])
-                            chain_assignments[possible_chain_label]['label'] = possible_chain_label
-                            # if we see a good match for one of the Class I or Class II chains, we can assign that complex
-                            if 'class_i_' in possible_chain_label:
-                                possible_class = 'class_i'
-                            elif 'class_ii_' in possible_chain_label:
-                                possible_class = 'class_ii'
-        # we can now reassign the chain marked as 'peptide' into either a Class I or Class II bound peptide        
-        if 'peptide' in chain_assignments:
-            chain_assignments[possible_class +'_peptide'] = chain_assignments['peptide']
-            chain_assignments[possible_class +'_peptide']['label'] = possible_class +'_peptide'
-            del chain_assignments['peptide']
+                    if 'example' in possible_chain:
+                        if len(possible_chain['example']) > 1:
+                            ratio, distance = levenshtein_ratio_and_distance(possible_chain['example'], current_chain['sequences'][0])
+                            # next see if the score is above the acceptable distance 
+                            if ratio > possible_chain['acceptable_distance']:
+                                if not possible_chain_label in chain_assignments:
+                                    # and if this is the case and that chain is not in the assignments already, then add it to them
+                                    chain_assignments[possible_chain_label] = {'chains':current_chain['chains'],'sequences':current_chain['sequences'],'lengths':current_chain['lengths']}
+                                    chain_assignments[possible_chain_label]['chunked_sequence'] = current_chain['chunked_sequence']                                
+                                    chain_assignments[possible_chain_label]['confidence'] = ratio
+                                    chain_assignments[possible_chain_label]['label'] = possible_chain_label
+                                    chain_assigned = True
+                                # if we see a good match for one of the Class I or Class II chains, we can assign that complex
+                                if 'class_i_' in possible_chain_label:
+                                    possible_class = 'class_i'
+                                elif 'class_ii_' in possible_chain_label:
+                                    possible_class = 'class_ii'
+            # we can now reassign the chain marked as 'peptide' into either a Class I or Class II bound peptide        
+            if 'peptide' in chain_assignments:
+                chain_assignments[possible_class +'_peptide'] = chain_assignments['peptide']
+                chain_assignments[possible_class +'_peptide']['label'] = possible_class +'_peptide'
+                del chain_assignments['peptide']
+            if chain_assigned is False:
+                chain_assignments['unassigned'] = {'chains':current_chain['chains'],'sequences':current_chain['sequences'],'lengths':current_chain['lengths']}
+                chain_assignments['unassigned']['chunked_sequence'] = current_chain['chunked_sequence']
+
 
         # next up scoring and assigning the complexes                
         complex_hits = {}
@@ -221,7 +213,12 @@ class RCSB():
                 if item == 'label':
                     label = complex['label']
                 else:
+                    if 'peptide' in complex[item]:
+                        # if there's something marked as a peptide, it's likely to be a peptide, so we'll add it to the matches so it can be part of the aggregate score
+                        score += 1
+                        matches.append(complex[item])
                     if complex[item] in chain_assignments:
+                        logging.warn(complex[item])
                         # if we find a matching label, we assign the confidence score of the individual chain to be part of an aggregate score
                         score += chain_assignments[complex[item]]['confidence']
                         # add it to the list of chain matches
@@ -249,19 +246,18 @@ class RCSB():
                     best_score = confidence
                     best_match = item
 
-        #unique_chain_set = self.cluster_alike_chains(structure, assembly_count)
-
+        # remove this keyed item as we're not going to be using it
+        del structure_stats['chainset']
 
         variables = {
-            'possible_complexes':possible_complexes,
             'chain_assignments':chain_assignments,
             'structure_stats':structure_stats,
             'best_match': {
                 'best_match': best_match,
                 'confidence': best_score
             },
-            'complex_hits':complex_hits
-            #'unique_chain_set':unique_chain_set
+            'complex_hits':complex_hits,
+            'unique_chain_set':alike_chains
         }
         return variables
 
@@ -347,27 +343,18 @@ class RCSB():
         return unique_chain_set
 
 
-
-
-
-
     def generate_basic_information(self, structure, assembly_count):
-
         structure_stats = self.get_structure_stats(structure, assembly_count)
-
-        
         possible_complexes, possible_complexes_labels = self.suggest_possible_complexes(structure_stats['chain_count'])
-
-
         basic_information = {
             "structure_stats":structure_stats,
             "possible_complexes":possible_complexes,
             "possible_complexes_labels": possible_complexes_labels,
         }
-
         return basic_information
 
 
+#TODO move resolve_doi, doesn't fit here
     def resolve_doi(self, paper_doi):
         url = doi.get_real_url_from_doi(paper_doi)
         return url

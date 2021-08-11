@@ -354,9 +354,6 @@ def structure_info_handler(pdb_code):
 
     pdb_file = rcsb.fetch(pdb_code)
 
-    # the rcsb pdb images are held in directories based on the middle two letters of the PDB code
-    pdb_image_folder = pdb_code[1:3]
-
     assembly_count = pdb_info['rcsb_entry_info']['assembly_count']
 
     # load the structure into BioPython

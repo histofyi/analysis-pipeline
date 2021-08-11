@@ -15,9 +15,11 @@ import logging
 #
 # Step 4 run split_structure - this will result in a set of individual PDB files for each assembly
 #
-# Step 5 run align_assembly - this will iterate through the split structures
+# Step 5 run align_structures - this will iterate through the split structures and create an aligned file for each
 #
 # Step 6 .... coming soon
+
+
 
 def fetch_pdb_data(pdb_code):
     rcsb = RCSB()

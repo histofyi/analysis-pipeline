@@ -79,17 +79,20 @@ def get_hydrated_structure_set(slug):
 
 
 
+# mostly static view
 @app.get('/')
 def home_handler():
     scratch_json, success, errors = filesystem.get('scratch/hello')
     return template.render('index', scratch_json)
 
 
+# static view
 @app.get('/structures')
 def structures_handler():
     return template.render('structures', {})
 
 
+# need to see how this is used now, possibly refactor
 @app.get('/structures/<string:pdb_code>/approve/best_match')
 def structure_approve_attribute_handler(pdb_code):
     variables = common.request_variables(['return_to'])
@@ -98,7 +101,7 @@ def structure_approve_attribute_handler(pdb_code):
     histo_info, success, errors = histo.structureInfo(pdb_code).put('complex_type', complex_type)
     return redirect(variables['return_to'])
 
-
+# search for new structures. Need options to hide already matched structures
 @app.get('/structures/search/<string:mhc_class>')
 def structures_search_handler(mhc_class):
     molecules, success, errors = filesystem.get('constants/shared/molecules')
@@ -138,12 +141,11 @@ def structures_search_handler(mhc_class):
     return template.render('structure_sets', {'nav':'sets','set':structureset, 'view_type':'condensed'})
 
 
+# make this a linked first point of call for new structures
 @app.get('/structures/assign_automatically/<string:pdb_code>')
 def structures_automatic_assignment_handler(pdb_code):
 
-
     rcsb = pdb.RCSB()
-
 
     histo_info, success, errors = histo.structureInfo(pdb_code).get()
     
@@ -179,7 +181,7 @@ def structures_automatic_assignment_handler(pdb_code):
         else:
             data, success, errors = lists.structureSet('unmatched').add(pdb_code)
             alike_chains = rcsb.cluster_alike_chains(structure, assembly_count)
-            isto_info, success, errors = histo.structureInfo(pdb_code).put('alike_chains', alike_chains)
+            histo_info, success, errors = histo.structureInfo(pdb_code).put('alike_chains', alike_chains)
 
         data, success, errors = lists.structureSet('automatically_matched').add(pdb_code)
 
@@ -197,6 +199,7 @@ def structures_automatic_assignment_handler(pdb_code):
     return variables
 
 
+#TODO not sure how this is used anymore check
 @app.get('/structures/analyse_chains/<string:pdb_code>')
 def analysechains_handler(pdb_code):
     rcsb = pdb.RCSB()
@@ -324,14 +327,14 @@ def update_structure_information_handler(pdb_code,information_section):
     return redirect(return_to(pdb_code))
 
 
+@app.get('/api/v1/structure/information/<string:pdb_code>')
 @app.get('/structures/information/<string:pdb_code>')
 def structure_info_handler(pdb_code):
     unmatched, success, errors = lists.structureSet('unmatched').get()
     unmatched_structure = False
-    logging.warn(unmatched['set'])
     if pdb_code in unmatched['set']:
         unmatched_structure = True
-        logging.warn("MATCH")
+
 
     # get the constants about complexes
     complexes, success, errors = filesystem.get('constants/shared/complexes')
@@ -350,7 +353,6 @@ def structure_info_handler(pdb_code):
     # the rcsb pdb images are held in directories based on the middle two letters of the PDB code
     pdb_image_folder = pdb_code[1:3]
 
-
     assembly_count = pdb_info['rcsb_entry_info']['assembly_count']
 
     # load the structure into BioPython
@@ -366,25 +368,27 @@ def structure_info_handler(pdb_code):
 
     # generate some basic information about the structure 
     # TODO refactor this
-    
     basic_information = rcsb.generate_basic_information(structure, assembly_count)
 
 
     # build variables for the UI
     variables = {
-        'nav':'structures',
-        'pdb_file':pdb_file, 
         'pdb_code':pdb_code, 
-        'pdb_info':pdb_info, 
-        'pdb_info_text':json.dumps(pdb_info, sort_keys=True, indent=4), 
-        'pdb_image_folder':pdb_image_folder, 
         'doi_url':doi_url,
-        'basic_information':basic_information,
-        'complexes':complexes,
         'histo_info':histo_info,
         'unmatched':unmatched_structure
     }
-    return template.render('structure_info', variables)
+    if 'api' in str(request.url_rule):
+        for this_key in variables['histo_info']['structure_stats']:
+            logging.warn(this_key)
+        return variables
+    else:
+        variables['pdb_info'] = pdb_info
+        variables['pdb_file'] = pdb_file
+        variables['complexes'] = complexes
+        variables['basic_information'] = basic_information
+        variables['pdb_image_folder'] = pdb_image_folder
+        return template.render('structure_info', variables)
 
 
 @app.get('/sets/intersection')

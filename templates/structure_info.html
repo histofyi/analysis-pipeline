@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-
+    {% set nav = 'structures' %}
     {% block title %}Structures | {{pdb_code}}{% endblock %}
 
     {% block style %}
@@ -288,7 +288,7 @@
           <div class="column-full-width vertical-spacing-top-0-5">
             <div class="inner">
                 <h2 class="heading-small">PDB info</h2>
-                <textarea>{{pdb_info_text}}</textarea>
+                <textarea>{{pdb_info|prettify_json}}</textarea>
                 </div>
             </div>
         </div>

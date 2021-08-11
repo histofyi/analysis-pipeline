@@ -484,21 +484,6 @@ def sets_create_action_handler():
 @app.get('/sets/<string:slug>')
 def sets_display_handler(slug):
     structureset = get_hydrated_structure_set(slug)
-    unnatural = []
-    short = []
-    for pdb_code in structureset['set']:
-        histo_info = structureset['histo_info'][pdb_code]
-        for chain in histo_info['structure_stats']['chain_assignments']:
-            if chain == 'class_i_peptide':
-                peptide_sequence = histo_info['structure_stats']['chain_assignments'][chain]['sequences'][0]
-                if 'Z' in peptide_sequence:
-                    unnatural.append(pdb_code)
-                if len(peptide_sequence) < 8:
-                    short.append(pdb_code)
-    logging.warn('unnatural')
-    logging.warn(unnatural)
-    logging.warn('short')
-    logging.warn(short)
     return template.render('set', {'nav':'sets','set':structureset})
 
 

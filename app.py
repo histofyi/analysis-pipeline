@@ -249,8 +249,8 @@ def split_assemblies(pdb_code):
 def align_complexes(pdb_code):
     complexes, success, errors = filesystem.get('constants/shared/complexes')
     histo_info, success, errors = histo.structureInfo(pdb_code).get()
-    #align_information = structure.align_structures(pdb_code, '1')
-    return 'Attempting to align 3hla with ' + pdb_code
+    align_information = structure.align_structures('class_i', pdb_code, '1', 'A')
+    return 'Attempting to align baseline clas_i with ' + pdb_code
 
 
 @app.post("/structures/information/<string:pdb_code>/assignchains")

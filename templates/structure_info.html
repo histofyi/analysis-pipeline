@@ -79,18 +79,34 @@
                     <script src="https://cdnjs.cloudflare.com/ajax/libs/3Dmol/1.4.0/3Dmol-min.js"></script>
 
                     <div style="height: 600px; width: 550px; position: relative;" id="viewer" ></div>  
+
+                    {% if histo_info.align_info %}
+                        {{ histo_info.align_info }}
+                    {% else %}
+                        {% if histo_info.split_info %}
+                            {{ histo_info.split_info }}
+                        {% endif %}
+                    {% endif %}
+
                     <script>
                         var viewer = $3Dmol.createViewer($("#viewer"));
-                            $3Dmol.download("pdb:{{pdb_code|upper}}",viewer,{multimodel:false, frames:true},function(){
+                            $3Dmol.download("pdb:{{pdb_code|upper}}",
+                            viewer,{multimodel:false, frames:true},function(){
                             viewer.setBackgroundColor(0xffffff);
-                            {% for chain in histo_info.structure_stats.chain_assignments %}
-                            {% set this_chain = histo_info.structure_stats.chain_assignments[chain] %}
+                            {% for chain in histo_info.chain_assignments %}
+                            {% set this_chain = histo_info.chain_assignments[chain] %}
                             {% for chain in this_chain.chains %}
                             {% if loop.index == 1 %}
                             {% if this_chain.label == 'class_i_peptide' %}
                             viewer.setStyle({chain:'{{chain}}'}, { stick: {colorscheme:'yellowCarbon'}});
                             {% else %}
-                            viewer.setStyle({chain:'{{chain}}'}, { cartoon: {color: '{{complexes.chains[this_chain.label].webglcolor}}'}});
+                            {% if this_chain.label %}
+                                viewer.setStyle({chain:'{{chain}}'}, { cartoon: {color: '{{complexes.chains[this_chain.label].webglcolor}}'}}); //{{this_chain.label}}
+                            {% else %}
+                                viewer.setStyle({chain:'{{chain}}'}, { cartoon: {color: '0xbbbbbb'}}); //{{this_chain.label}}
+                            {% endif%}
+
+                            
                             {% endif %}
                             {% else %}
                             viewer.setStyle({chain:'{{chain}}'}, { line: { hidden: true }})
@@ -115,19 +131,19 @@
                     <table class="body-copy-smallest">
                         <tr>
                             <td class="strong">Resolution:</td>
-                            <td>{{histo_info.rcsb_info.entry_info.resolution_combined|join(', ')}}&#8491;</td>
+                            <td>{{histo_info.rcsb_info.resolution_combined|join(', ')}}&#8491;</td>
                         </tr>
                         <tr>
                             <td class="strong">Assembly count:</td>
-                            <td>{{ histo_info.structure_stats.structure_stats.assembly_count }}</td>
+                            <td>{{ histo_info.basic_info.assembly_count }}</td>
                         </tr>
                         <tr>
                             <td class="strong">Chain count:</td>
-                            <td>{{ histo_info.structure_stats.structure_stats.chain_count|int }}</td>
+                            <td>{{ histo_info.basic_info.chain_count|int }}</td>
                         </tr>
                         <tr>
                             <td class="strong">Chains:</td>
-                            <td>{{ histo_info.structure_stats.structure_stats.chainlist|join(', ') }}</td>
+                            <td>{{ histo_info.basic_info.chainlist|join(', ') }}</td>
                         </tr>
                     </table>
                     <h3 class="heading-small vertical-spacing-top-0-5 vertical-spacing-bottom-0-25">Publication details</h3>
@@ -213,9 +229,9 @@
 
     <section class="">
         <div class="grid-container">
-            {% if histo_info.structure_stats.chain_assignments %}
-            {% for chain in histo_info.structure_stats.chain_assignments %}
-            {% set this_chain = histo_info.structure_stats.chain_assignments[chain] %}
+            {% if histo_info.chain_assignments %}
+            {% for chain in histo_info.chain_assignments %}
+            {% set this_chain = histo_info.chain_assignments[chain] %}
             <div class="column-one-quarter">
                 <div class="inner vertical-spacing-bottom">
                     <div><strong>{{chain}} ({{this_chain.lengths[0]}}aa)</strong></div>
@@ -253,7 +269,18 @@
         <div class="grid-container top-border">
           <div class="column-full-width vertical-spacing-top-0-5">
             <div class="inner">
-                <h2 class="heading-small">PDB info</h2>
+                <h2 class="heading-small">Histo info</h2>
+                <textarea>{{histo_info|prettify_json}}</textarea>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="vertical-spacing-top-0-5">
+        <div class="grid-container top-border">
+          <div class="column-full-width vertical-spacing-top-0-5">
+            <div class="inner">
+                <h2 class="heading-small">RCSB info</h2>
                 <textarea>{{pdb_info|prettify_json}}</textarea>
                 </div>
             </div>

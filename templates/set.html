@@ -9,10 +9,9 @@
       <div class="inner">
         <h1 class="vertical-spacing-bottom-0-25">{{set.ui_text}}</h1>
         <div>Last updated {{set.last_updated|timesince}} | {{set.length}} items</div>
-        
         <div class="vertical-spacing-top vertical-spacing-bottom">
           {% for structure in set.set %}
-          <div class="vertical-spacing-top-0-25"><strong><a href="/structures/information/{{structure}}" target='_new'>{{structure}}</a></strong> : {{set['histo_info'][structure].rcsb_info.title}}</div>
+          <div class="vertical-spacing-top-0-25"><strong><a href="/structures/information/{{structure}}" target='_new'>{{structure}}</a></strong> : {% if set['histo_info'][structure].rcsb_info %}{{set['histo_info'][structure].rcsb_info.title}}{% endif %}</div>
           <div class="vertical-spacing-bottom-0-5">
             <div>{{set['histo_info'][structure].best_match}}</div>
             <div>{{set['histo_info'][structure].complex_type}}</div>

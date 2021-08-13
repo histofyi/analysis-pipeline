@@ -20,6 +20,13 @@ import logging
 # Step 6 .... coming soon
 
 
+def clean_record(pdb_code):
+    histo_info, success, errors = structureInfo(pdb_code).clean()
+    data = {
+        'histo_info': histo_info
+    }
+    return data, success, errors
+
 
 def fetch_pdb_data(pdb_code):
     rcsb = RCSB()
@@ -34,7 +41,8 @@ def fetch_pdb_data(pdb_code):
     # create a dictionary of just the RCSB info we need
     rcsb_info = {}
     rcsb_info['primary_citation'] = pdb_info['rcsb_primary_citation']
-    rcsb_info['description'] = pdb_info['struct']['pdbx_descriptor']
+    if 'pdbx_descriptor' in pdb_info['struct']:
+        rcsb_info['description'] = ['pdbx_descriptor']
     rcsb_info['resolution_combined'] = pdb_info['rcsb_entry_info']['resolution_combined']
     rcsb_info['title'] = pdb_info['struct']['title']
     rcsb_info['assembly_count'] = pdb_info['rcsb_entry_info']['assembly_count']
@@ -104,10 +112,9 @@ def automatic_assignment(pdb_code):
 
 def split_structure(pdb_code):
     histo_info, success, errors = structureInfo(pdb_code).get()
-    if 'split_info' not in histo_info:
-        current_assembly = RCSB().load_structure(pdb_code)
-        split_information = split_assemblies(histo_info, current_assembly, pdb_code)
-        histo_info, success, errors = structureInfo(pdb_code).put('split_info', split_information)
+    current_assembly = RCSB().load_structure(pdb_code)
+    split_information = split_assemblies(histo_info, current_assembly, pdb_code)
+    histo_info, success, errors = structureInfo(pdb_code).put('split_info', split_information)
     data = {
         'histo_info': histo_info
     }
@@ -140,13 +147,13 @@ def align_structures(pdb_code):
                         'chain_assignment': aligned_assignment,
                         'filename': complex['filename']
                     }
-                    try:
+                    if True:
                         align_information = align_structure('class_i', pdb_code, str(i), chain)
                         if align_information:
                             current_alignment['rms'] = align_information
                         else:
                             current_alignment['errors'] = ['unable_to_load']
-                    except:
+                    else:
                         current_alignment['errors'] = ['unable_to_align']
                     align_info[complex_number] = current_alignment
             i += 1

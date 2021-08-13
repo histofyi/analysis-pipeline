@@ -39,5 +39,18 @@ class structureInfo():
         structure_info, success, errors = file.put(self.build_info_path(), json.dumps(structure_info))
         return structure_info, success, errors
 
+    
+    def clean(self):
+        structure_info, success, errors = self.get()
+        clean_record = {}
+        keep_keys = ['complex_type','publication']
+        for key in structure_info:
+            if key in keep_keys:
+                clean_record[key] = structure_info[key]
+        structure_info, success, errors = file.put(self.build_info_path(), json.dumps(clean_record))
+        return structure_info, success, errors
+
+
+
 
 

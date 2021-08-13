@@ -140,7 +140,7 @@ class RCSB():
         # initialise some variables
         possible_chains = {}
         chain_assignments = {}
-        possible_class = ''
+        possible_class = None
 
 
         # first generate a set of all possible chain types in all the possible complexes
@@ -177,6 +177,7 @@ class RCSB():
                     if 'example' in possible_chain:
                         if len(possible_chain['example']) > 1:
                             ratio, distance = levenshtein_ratio_and_distance(possible_chain['example'], current_chain['sequences'][0])
+                            logging.warn(ratio)
                             # next see if the score is above the acceptable distance 
                             if ratio > possible_chain['acceptable_distance']:
                                 if not possible_chain_label in chain_assignments:
@@ -187,15 +188,20 @@ class RCSB():
                                     chain_assignments[possible_chain_label]['label'] = possible_chain_label
                                     chain_assigned = True
                                 # if we see a good match for one of the Class I or Class II chains, we can assign that complex
+                                logging.warn(possible_chain_label)
                                 if 'class_i_' in possible_chain_label:
                                     possible_class = 'class_i'
                                 elif 'class_ii_' in possible_chain_label:
                                     possible_class = 'class_ii'
             # we can now reassign the chain marked as 'peptide' into either a Class I or Class II bound peptide        
-            if 'peptide' in chain_assignments:
+            if 'peptide' in chain_assignments and possible_class is not None:
                 chain_assignments[possible_class +'_peptide'] = chain_assignments['peptide']
                 chain_assignments[possible_class +'_peptide']['label'] = possible_class +'_peptide'
                 del chain_assignments['peptide']
+            if '_peptide' in chain_assignments and possible_class is not None:
+                chain_assignments[possible_class +'_peptide'] = chain_assignments['_peptide']
+                chain_assignments[possible_class +'_peptide']['label'] = possible_class +'_peptide'
+                del chain_assignments['_peptide']
             if chain_assigned is False:
                 chain_assignments['unassigned'] = {'chains':current_chain['chains'],'sequences':current_chain['sequences'],'lengths':current_chain['lengths']}
                 chain_assignments['unassigned']['chunked_sequence'] = current_chain['chunked_sequence']
@@ -265,12 +271,15 @@ class RCSB():
 
 
     def cluster_alike_chains(self,structure, assembly_count):
+        logging.warn("CLUSTERING ALIKE CHAINS")
         ### Performs a clustering of similar chains (on sequence basis) in the structure ###
         # First get the basic stats on the structure
         structure_stats = self.get_structure_stats(structure, assembly_count)
+        logging.warn(structure_stats)
         unique_chain_set = {}
         # if there's only one assembly, then just assign the chains, no clustering needed
         if int(assembly_count) == 1:
+            logging.warn("only one assembly")
             i = 1
             for chain in structure_stats['chainset']:
                 chainset = {}
@@ -283,12 +292,15 @@ class RCSB():
 
                 i += 1
         else:
+            logging.warn("more than one assembly")
             # if more than one assembly we need to start creating clusters of matched chains        
             matched = []
             matches = []
             # we're doing pairwise matches of chains now
             for first_chain in structure_stats['chainset']:
                 first_sequence = structure_stats['chainset'][first_chain]['sequence']['one_letter_sequence_string']
+                logging.warn(first_chain)
+                logging.warn(first_sequence)
                 for second_chain in structure_stats['chainset']:
                     # first of all, make sure we're not matching the same chain!
                     if second_chain != first_chain:
@@ -296,21 +308,33 @@ class RCSB():
                         # reset the found_match variable
                         found_match = False
                         # then checking we're not doing work already done
-                        if first_chain not in matched and second_chain not in matched:
+                        if second_chain not in matched:
                             # first see if the sequences match, this is the most common case and least expensive calculation
                             if this_sequence == first_sequence:
+                                logging.warn([first_chain, second_chain])
+                                logging.warn('same sequence')
                                 found_match = True
                             else:
-                                # sadly not, then we're going to look and see if the sequences are roughly the same length before we do the more expensive fuzzy matching calculation
-                                if len(this_sequence) > len(first_sequence):
-                                    length_score = float(len(first_sequence)) / float(len(this_sequence))
-                                else:
-                                    length_score = float(len(this_sequence)) / float(len(first_sequence))
-                                # if they're roughly the same length, calculate the Levenshtein distance/ratio
-                                if length_score > 0.9:
+                                if len(this_sequence) < 20 and len(first_sequence) < 20:
+                                    logging.warn('peptides')
                                     ratio, distance = levenshtein_ratio_and_distance(first_sequence, this_sequence)
-                                    if ratio > 0.9:
-                                        found_match = True
+                                    logging.warn(ratio)
+                                    found_match = True
+                                else:
+                                    # sadly not, then we're going to look and see if the sequences are roughly the same length before we do the more expensive fuzzy matching calculation
+                                    if len(this_sequence) > len(first_sequence):
+                                        length_score = float(len(first_sequence)) / float(len(this_sequence))
+                                    else:
+                                        length_score = float(len(this_sequence)) / float(len(first_sequence))
+                                    # if they're roughly the same length, calculate the Levenshtein distance/ratio
+                                    if length_score > 0.9:
+                                        logging.warn([first_chain, second_chain])
+                                        logging.warn('length match')
+                                        ratio, distance = levenshtein_ratio_and_distance(first_sequence, this_sequence)
+                                        if ratio > 0.8:
+                                            logging.warn([first_chain, second_chain])
+                                            logging.warn('text match')
+                                            found_match = True
                             # if through any of these methods we've found a match, we append the items into the relevant sets
                             if found_match:
                                 matched.append(first_chain)
@@ -322,10 +346,14 @@ class RCSB():
                                                 match.append(second_chain)              
                                 else:
                                     matches.append([first_chain,second_chain])
+            correct_matches = []
+            for match in matches:
+                if len(match) == assembly_count:
+                    correct_matches.append(match)
             # now we've found the matches, we can build a dictionary of the matched chains
             unique_chain_set = {}
             i = 1
-            for match in matches:
+            for match in correct_matches:
                 chainset = {}
                 first_match = match[0]
                 
@@ -344,6 +372,7 @@ class RCSB():
 
 
     def generate_basic_information(self, structure, assembly_count):
+        logging.warn(assembly_count)
         structure_stats = self.get_structure_stats(structure, assembly_count)
         possible_complexes, possible_complexes_labels = self.suggest_possible_complexes(structure_stats['chain_count'])
         basic_information = {

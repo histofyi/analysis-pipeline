@@ -1,1 +1,2 @@
-from .structure_pipeline import automatic_assignment, fetch_pdb_data, split_structure, align_structures
+from .structure_pipeline import clean_record, automatic_assignment, fetch_pdb_data, split_structure, align_structures
+from .sequence_pipeline import get_simplified_sequence_set

@@ -71,8 +71,11 @@ def get_hydrated_structure_set(slug):
     structureset, success, errors = lists.structureSet(slug).get()
     structureset['histo_info'] = {}
     for pdb_code in structureset['set']:
-        histo_info, success, errors = histo.structureInfo(pdb_code).get()
-        structureset['histo_info'][pdb_code] = histo_info
+        try:
+            histo_info, success, errors = histo.structureInfo(pdb_code).get()
+            structureset['histo_info'][pdb_code] = histo_info
+        except:
+            logging.warn("ERROR for " + pdb_code)
     return structureset
 
 
@@ -90,7 +93,123 @@ def structures_handler():
     return template.render('structures', {})
 
 
+### Structure pipeline ###
 
+# Step 0
+@app.get('/structures/pipeline/clean/set/<string:slug>')
+def set_clean_record_handler(slug):
+    structureset, success, errors = lists.structureSet(slug).get()
+    success_array = []
+    errors_array = []
+    for pdb_code in structureset['set']:
+        try:
+            data, success, errors = actions.clean_record(pdb_code)
+            if success:
+                success_array.append(pdb_code)
+            else:
+                errors_array.append(pdb_code)
+        except:
+            errors_array.append(pdb_code)
+    data = {
+        'success':success_array,
+        'errors':errors_array
+    }
+    return data
+
+
+# Step 1
+@app.get('/structures/pipeline/fetch/set/<string:slug>')
+def set_fetch_pdb_data_handler(slug):
+    structureset, success, errors = lists.structureSet(slug).get()
+    success_array = []
+    errors_array = []
+    for pdb_code in structureset['set']:
+        try:
+            data, success, errors = actions.fetch_pdb_data(pdb_code)
+            if success:
+                success_array.append(pdb_code)
+            else:
+                errors_array.append(pdb_code)
+        except:
+            errors_array.append(pdb_code)
+    data = {
+        'success':success_array,
+        'errors':errors_array
+    }
+    return data
+
+
+# Step 2
+@app.get('/structures/pipeline/assign/set/<string:slug>')
+def set_automatic_assignment_handler(slug):
+    structureset, success, errors = lists.structureSet(slug).get()
+    success_array = []
+    errors_array = []
+    for pdb_code in structureset['set']:
+        try:
+            data, success, errors = actions.automatic_assignment(pdb_code)
+            if success:
+                success_array.append(pdb_code)
+            else:
+                errors_array.append(pdb_code)
+        except:
+            errors_array.append(pdb_code)
+    data = {
+        'success':success_array,
+        'errors':errors_array
+    }
+    return data
+
+
+# Step 3
+@app.get('/structures/pipeline/split/set/<string:slug>')
+def set_split_structure_handler(slug):
+    structureset, success, errors = lists.structureSet(slug).get()
+    success_array = []
+    errors_array = []
+    for pdb_code in structureset['set']:
+        try:
+            data, success, errors = actions.split_structure(pdb_code)
+            if data:
+                success_array.append(pdb_code)
+            else:
+                errors_array.append(pdb_code)
+        except:
+            errors_array.append(pdb_code)
+    data = {
+        'success':success_array,
+        'errors':errors_array
+    }
+    return data
+
+
+# Step 4
+@app.get('/structures/pipeline/align/set/<string:slug>')
+def set_align_structures_handler(slug):
+    structureset, success, errors = lists.structureSet(slug).get()
+    success_array = []
+    errors_array = []
+    for pdb_code in structureset['set']:
+        try:
+            data, success, errors = actions.align_structures(pdb_code)
+            if data:
+                success_array.append(pdb_code)
+            else:
+                errors_array.append(pdb_code)
+        except:
+            errors_array.append(pdb_code)
+    data = {
+        'success':success_array,
+        'errors':errors_array
+    }
+    return data
+
+
+# Step 0
+@app.get('/structures/pipeline/clean/<string:pdb_code>')
+def clean_record_handler(pdb_code):
+    data, success, errors = actions.clean_record(pdb_code)
+    return data['histo_info']
 
 
 # Step 1
@@ -103,26 +222,35 @@ def fetch_pdb_data_handler(pdb_code):
 # Step 2
 @app.get('/structures/pipeline/assign/<string:pdb_code>')
 def automatic_assignment_handler(pdb_code):
+    logging.warn("ASSIGNING")
     data, success, errors = actions.automatic_assignment(pdb_code)
-    return data
+    return data['histo_info']
+
+
+# Step 3
+@app.get('/structures/pipeline/split/<string:pdb_code>')
+def split_structure_handler(pdb_code):
+
+    data, success, errors = actions.split_structure(pdb_code)
+    return data['histo_info']
 
 
 # Step 4
-@app.get('/structures/pipeline/split/<string:pdb_code>')
-def split_structure_handler(pdb_code):
-    data, success, errors = actions.split_structure(pdb_code)
-    return data
-
-
-# Step 5
 @app.get('/structures/pipeline/align/<string:pdb_code>')
 def align_structures_handler(pdb_code):
     data, success, errors = actions.align_structures(pdb_code)
+    return data['histo_info']
+
+
+
+
+
+### Sequence pipeline ###
+
+@app.get('/sequence/pipeline/clean/<string:mhc_class>/<string:locus>')
+def simplify_sequence_set_handler(mhc_class, locus):
+    data, success, errors = actions.get_simplified_sequence_set(mhc_class, locus)
     return data
-
-
-
-
 
 
 
@@ -412,8 +540,6 @@ def structure_info_handler(pdb_code):
         'unmatched':unmatched_structure
     }
     if 'api' in str(request.url_rule):
-        if 'structure_stats' in histo_info['structure_stats']:
-            logging.warn("DUPLICATION")
         return variables
     else:
         variables['pdb_info'] = pdb_info

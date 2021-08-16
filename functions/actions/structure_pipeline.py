@@ -3,7 +3,12 @@ from ..pdb import RCSB
 from ..lists import structureSet
 from ..structure import split_assemblies, align_structure
 
+from .sequence_pipeline import get_simplified_sequence_set
+
 import logging
+
+from functions.actions import sequence_pipeline
+from functions.lists import structureSet
 
 ### Pipeline for categorising new structures
 #
@@ -11,13 +16,17 @@ import logging
 #
 # Step 2 run automatic_assignment - this will result, if it fits into a common pattern with a set of assigned chain groups with alike chains grouped
 #
-# Step 3 if edge case, approve assignment or manually set assignment
+# Step 2a if edge case, approve assignment or manually set assignment
 #
-# Step 4 run split_structure - this will result in a set of individual PDB files for each assembly
+# Step 3 run split_structure - this will result in a set of individual PDB files for each assembly
 #
-# Step 5 run align_structures - this will iterate through the split structures and create an aligned file for each
+# Step 4 run align_structures - this will iterate through the split structures and create an aligned file for each
 #
-# Step 6 .... coming soon
+# Step 5 run match_structure - this will hopefully result in a match to a specific allele by sequence
+
+sequence_sets = ['hla-a','hla-b','hla-c']
+
+
 
 
 def clean_record(pdb_code):
@@ -165,5 +174,81 @@ def align_structures(pdb_code):
     }
     return data, success, errors
 
+
+def first_pass_sequence_match(sequence_to_test):
+    match_info = None
+    for locus in sequence_sets:
+        locus_set, success, errors = get_simplified_sequence_set('class_i', locus)
+        for allele_group in  locus_set['sequences']:
+            this_sequence = locus_set['sequences'][allele_group]['alleles'][0]['sequence']
+            if sequence_to_test == this_sequence:
+                match_info = {
+                    'allele': locus_set['sequences'][allele_group]['alleles'][0]['allele'],
+                    'allele_group': locus_set['sequences'][allele_group]['alleles'][0]['allele_group'],
+                    'locus':locus,
+                    'confidence': 1
+                }
+                break
+        if match_info:
+            break
+    return match_info
+    
+
+def second_pass_sequence_match(sequence_to_test):
+    match_info = None
+    for locus in sequence_sets:
+        locus_set, success, errors = get_simplified_sequence_set('class_i', locus)
+        for allele_group in  locus_set['sequences']:
+            allele_set = locus_set['sequences'][allele_group]['alleles']
+            for allele in allele_set:
+                this_sequence = allele['sequence']
+                if sequence_to_test == this_sequence:
+                    match_info = {
+                        'allele': allele['allele'],
+                        'allele_group': allele['allele_group'],
+                        'locus':locus,
+                        'confidence': 1
+                    }
+                    break
+        if match_info:
+            break
+    return match_info
+
+
+def match_structure(pdb_code):
+    histo_info, success, errors = structureInfo(pdb_code).get()
+    has_class_i_alpha = False
+    match_info = None
+    if 'best_match' in histo_info:
+        if 'class_i' in histo_info['best_match']['best_match'] and histo_info['best_match']['confidence'] > 0.9:
+            has_class_i_alpha = True
+    elif 'complex_type' in histo_info:
+        if 'class_i' in histo_info['complex_type']:
+            has_class_i_alpha = True
+    if has_class_i_alpha:
+        sequence_to_test = histo_info['chain_assignments']['class_i_alpha']['sequences'][0]
+        if len(sequence_to_test) > 275:
+            sequence_to_test = sequence_to_test[0:275]
+        match_info = first_pass_sequence_match(sequence_to_test)
+        if not match_info:
+            match_info = second_pass_sequence_match(sequence_to_test)
+    if match_info:
+        logging.warn("MATCH")
+        logging.warn(match_info)
+        histo_info, success, errors = structureInfo(pdb_code).put('match_info', match_info)
+        data, success, errors = structureSet('alleles/human/all').add(pdb_code)
+        data, success, errors = structureSet('alleles/human/'+ match_info['locus'] + '/all').add(pdb_code)
+        data, success, errors = structureSet('alleles/human/'+ match_info['locus'] + '/' + match_info['allele_group'].replace('*','')).add(pdb_code)
+        data, success, errors = structureSet('alleles/human/'+ match_info['locus'] + '/' + match_info['allele'].replace(':','_').replace('*','')).add(pdb_code)
+    else:
+        data, success, errors = structureSet('alleles/nomatch').add(pdb_code)
+    data = {
+        'histo_info': histo_info
+    }
+    return data, True, None
+
+
+def peptide_positions(pdb_code):
+    pass
 
 

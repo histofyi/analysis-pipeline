@@ -76,6 +76,19 @@ class RCSB():
         return one_letter
 
 
+    def one_letter_to_three(self, residue):
+        if residue.upper() not in ['Z']:
+            try:
+                three_letter = self.amino_acids["natural"]["translations"]["one_letter"][residue.lower()]
+            except:
+                logging.warn('UNNATURAL ' + residue)
+                three_letter = 'ZZZ'
+        else:
+            three_letter = 'ZZZ'
+        return three_letter
+
+
+
     def chunk_one_letter_sequence(self, sequence, residues_per_line):
         # splits sequence into blocks
         chunked_sequence = []

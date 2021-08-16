@@ -1,2 +1,2 @@
-from .structure_pipeline import clean_record, automatic_assignment, fetch_pdb_data, split_structure, align_structures, match_structure, peptide_positions
+from .structure_pipeline import clean_record, automatic_assignment, fetch_pdb_data, split_structure, align_structures, match_structure, peptide_positions, peptide_contacts
 from .sequence_pipeline import get_simplified_sequence_set

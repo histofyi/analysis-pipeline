@@ -1,3 +1,7 @@
+import Bio
+
+import operator
+
 from ..histo import structureInfo
 from ..pdb import RCSB
 from ..lists import structureSet
@@ -9,6 +13,9 @@ import logging
 
 from functions.actions import sequence_pipeline
 from functions.lists import structureSet
+
+hetatms = ['HOH','EDO','GOL', ' CA', ' CD', ' CU', ' MG', ' NA', ' NI', ' ZN', 'EDO', 'FMT', 'IOD', 'NAG', 'P4G', 'SO4', ' CL']
+
 
 ### Pipeline for categorising new structures
 #
@@ -27,6 +34,15 @@ from functions.lists import structureSet
 sequence_sets = ['hla-a','hla-b','hla-c']
 
 
+def check_mhc_class(histo_info, mhc_class):
+    mhc_class_present = False
+    if 'best_match' in histo_info:
+        if mhc_class in histo_info['best_match']['best_match'] and histo_info['best_match']['confidence'] > 0.9:
+            mhc_class_present = True
+    elif 'complex_type' in histo_info:
+        if mhc_class in histo_info['complex_type']:
+            mhc_class_present = True
+    return mhc_class_present
 
 
 def clean_record(pdb_code):
@@ -217,14 +233,8 @@ def second_pass_sequence_match(sequence_to_test):
 
 def match_structure(pdb_code):
     histo_info, success, errors = structureInfo(pdb_code).get()
-    has_class_i_alpha = False
     match_info = None
-    if 'best_match' in histo_info:
-        if 'class_i' in histo_info['best_match']['best_match'] and histo_info['best_match']['confidence'] > 0.9:
-            has_class_i_alpha = True
-    elif 'complex_type' in histo_info:
-        if 'class_i' in histo_info['complex_type']:
-            has_class_i_alpha = True
+    has_class_i_alpha = check_mhc_class('class_i')
     if has_class_i_alpha:
         sequence_to_test = histo_info['chain_assignments']['class_i_alpha']['sequences'][0]
         if len(sequence_to_test) > 275:
@@ -249,6 +259,99 @@ def match_structure(pdb_code):
 
 
 def peptide_positions(pdb_code):
-    pass
+    histo_info, success, errors = structureInfo(pdb_code).get()
+    is_class_i = check_mhc_class(histo_info, 'class_i')
+    current_assembly = RCSB().load_structure(pdb_code)
+    if is_class_i:
+        for chain in current_assembly.get_chains():
+            if chain.id == histo_info['chain_assignments']['class_i_peptide']['chains'][0]:
+                sequence_array = [residue.resname for residue in chain]
+                clean_array = [residue for residue in sequence_array if residue not in hetatms]
+                sequence_array = clean_array
+                peptide_length = len(sequence_array)
+                logging.warn(sequence_array)
+                logging.warn(peptide_length)
+                if peptide_length >= 8:
+                    peptide_positions = {
+                        'p1':sequence_array[0],
+                        'p2':sequence_array[1],                        
+                        'p3':sequence_array[2],
+                        'pn-2':sequence_array[peptide_length - 3],
+                        'pn-1':sequence_array[peptide_length - 2],
+                        'pn':sequence_array[peptide_length - 1],
+                        'bulge': sequence_array[3:peptide_length - 3],
+                        'bulge_length': peptide_length - 6
+                    }
+                else:
+                    peptide_positions = None
+        if peptide_positions:
+            data, success, errors = structureSet('peptides/class_i/positions/p1/'+ peptide_positions['p1'].lower()).add(pdb_code)
+            data, success, errors = structureSet('peptides/class_i/positions/p2/'+ peptide_positions['p2'].lower()).add(pdb_code)
+            data, success, errors = structureSet('peptides/class_i/positions/p3/'+ peptide_positions['p3'].lower()).add(pdb_code)
+            data, success, errors = structureSet('peptides/class_i/positions/pn-2/'+ peptide_positions['pn-2'].lower()).add(pdb_code)
+            data, success, errors = structureSet('peptides/class_i/positions/pn-1/'+ peptide_positions['pn-1'].lower()).add(pdb_code)
+            data, success, errors = structureSet('peptides/class_i/positions/pn/'+ peptide_positions['pn'].lower()).add(pdb_code)
+            data, success, errors = structureSet('peptides/class_i/bulges/length_'+ str(peptide_positions['bulge_length'])).add(pdb_code)
+
+            histo_info, success, errors = structureInfo(pdb_code).put('peptide_positions', peptide_positions)
+            logging.warn(peptide_positions)
+    data = {
+        'histo_info': histo_info
+    }
+    return data, True, None
 
 
+def peptide_contacts(pdb_code):
+    histo_info, success, errors = structureInfo(pdb_code).get()
+    is_class_i = check_mhc_class(histo_info, 'class_i')
+    current_assembly = RCSB().load_structure(pdb_code +'_1', directory='structures/pdb_format/single_assemblies')
+    all_atoms = []
+
+    if is_class_i:
+        class_i_alpha = histo_info['chain_assignments']['class_i_alpha']['chains'][0]
+        class_i_peptide = histo_info['chain_assignments']['class_i_peptide']['chains'][0]
+
+    for chain in current_assembly.get_chains():
+        for residue in chain:
+            if residue.id[0] == ' ':
+                for atom in residue:
+                    all_atoms.append(atom)
+
+
+    neighbor = Bio.PDB.NeighborSearch(all_atoms)
+    neighbours = neighbor.search_all(5, level='R')
+
+    contacts = {
+        class_i_alpha:{},
+        class_i_peptide:{}
+    }
+
+    for residue_pair in neighbours:
+        residue_1 = residue_pair[0]
+        residue_2 = residue_pair[1]
+        if residue_1.get_parent().id != residue_2.get_parent().id:
+            chain_pair = [residue_1.get_parent().id, residue_2.get_parent().id]
+            
+            if class_i_peptide in chain_pair and class_i_alpha in chain_pair:
+                residue_1_name = residue_1.resname.lower() + '_' + str(residue_1.get_id()[1])
+                residue_2_name = residue_2.resname.lower() + '_' + str(residue_2.get_id()[1])
+
+                if residue_1.get_id()[1] not in contacts[residue_1.get_parent().id]:
+                    contacts[residue_1.get_parent().id][residue_1.get_id()[1]] = {'position':residue_1.get_id()[1], 'residue':residue_1.resname.lower(), 'contacts':[] }
+                contacts[residue_1.get_parent().id][residue_1.get_id()[1]]['contacts'].append(residue_2_name)
+
+                if residue_2.get_id()[1] not in contacts[residue_2.get_parent().id]:
+                    contacts[residue_2.get_parent().id][residue_2.get_id()[1]] = {'position':residue_2.get_id()[1], 'residue':residue_2.resname.lower(), 'contacts':[] }
+                contacts[residue_2.get_parent().id][residue_2.get_id()[1]]['contacts'].append(residue_1_name)
+
+    
+    sorted_peptide = dict(sorted(contacts[class_i_peptide].items()))
+    sorted_abd = dict(sorted(contacts[class_i_alpha].items()))
+    logging.warn(sorted_peptide)
+    logging.warn(' ')
+    logging.warn(sorted_abd)
+
+    data = {
+        'histo_info': histo_info
+    }
+    return data, True, None

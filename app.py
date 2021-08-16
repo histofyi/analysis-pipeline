@@ -205,6 +205,32 @@ def set_align_structures_handler(slug):
     return data
 
 
+
+# Step 5
+@app.get('/structures/pipeline/match/set/<string:slug>')
+def set_match_structures_handler(slug):
+    structureset, success, errors = lists.structureSet(slug).get()
+    success_array = []
+    errors_array = []
+    for pdb_code in structureset['set']:
+        try:
+            data, success, errors = actions.match_structure(pdb_code)
+            if data:
+                success_array.append(pdb_code)
+            else:
+                errors_array.append(pdb_code)
+        except:
+            errors_array.append(pdb_code)
+    data = {
+        'success':success_array,
+        'errors':errors_array
+    }
+    return data
+
+
+
+
+
 # Step 0
 @app.get('/structures/pipeline/clean/<string:pdb_code>')
 def clean_record_handler(pdb_code):
@@ -240,6 +266,25 @@ def split_structure_handler(pdb_code):
 def align_structures_handler(pdb_code):
     data, success, errors = actions.align_structures(pdb_code)
     return data['histo_info']
+
+
+
+# Step 5
+@app.get('/structures/pipeline/match/<string:pdb_code>')
+def match_structures_handler(pdb_code):
+    data, success, errors = actions.match_structure(pdb_code)
+    return data['histo_info']
+
+
+# Step 6
+@app.get('/structures/pipeline/peptide_positions/<string:pdb_code>')
+def peptide_positions_handler(pdb_code):
+    data, success, errors = actions.peptide_positions(pdb_code)
+    return data['histo_info']
+
+
+
+
 
 
 
@@ -607,7 +652,7 @@ def sets_create_action_handler():
 
 
 
-@app.get('/sets/<string:slug>')
+@app.get('/sets/<path:slug>')
 def sets_display_handler(slug):
     structureset = get_hydrated_structure_set(slug)
     return template.render('set', {'nav':'sets','set':structureset})

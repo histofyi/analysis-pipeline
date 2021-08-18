@@ -250,6 +250,30 @@ def set_peptide_positions_handler(slug):
     return data
 
 
+# Step 7
+@app.get('/structures/pipeline/peptide_neighbours/set/<string:slug>')
+def set_peptide_neighbours_handler(slug):
+    structureset, success, errors = lists.structureSet(slug).get()
+    success_array = []
+    errors_array = []
+    for pdb_code in structureset['set']:
+        try:
+            data, success, errors = actions.peptide_neighbours(pdb_code)
+            if data:
+                success_array.append(pdb_code)
+            else:
+                errors_array.append(pdb_code)
+        except:
+            errors_array.append(pdb_code)
+    data = {
+        'success':success_array,
+        'errors':errors_array
+    }
+    return data
+
+
+
+
 
 # Step 0
 @app.get('/structures/pipeline/clean/<string:pdb_code>')
@@ -304,9 +328,9 @@ def peptide_positions_handler(pdb_code):
 
 
 # Step 7
-@app.get('/structures/pipeline/peptide_contacts/<string:pdb_code>')
-def peptide_contacts_handler(pdb_code):
-    data, success, errors = actions.peptide_contacts(pdb_code)
+@app.get('/structures/pipeline/peptide_neighbours/<string:pdb_code>')
+def peptide_neighbours_handler(pdb_code):
+    data, success, errors = actions.peptide_neighbours(pdb_code)
     return data['histo_info']
 
 

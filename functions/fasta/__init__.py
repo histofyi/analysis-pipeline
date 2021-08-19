@@ -22,6 +22,8 @@ def read_sequence_set(mhc_class, locus):
         all_sequences = SeqIO.parse(fasta_path, "fasta")
         sequences = filter_sequence_set(all_sequences)
         sequences['last_updated'] = last_updated
+        if 'hla-' in locus:
+            sequences['species'] = 'human'            
         sequences, success, errors = file.put(base_file_ppath, json.dumps(sequences))
     return sequences, True, None
 

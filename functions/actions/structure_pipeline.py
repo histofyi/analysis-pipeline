@@ -38,7 +38,7 @@ hetatms = ['HOH','EDO','GOL', ' CA', ' CD', ' CU', ' MG', ' NA', ' NI', ' ZN', '
 
 
 
-sequence_sets = ['hla-a','hla-b','hla-c']
+sequence_sets = ['hla-a','hla-b','hla-c','h-2']
 
 
 def check_mhc_class(histo_info, mhc_class):
@@ -102,7 +102,7 @@ def automatic_assignment(pdb_code):
     # load the structure into BioPDB
     structure = rcsb.load_structure(pdb_code)
 
-    try:
+    if True:
         # predict some initial chain assignments
         structure_stats = rcsb.predict_assigned_chains(structure, assembly_count)
 
@@ -122,7 +122,8 @@ def automatic_assignment(pdb_code):
         basic_info = structure_stats['basic_info']
 
         histo_info, success, errors = structureInfo(pdb_code).put('basic_info', basic_info)
-
+        logging.warn("BEST MATCH")
+        logging.warn(best_match)
         if best_match['confidence'] > 0.8:
             del structure_stats['complex_hits']
             data, success, errors = structureSet(best_match['best_match']).add(pdb_code)
@@ -133,8 +134,8 @@ def automatic_assignment(pdb_code):
 
         data, success, errors = structureSet('automatically_matched').add(pdb_code)
 
-    except:
-        data, success, errors = structureSet('error').add(pdb_code)
+    #except:
+        #data, success, errors = structureSet('error').add(pdb_code)
 
     data = {
             'histo_info': histo_info
@@ -202,10 +203,14 @@ def first_pass_sequence_match(sequence_to_test):
     match_info = None
     for locus in sequence_sets:
         locus_set, success, errors = get_simplified_sequence_set('class_i', locus)
+        species = locus_set['species']
         for allele_group in  locus_set['sequences']:
             this_sequence = locus_set['sequences'][allele_group]['alleles'][0]['sequence']
+            if len(sequence_to_test) < len(this_sequence):
+                this_sequence = this_sequence[0:len(sequence_to_test)]
             if sequence_to_test == this_sequence:
                 match_info = {
+                    'species': species,
                     'allele': locus_set['sequences'][allele_group]['alleles'][0]['allele'],
                     'allele_group': locus_set['sequences'][allele_group]['alleles'][0]['allele_group'],
                     'locus':locus,
@@ -221,12 +226,16 @@ def second_pass_sequence_match(sequence_to_test):
     match_info = None
     for locus in sequence_sets:
         locus_set, success, errors = get_simplified_sequence_set('class_i', locus)
+        species = locus_set['species']
         for allele_group in  locus_set['sequences']:
             allele_set = locus_set['sequences'][allele_group]['alleles']
             for allele in allele_set:
                 this_sequence = allele['sequence']
+                if len(sequence_to_test) < len(this_sequence):
+                    this_sequence = this_sequence[0:len(sequence_to_test)]
                 if sequence_to_test == this_sequence:
                     match_info = {
+                        'species': species,
                         'allele': allele['allele'],
                         'allele_group': allele['allele_group'],
                         'locus':locus,
@@ -241,7 +250,7 @@ def second_pass_sequence_match(sequence_to_test):
 def match_structure(pdb_code):
     histo_info, success, errors = structureInfo(pdb_code).get()
     match_info = None
-    has_class_i_alpha = check_mhc_class('class_i')
+    has_class_i_alpha = check_mhc_class(histo_info, 'class_i')
     if has_class_i_alpha:
         sequence_to_test = histo_info['chain_assignments']['class_i_alpha']['sequences'][0]
         if len(sequence_to_test) > 275:
@@ -253,10 +262,14 @@ def match_structure(pdb_code):
         logging.warn("MATCH")
         logging.warn(match_info)
         histo_info, success, errors = structureInfo(pdb_code).put('match_info', match_info)
-        data, success, errors = structureSet('alleles/human/all').add(pdb_code)
-        data, success, errors = structureSet('alleles/human/'+ match_info['locus'] + '/all').add(pdb_code)
-        data, success, errors = structureSet('alleles/human/'+ match_info['locus'] + '/' + match_info['allele_group'].replace('*','')).add(pdb_code)
-        data, success, errors = structureSet('alleles/human/'+ match_info['locus'] + '/' + match_info['allele'].replace(':','_').replace('*','')).add(pdb_code)
+        if 'species' in match_info:
+            species = match_info['species']
+        else:
+            species = 'other'
+        data, success, errors = structureSet('alleles/' + species + '/all').add(pdb_code)
+        data, success, errors = structureSet('alleles/' + species + '/'+ match_info['locus'] + '/all').add(pdb_code)
+        data, success, errors = structureSet('alleles/' + species + '/'+ match_info['locus'] + '/' + match_info['allele_group'].replace('*','')).add(pdb_code)
+        data, success, errors = structureSet('alleles/' + species + '/'+ match_info['locus'] + '/' + match_info['allele'].replace(':','_').replace('*','')).add(pdb_code)
     else:
         data, success, errors = structureSet('alleles/nomatch').add(pdb_code)
     data = {
@@ -313,6 +326,8 @@ def peptide_positions(pdb_code):
             data, success, errors = structureSet('peptides/class_i/positions/pn-1/'+ peptide_positions['pn-1'].lower()).add(pdb_code)
             data, success, errors = structureSet('peptides/class_i/positions/pn/'+ peptide_positions['pn'].lower()).add(pdb_code)
             data, success, errors = structureSet('peptides/class_i/bulges/length_'+ str(peptide_positions['bulge_length'])).add(pdb_code)
+            if len(peptide_positions['extension']) > 0:
+                data, success, errors = structureSet('peptides/class_i/extensions/length_'+ str(len(peptide_positions['extension']))).add(pdb_code)
 
             histo_info, success, errors = structureInfo(pdb_code).put('peptide_positions', peptide_positions)
             #logging.warn(peptide_positions)
@@ -372,17 +387,11 @@ def peptide_neighbours(pdb_code):
         class_i_peptide:{}
     }
 
-    logging.warn(class_i_alpha)
-    logging.warn(class_i_peptide)
-
     for residue_pair in neighbours:
         residue_1 = residue_pair[0]
         residue_2 = residue_pair[1]
         if residue_1.get_parent().id != residue_2.get_parent().id:
             chain_pair = [residue_1.get_parent().id, residue_2.get_parent().id]
-            logging.warn(residue_1)
-            logging.warn(residue_2)
-            logging.warn(chain_pair)
             if class_i_peptide in chain_pair and class_i_alpha in chain_pair:
                 if residue_1.get_parent().id == class_i_alpha:
                     class_i_details = {'residue':residue_1.resname, 'position':residue_1.get_id()[1]}
@@ -398,8 +407,6 @@ def peptide_neighbours(pdb_code):
                 class_i_details['position'] = class_i_residue_id
                 peptide_details['position'] = peptide_residue_id
 
-                logging.warn(class_i_details)
-                logging.warn(peptide_details)
 
                 if class_i_residue_id not in contacts[class_i_alpha]:
                     contacts[class_i_alpha][class_i_residue_id] = {'position':class_i_residue_id, 'residue':class_i_details['residue'], 'neighbours':[] }
@@ -434,7 +441,7 @@ def peptide_neighbours(pdb_code):
 
         abd_contacts = [neighbour['position'] for neighbour in sorted_peptide[position]['neighbours']]
         if 116 in abd_contacts and 143 in abd_contacts:
-            logging.warn('116')
+            logging.warn('116/143')
             logging.warn('LAST POSITION')
             logging.warn(sorted_peptide[position])
             last_position = True

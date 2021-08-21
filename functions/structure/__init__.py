@@ -1,2 +1,3 @@
 from .split_assemblies import split_assemblies
 from .align_structures import align_structure
+from .split_into_components import extract_peptide

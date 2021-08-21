@@ -272,6 +272,26 @@ def set_peptide_neighbours_handler(slug):
     return data
 
 
+# Step 8
+@app.get('/structures/pipeline/extract_peptides/set/<string:slug>')
+def set_extract_peptides_handlerr(slug):
+    structureset, success, errors = lists.structureSet(slug).get()
+    success_array = []
+    errors_array = []
+    for pdb_code in structureset['set']:
+        try:
+            data, success, errors = actions.extract_peptides(pdb_code)
+            if data:
+                success_array.append(pdb_code)
+            else:
+                errors_array.append(pdb_code)
+        except:
+            errors_array.append(pdb_code)
+    data = {
+        'success':success_array,
+        'errors':errors_array
+    }
+    return data
 
 
 
@@ -312,7 +332,6 @@ def align_structures_handler(pdb_code):
     return data['histo_info']
 
 
-
 # Step 5
 @app.get('/structures/pipeline/match/<string:pdb_code>')
 def match_structures_handler(pdb_code):
@@ -333,6 +352,12 @@ def peptide_neighbours_handler(pdb_code):
     data, success, errors = actions.peptide_neighbours(pdb_code)
     return data['histo_info']
 
+
+# Step 8
+@app.get('/structures/pipeline/extract_peptides/<string:pdb_code>')
+def extract_peptides_handler(pdb_code):
+    data, success, errors = actions.extract_peptides(pdb_code)
+    return data['histo_info']
 
 
 

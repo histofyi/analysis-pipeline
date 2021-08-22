@@ -34,8 +34,25 @@ config = {
 }
 
 pipeline_actions = {
-    'peptide_angles': actions.measure_peptide_angles
+    'fetch': {'action':actions.fetch_pdb_data},
+    'assign': {'action':actions.automatic_assignment},
+    'split': {'action':actions.split_structure},
+    'align': {'action':actions.align_structures},
+    'match': {'action':actions.match_structure},
+    'peptide_positions': {'action':actions.peptide_positions},
+    'peptide_neighbours': {'action':actions.peptide_neighbours},
+    'peptide_angles': {'action':actions.measure_peptide_angles},
+    'extract_peptides': {'action':actions.extract_peptides}
 }
+
+
+representation_actions = {
+    'flare': {'action':actions.generate_flare_file, 'format':'json'},
+    'peptide_phipsi': {'action':None, 'format':'csv'},
+    'peptide_sidechain': {'action':None, 'format':'csv'},
+    'abd_sidechain': {'action':None, 'format':'csv'}
+}
+
 
 app = Flask(__name__)
 app.config.from_file('config.toml', toml.load)
@@ -67,21 +84,14 @@ def pdb_image_folder(pdb_code):
     return pdb_code[1:3]
 
 
+
+
+
 def return_to(pdb_code):
     return '/structures/information/{pdb_code}'.format(pdb_code=pdb_code)
 
 
-@cache.memoize(timeout=300)
-def get_hydrated_structure_set(slug):
-    structureset, success, errors = lists.structureSet(slug).get()
-    structureset['histo_info'] = {}
-    for pdb_code in structureset['set']:
-        try:
-            histo_info, success, errors = histo.structureInfo(pdb_code).get()
-            structureset['histo_info'][pdb_code] = histo_info
-        except:
-            logging.warn("ERROR for " + pdb_code)
-    return structureset
+
 
 
 
@@ -100,219 +110,14 @@ def structures_handler():
 
 ### Structure pipeline ###
 
-# Step 0
-@app.get('/structures/pipeline/clean/set/<string:slug>')
-def set_clean_record_handler(slug):
+# Set pipeline step handler
+@app.get('/structures/pipeline/<string:route>/set/<path:slug>')
+def pipeline_set_handler(route, slug):
     structureset, success, errors = lists.structureSet(slug).get()
     success_array = []
     errors_array = []
     for pdb_code in structureset['set']:
-        try:
-            data, success, errors = actions.clean_record(pdb_code)
-            if success:
-                success_array.append(pdb_code)
-            else:
-                errors_array.append(pdb_code)
-        except:
-            errors_array.append(pdb_code)
-    data = {
-        'success':success_array,
-        'errors':errors_array
-    }
-    return data
-
-
-# Step 1
-@app.get('/structures/pipeline/fetch/set/<string:slug>')
-def set_fetch_pdb_data_handler(slug):
-    structureset, success, errors = lists.structureSet(slug).get()
-    success_array = []
-    errors_array = []
-    for pdb_code in structureset['set']:
-        try:
-            data, success, errors = actions.fetch_pdb_data(pdb_code)
-            if success:
-                success_array.append(pdb_code)
-            else:
-                errors_array.append(pdb_code)
-        except:
-            errors_array.append(pdb_code)
-    data = {
-        'success':success_array,
-        'errors':errors_array
-    }
-    return data
-
-
-# Step 2
-@app.get('/structures/pipeline/assign/set/<string:slug>')
-def set_automatic_assignment_handler(slug):
-    structureset, success, errors = lists.structureSet(slug).get()
-    success_array = []
-    errors_array = []
-    for pdb_code in structureset['set']:
-        try:
-            data, success, errors = actions.automatic_assignment(pdb_code)
-            if success:
-                success_array.append(pdb_code)
-            else:
-                errors_array.append(pdb_code)
-        except:
-            errors_array.append(pdb_code)
-    data = {
-        'success':success_array,
-        'errors':errors_array
-    }
-    return data
-
-
-# Step 3
-@app.get('/structures/pipeline/split/set/<string:slug>')
-def set_split_structure_handler(slug):
-    structureset, success, errors = lists.structureSet(slug).get()
-    success_array = []
-    errors_array = []
-    for pdb_code in structureset['set']:
-        try:
-            data, success, errors = actions.split_structure(pdb_code)
-            if data:
-                success_array.append(pdb_code)
-            else:
-                errors_array.append(pdb_code)
-        except:
-            errors_array.append(pdb_code)
-    data = {
-        'success':success_array,
-        'errors':errors_array
-    }
-    return data
-
-
-# Step 4
-@app.get('/structures/pipeline/align/set/<string:slug>')
-def set_align_structures_handler(slug):
-    structureset, success, errors = lists.structureSet(slug).get()
-    success_array = []
-    errors_array = []
-    for pdb_code in structureset['set']:
-        try:
-            data, success, errors = actions.align_structures(pdb_code)
-            if data:
-                success_array.append(pdb_code)
-            else:
-                errors_array.append(pdb_code)
-        except:
-            errors_array.append(pdb_code)
-    data = {
-        'success':success_array,
-        'errors':errors_array
-    }
-    return data
-
-
-
-# Step 5
-@app.get('/structures/pipeline/match/set/<string:slug>')
-def set_match_structures_handler(slug):
-    structureset, success, errors = lists.structureSet(slug).get()
-    success_array = []
-    errors_array = []
-    for pdb_code in structureset['set']:
-        try:
-            data, success, errors = actions.match_structure(pdb_code)
-            if data:
-                success_array.append(pdb_code)
-            else:
-                errors_array.append(pdb_code)
-        except:
-            errors_array.append(pdb_code)
-    data = {
-        'success':success_array,
-        'errors':errors_array
-    }
-    return data
-
-
-# Step 6
-@app.get('/structures/pipeline/peptide_positions/set/<string:slug>')
-def set_peptide_positions_handler(slug):
-    structureset, success, errors = lists.structureSet(slug).get()
-    success_array = []
-    errors_array = []
-    for pdb_code in structureset['set']:
-        try:
-            data, success, errors = actions.peptide_positions(pdb_code)
-            if data:
-                success_array.append(pdb_code)
-            else:
-                errors_array.append(pdb_code)
-        except:
-            errors_array.append(pdb_code)
-    data = {
-        'success':success_array,
-        'errors':errors_array
-    }
-    return data
-
-
-# Step 7
-@app.get('/structures/pipeline/peptide_neighbours/set/<string:slug>')
-def set_peptide_neighbours_handler(slug):
-    structureset, success, errors = lists.structureSet(slug).get()
-    success_array = []
-    errors_array = []
-    for pdb_code in structureset['set']:
-        try:
-            data, success, errors = actions.peptide_neighbours(pdb_code)
-            if data:
-                success_array.append(pdb_code)
-            else:
-                errors_array.append(pdb_code)
-        except:
-            errors_array.append(pdb_code)
-    data = {
-        'success':success_array,
-        'errors':errors_array
-    }
-    return data
-
-
-# Step 8
-@app.get('/structures/pipeline/extract_peptides/set/<string:slug>')
-def set_extract_peptides_handler(slug):
-    structureset, success, errors = lists.structureSet(slug).get()
-    success_array = []
-    errors_array = []
-    for pdb_code in structureset['set']:
-        try:
-            data, success, errors = actions.extract_peptides(pdb_code)
-            if data:
-                success_array.append(pdb_code)
-            else:
-                errors_array.append(pdb_code)
-        except:
-            errors_array.append(pdb_code)
-    data = {
-        'success':success_array,
-        'errors':errors_array
-    }
-    return data
-
-
-route_actions = {
-    'peptide_angles': actions.measure_peptide_angles
-}
-
-
-
-# Step X
-@app.get('/structures/pipeline/<string:route_action>/set/<path:slug>')
-def pipeline_set_handler(route_action, slug):
-    structureset, success, errors = lists.structureSet(slug).get()
-    success_array = []
-    errors_array = []
-    for pdb_code in structureset['set']:
-        data, success, errors = pipeline_actions[route_action](pdb_code)
+        data, success, errors = pipeline_actions[route]['action'](pdb_code)
         if data:
             success_array.append(pdb_code)
         else:
@@ -335,98 +140,22 @@ def pipeline_set_handler(route_action, slug):
     return data
 
 
-# Step X
-@app.get('/structures/pipeline/<string:route_action>/<string:pdb_code>')
-def pipeline_item_handler(route_action, pdb_code):
-    data, success, errors = pipeline_actions[route_action](pdb_code)
-    return data['histo_info']
-
-
-
-
-
-
-
+# Pipeline step handler
+@app.get('/structures/pipeline/<string:route>/<string:pdb_code>')
+def pipeline_item_handler(route, pdb_code):
+    data, success, errors = pipeline_actions[route]['action'](pdb_code)
+    logging.warn(errors)
+    if data:
+        if 'histo_info' in data:
+            return data['histo_info']
+    return {'erors':errors}
 
 
 # Step 0
-@app.get('/structures/pipeline/clean/<string:pdb_code>')
-def clean_record_handler(pdb_code):
-    data, success, errors = actions.clean_record(pdb_code)
-    return data['histo_info']
-
-
-# Step 1
-@app.get('/structures/pipeline/fetch/<string:pdb_code>')
-def fetch_pdb_data_handler(pdb_code):
-    data, success, errors = actions.fetch_pdb_data(pdb_code)
-    return data['histo_info']
-
-
-# Step 2
-@app.get('/structures/pipeline/assign/<string:pdb_code>')
-def automatic_assignment_handler(pdb_code):
-    logging.warn("ASSIGNING")
-    data, success, errors = actions.automatic_assignment(pdb_code)
-    return data['histo_info']
-
-
-# Step 3
-@app.get('/structures/pipeline/split/<string:pdb_code>')
-def split_structure_handler(pdb_code):
-
-    data, success, errors = actions.split_structure(pdb_code)
-    return data['histo_info']
-
-
-# Step 4
-@app.get('/structures/pipeline/align/<string:pdb_code>')
-def align_structures_handler(pdb_code):
-    data, success, errors = actions.align_structures(pdb_code)
-    return data['histo_info']
-
-
-# Step 5
-@app.get('/structures/pipeline/match/<string:pdb_code>')
-def match_structures_handler(pdb_code):
-    data, success, errors = actions.match_structure(pdb_code)
-    return data['histo_info']
-
-
-# Step 6
-@app.get('/structures/pipeline/peptide_positions/<string:pdb_code>')
-def peptide_positions_handler(pdb_code):
-    data, success, errors = actions.peptide_positions(pdb_code)
-    return data['histo_info']
-
-
-# Step 7
-@app.get('/structures/pipeline/peptide_neighbours/<string:pdb_code>')
-def peptide_neighbours_handler(pdb_code):
-    data, success, errors = actions.peptide_neighbours(pdb_code)
-    return data['histo_info']
-
-
-# Step 8
-@app.get('/structures/pipeline/extract_peptides/<string:pdb_code>')
-def extract_peptides_handler(pdb_code):
-    data, success, errors = actions.extract_peptides(pdb_code)
-    return data['histo_info']
-
-
-
-
-
-# Step 10
-@app.get('/structures/pipeline/flare/<string:pdb_code>')
-def generate_flare_file_handler(pdb_code):
-    data, success, errors = actions.generate_flare_file(pdb_code)
-    return data['flare_info']
-
-
-
-
-
+#@app.get('/structures/pipeline/clean/<string:pdb_code>')
+#def clean_record_handler(pdb_code):
+#    data, success, errors = actions.clean_record(pdb_code)
+#    return data['histo_info']
 
 
 ### Sequence pipeline ###
@@ -437,6 +166,97 @@ def simplify_sequence_set_handler(mhc_class, locus):
     return data
 
 
+### Epitope pipeline ###
+
+
+### Sets views ###
+
+
+@cache.memoize(timeout=300)
+def get_hydrated_structure_set(slug):
+    structureset, success, errors = lists.structureSet(slug).get()
+    structureset['histo_info'] = {}
+    for pdb_code in structureset['set']:
+        try:
+            histo_info, success, errors = histo.structureInfo(pdb_code).get()
+            structureset['histo_info'][pdb_code] = histo_info
+        except:
+            logging.warn("ERROR for " + pdb_code)
+    return structureset
+
+
+@app.get('/sets/<path:slug>')
+def sets_display_handler(slug):
+    structureset = get_hydrated_structure_set(slug)
+    return template.render('set', {'nav':'sets','set':structureset})
+
+
+@app.get('/sets')
+def sets_list_handler():
+    set_list = {
+        'publications':['open_access','paywalled','missing_publication'],
+        'structures':['class_i_with_peptide','probable_class_i_with_peptide'],
+        'editorial':['interesting'],
+        'curatorial':['edgecases','exclude','incorrect_chain_labels']
+    }
+    sets = {}
+    for category in set_list:
+        sets[category] = {}
+        for set in set_list[category]:
+            sets[category][set], success, errors = lists.structureSet(set).get()
+    return template.render('sets', {'nav':'sets','sets':sets})
+
+
+@app.get('/sets/intersection')
+def sets_intersection_handler():
+    return template.render('sets_intersection', {'setlist':{}})
+
+
+@app.get('/sets/create')
+def sets_create_form_handler():
+    return template.render('sets_create', {'variables':{},'structureset':None,'errors':['no_data']})
+
+
+@app.post('/sets/create')
+def sets_create_action_handler():
+    params = ['set_ui_text','set_members']
+    variables = {}
+    errors = None
+    slug = None
+    members = None
+    structureset = None
+    variables = common.request_variables(params)
+    if 'set_ui_text' in variables:
+        if variables['set_ui_text'] is not None:
+            slug = common.slugify(variables['set_ui_text'])
+            logging.warn(slug)
+        else:
+            errors.append('no_ui_text')
+    else:
+        errors.append('no_ui_text')
+    if 'set_members' in variables:
+        if variables['set_members'] is not None:
+            try:
+                if '\'' in variables['set_members']:
+                    variables['set_members'] = variables['set_members'].replace('\'','"')
+                members = json.loads(variables['set_members'])
+                members = [member.lower() for member in members]
+                logging.warn(members)
+            except:
+                errors.append('not_json')
+        else:
+            errors.append('no_members')
+    else:
+        errors.append('no_members')
+    if errors is None:
+        already_exists = lists.structureSet(slug).check_exists()
+        if not already_exists:
+            structureset, success, errors = lists.structureSet(slug).put(members)
+        else:
+            structureset, success, errors = lists.structureSet(slug).get()
+            errors.append('already_exists')
+    logging.warn(errors)
+    return template.render('sets_create', {'variables':variables,'errors':errors,'structureset':structureset,'errors':errors})
 
 
 
@@ -444,6 +264,18 @@ def simplify_sequence_set_handler(mhc_class, locus):
 
 
 
+
+
+### Representations ###
+
+
+@app.get('/representations/<string:route>/<string:pdb_code>')
+def representation_handler(route, pdb_code):
+    data, success, errors = representation_actions[route]['action'](pdb_code)
+    if data:
+        return data
+    else:
+        return {'erors':errors}
 
 
 
@@ -733,84 +565,11 @@ def structure_info_handler(pdb_code):
         return template.render('structure_info', variables)
 
 
-@app.get('/sets/intersection')
-def sets_intersection_handler():
-    return template.render('sets_intersection', {'setlist':{}})
-
-
-
-@app.get('/sets/create')
-def sets_create_form_handler():
-    return template.render('sets_create', {'variables':{},'structureset':None,'errors':['no_data']})
-
-
-@app.post('/sets/create')
-def sets_create_action_handler():
-    params = ['set_ui_text','set_members']
-    variables = {}
-    errors = None
-    slug = None
-    members = None
-    structureset = None
-    variables = common.request_variables(params)
-    if 'set_ui_text' in variables:
-        if variables['set_ui_text'] is not None:
-            slug = common.slugify(variables['set_ui_text'])
-            logging.warn(slug)
-        else:
-            errors.append('no_ui_text')
-    else:
-        errors.append('no_ui_text')
-    if 'set_members' in variables:
-        if variables['set_members'] is not None:
-            try:
-                if '\'' in variables['set_members']:
-                    variables['set_members'] = variables['set_members'].replace('\'','"')
-                members = json.loads(variables['set_members'])
-                members = [member.lower() for member in members]
-                logging.warn(members)
-            except:
-                errors.append('not_json')
-        else:
-            errors.append('no_members')
-    else:
-        errors.append('no_members')
-    if errors is None:
-        already_exists = lists.structureSet(slug).check_exists()
-        if not already_exists:
-            structureset, success, errors = lists.structureSet(slug).put(members)
-        else:
-            structureset, success, errors = lists.structureSet(slug).get()
-            errors.append('already_exists')
-    logging.warn(errors)
-    return template.render('sets_create', {'variables':variables,'errors':errors,'structureset':structureset,'errors':errors})
 
 
 
 
 
-
-
-@app.get('/sets/<path:slug>')
-def sets_display_handler(slug):
-    structureset = get_hydrated_structure_set(slug)
-    return template.render('set', {'nav':'sets','set':structureset})
-
-
-@app.get('/sets')
-def sets_list_handler():
-    set_list = {
-        'publications':['open_access','paywalled','missing_publication'],
-        'structures':['class_i_with_peptide','probable_class_i_with_peptide'],
-        'editorial':['interesting'],
-        'curatorial':['edgecases','exclude','incorrect_chain_labels']
-    }
-    sets = {}
-    for category in set_list:
-        sets[category] = {}
-        for set in set_list[category]:
-            sets[category][set], success, errors = lists.structureSet(set).get()
-    return template.render('sets', {'nav':'sets','sets':sets})
 
 
 

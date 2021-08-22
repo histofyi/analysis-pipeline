@@ -33,6 +33,10 @@ config = {
     "CACHE_DEFAULT_TIMEOUT": 300
 }
 
+pipeline_actions = {
+    'peptide_angles': actions.measure_peptide_angles
+}
+
 app = Flask(__name__)
 app.config.from_file('config.toml', toml.load)
 app.config.from_mapping(config)
@@ -299,14 +303,16 @@ route_actions = {
     'peptide_angles': actions.measure_peptide_angles
 }
 
-# Step 9
+
+
+# Step X
 @app.get('/structures/pipeline/<string:route_action>/set/<path:slug>')
-def set_peptide_angles_handler(route_action, slug):
+def pipeline_set_handler(route_action, slug):
     structureset, success, errors = lists.structureSet(slug).get()
     success_array = []
     errors_array = []
     for pdb_code in structureset['set']:
-        data, success, errors = route_actions[route_action](pdb_code)
+        data, success, errors = pipeline_actions[route_action](pdb_code)
         if data:
             success_array.append(pdb_code)
         else:
@@ -327,6 +333,16 @@ def set_peptide_angles_handler(route_action, slug):
         'error_types': error_types
     }
     return data
+
+
+# Step X
+@app.get('/structures/pipeline/<string:route_action>/<string:pdb_code>')
+def pipeline_item_handler(route_action, pdb_code):
+    data, success, errors = pipeline_actions[route_action](pdb_code)
+    return data['histo_info']
+
+
+
 
 
 
@@ -398,11 +414,7 @@ def extract_peptides_handler(pdb_code):
     return data['histo_info']
 
 
-# Step 9
-@app.get('/structures/pipeline/peptide_angles/<string:pdb_code>')
-def peptide_angles_handler(pdb_code):
-    data, success, errors = actions.measure_peptide_angles(pdb_code)
-    return data['histo_info']
+
 
 
 # Step 10

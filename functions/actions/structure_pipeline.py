@@ -542,7 +542,6 @@ def measure_peptide_angles(pdb_code):
             i += 1
         if len(angle_info) > 0:
             histo_info, success, errors = structureInfo(pdb_code).put('peptide_angle_info', angle_info)
-            logging.warn(angle_info)
         data = {
             'histo_info': histo_info
         }

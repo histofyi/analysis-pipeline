@@ -1,3 +1,4 @@
+from functions.actions.structure_pipeline import measure_peptide_angles
 from flask import Flask, request, redirect
 from flask_caching import Cache
 
@@ -294,24 +295,36 @@ def set_extract_peptides_handler(slug):
     return data
 
 
+route_actions = {
+    'peptide_angles': actions.measure_peptide_angles
+}
 
 # Step 9
-@app.get('/structures/pipeline/peptide_angles/set/<path:slug>')
-def set_peptide_angles_handler(slug):
+@app.get('/structures/pipeline/<string:route_action>/set/<path:slug>')
+def set_peptide_angles_handler(route_action, slug):
     structureset, success, errors = lists.structureSet(slug).get()
     success_array = []
     errors_array = []
     for pdb_code in structureset['set']:
-        data, success, errors = actions.measure_peptide_angles(pdb_code)
+        data, success, errors = route_actions[route_action](pdb_code)
         if data:
             success_array.append(pdb_code)
         else:
-            errors_array.append({'pdb_code':pdb_code,'error':errors})
+            errors_array.append({'pdb_code':pdb_code,'errors':errors})
+    error_types = {}
+    for errors in errors_array:
+        for error in errors['errors']:
+            if not error['error'] in error_types:
+                error_type = error['error']
+                error_types[error_type] = {'count':0, 'set':[]}
+            error_types[error_type]['set'].append(error['pdb_code'])
+            error_types[error_type]['count'] += 1
     data = {
         'success':success_array,
         'success_count': len(success_array),
         'errors':errors_array,
-        'errors_count': len(errors_array)
+        'errors_count': len(errors_array),
+        'error_types': error_types
     }
     return data
 

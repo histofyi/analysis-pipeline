@@ -274,7 +274,7 @@ def set_peptide_neighbours_handler(slug):
 
 # Step 8
 @app.get('/structures/pipeline/extract_peptides/set/<string:slug>')
-def set_extract_peptides_handlerr(slug):
+def set_extract_peptides_handler(slug):
     structureset, success, errors = lists.structureSet(slug).get()
     success_array = []
     errors_array = []
@@ -292,6 +292,31 @@ def set_extract_peptides_handlerr(slug):
         'errors':errors_array
     }
     return data
+
+
+
+# Step 9
+@app.get('/structures/pipeline/peptide_angles/set/<path:slug>')
+def set_peptide_angles_handler(slug):
+    structureset, success, errors = lists.structureSet(slug).get()
+    success_array = []
+    errors_array = []
+    for pdb_code in structureset['set']:
+        data, success, errors = actions.measure_peptide_angles(pdb_code)
+        if data:
+            success_array.append(pdb_code)
+        else:
+            errors_array.append({'pdb_code':pdb_code,'error':errors})
+    data = {
+        'success':success_array,
+        'success_count': len(success_array),
+        'errors':errors_array,
+        'errors_count': len(errors_array)
+    }
+    return data
+
+
+
 
 
 
@@ -358,6 +383,22 @@ def peptide_neighbours_handler(pdb_code):
 def extract_peptides_handler(pdb_code):
     data, success, errors = actions.extract_peptides(pdb_code)
     return data['histo_info']
+
+
+# Step 9
+@app.get('/structures/pipeline/peptide_angles/<string:pdb_code>')
+def peptide_angles_handler(pdb_code):
+    data, success, errors = actions.measure_peptide_angles(pdb_code)
+    return data['histo_info']
+
+
+# Step 10
+@app.get('/structures/pipeline/flare/<string:pdb_code>')
+def generate_flare_file_handler(pdb_code):
+    data, success, errors = actions.generate_flare_file(pdb_code)
+    return data['flare_info']
+
+
 
 
 

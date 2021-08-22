@@ -5,7 +5,7 @@ import operator
 from ..histo import structureInfo
 from ..pdb import RCSB
 from ..lists import structureSet
-from ..structure import split_assemblies, align_structure, extract_peptide
+from ..structure import split_assemblies, align_structure, extract_peptide, generate_peptide_angles
 
 from .sequence_pipeline import get_simplified_sequence_set
 
@@ -39,7 +39,8 @@ filesystem = filesystemProvider(None)
 # Step 7 run peptide_positions - this will result in a definition of the different peptide positions and the bulge
 # 
 # Step 8 run extract_peptides - this will result in a separate pdb file for the peptide in a structure
-
+# 
+# Step 9 run measure_peptide_angles - this will create a dictionary of dihedral angles and torsion angles for the peptides
 
 
 sequence_sets = ['hla-a','hla-b','hla-c','h-2']
@@ -56,6 +57,7 @@ def check_mhc_class(histo_info, mhc_class):
     return mhc_class_present
 
 
+# Step 0
 def clean_record(pdb_code):
     histo_info, success, errors = structureInfo(pdb_code).clean()
     data = {
@@ -64,6 +66,7 @@ def clean_record(pdb_code):
     return data, success, errors
 
 
+# Step 1
 def fetch_pdb_data(pdb_code):
     rcsb = RCSB()
 
@@ -94,6 +97,7 @@ def fetch_pdb_data(pdb_code):
     return data, success, errors
 
 
+# Step 2
 def automatic_assignment(pdb_code):
     rcsb = RCSB()
 
@@ -517,3 +521,86 @@ def extract_peptides(pdb_code):
         return data, success, errors
     else:
         return None, False, ['no_align_info']
+
+
+
+def measure_peptide_angles(pdb_code):
+    histo_info, success, errors = structureInfo(pdb_code).get()
+    errors = []
+    angle_info = {}
+    if 'align_info' in histo_info:
+        i = 1
+        for complex in histo_info['align_info']:
+            filename = histo_info['align_info'][complex]['filename']
+            peptide_filename = filename.split('.pdb')[0] + '_no_het'
+            try:
+                current_complex = RCSB().load_structure(peptide_filename, directory = 'structures/pdb_format/fragments/peptides')
+                peptide_angle_info = generate_peptide_angles(current_complex)
+                angle_info[i] = {'peptide': i, 'angles': peptide_angle_info}
+            except(FileNotFoundError):
+                errors.append({'error':'file_not_found', 'filename':filename})
+            i += 1
+        if len(angle_info) > 0:
+            histo_info, success, errors = structureInfo(pdb_code).put('peptide_angle_info', angle_info)
+            logging.warn(angle_info)
+        data = {
+            'histo_info': histo_info
+        }
+        return data, success, errors
+    else:
+        errors.append({'error':'no_align_info', 'pdb_code': pdb_code})
+        return None, False, errors
+
+
+
+def generate_flare_file(pdb_code):
+    histo_info, success, errors = structureInfo(pdb_code).get()
+    flare_info = None
+    if 'neighbour_info' in histo_info:
+        flare_info = {'edges':[]}
+        peptide_properties = []
+        class_i_properties = []
+        peptide_array = []
+        class_i_array = []
+        for position in histo_info['neighbour_info']['class_i_peptide']:
+            residue = histo_info['neighbour_info']['class_i_peptide'][position]
+            name1 = 'P{position_id}-{position_res}'.format(position_id=residue['position'], position_res=residue['residue'])
+            peptide_properties.append({'nodeName':name1, 'color':'#ff00ff', 'size':.1})
+            peptide_array.append(name1)
+            if len(residue['neighbours']) == 0:
+                    row = {'name1':name1,'name2':'none','frames':[0]}
+                    flare_info['edges'].append(row)
+            else:
+                for row in residue['neighbours']:
+                    name2 = 'A{position_id}-{position_res}'.format(position_id=row['position'], position_res=row['residue'])     
+                    if not name2 in peptide_array:
+                        if row['position'] < 51:
+                            color = '#cc0000'
+                        elif row['position'] < 85:
+                            color = '#00cc00'
+                        elif row['position'] < 138:
+                            color = '#cc0000'
+                        else:
+                            color = '#0000cc'
+                        peptide_properties.append({'nodeName':name2, 'color':color, 'size':0.1})
+                        peptide_array.append(name2)
+                    row = {'name1':name1,'name2':name2,'frames':[0]}
+                    flare_info['edges'].append(row)
+        flare_info['tracks'] = [{
+            'trackLabel':'Peptide',
+            'trackProperties':peptide_properties
+         }]
+        flare_info['trees'] = [{
+            'treeLabel':'Peptide',
+            'treePaths':peptide_array
+        }]
+        flare_info['defaults'] = {
+            'edgeColor':'rgba(100,100,100,100)',
+            'edgeWidth':1
+        }
+        data = {
+            'flare_info': flare_info
+        }
+        return data, success, errors
+    else:
+        return None, False, ['no_neighbour_info']

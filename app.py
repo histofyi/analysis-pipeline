@@ -1,6 +1,9 @@
 from functions.actions.structure_pipeline import measure_peptide_angles
-from flask import Flask, request, redirect
+from flask import Flask, request, redirect, make_response, Response
 from flask_caching import Cache
+
+import csv
+from io import StringIO
 
 import toml
 import json
@@ -47,8 +50,8 @@ pipeline_actions = {
 
 
 representation_actions = {
-    'flare': {'action':actions.generate_flare_file, 'format':'json'},
-    'peptide_phipsi': {'action':None, 'format':'csv'},
+    'flare': {'action':actions.generate_flare_file},
+    'peptide_phipsi': {'action':actions.peptide_phi_psi, 'format':'csv'},
     'peptide_sidechain': {'action':None, 'format':'csv'},
     'abd_sidechain': {'action':None, 'format':'csv'}
 }
@@ -269,11 +272,35 @@ def sets_create_action_handler():
 ### Representations ###
 
 
+def to_csv(array):
+    si = StringIO()
+    cw = csv.writer(si)
+    cw.writerows(array)
+    #output = make_response(si.getvalue())
+    return si.getvalue()
+
+
 @app.get('/representations/<string:route>/<string:pdb_code>')
 def representation_handler(route, pdb_code):
-    data, success, errors = representation_actions[route]['action'](pdb_code)
+    format = None
+    if 'format' in representation_actions[route]:
+        format = representation_actions[route]['format']
+        data, success, errors = representation_actions[route]['action'](pdb_code, format)
+    else:
+        data, success, errors = representation_actions[route]['action'](pdb_code)
     if data:
-        return data
+        if not format:
+            return json.dumps(data)
+        else:
+            if format == 'csv':
+                flat_array = [data['row_labels']]
+                for row in data['data']:
+                    flat_array.append(row)
+                filename = pdb_code +'_' + route
+                return Response(
+                    to_csv(flat_array),
+                    mimetype='text/csv',
+                    headers={'Content-disposition':'attachment; filename={filename}.csv'.format(filename=filename)})
     else:
         return {'erors':errors}
 

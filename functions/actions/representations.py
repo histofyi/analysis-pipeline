@@ -52,35 +52,47 @@ def generate_flare_file(pdb_code):
     else:
         return None, False, ['no_neighbour_info']
 
+def simplify_angle(angle):
+    if angle:
+        if angle < 0:
+            angle = 360 + angle
+        angle = int(angle)
+        return angle
+    else:
+        return None
 
 
 def peptide_phi_psi(pdb_code, format):
     histo_info, success, errors = structureInfo(pdb_code).get()
-    peptide_angle_labels = []
+    peptide_angle_labels = ['complex_id']
+    #peptide_angle_labels = []
     peptide_angles = []
     if 'peptide_angle_info' in histo_info:
         for peptide in histo_info['peptide_angle_info']:
-            this_peptide_angles = []
+            this_peptide_angles = ['{pdb_code}_{id}'.format(pdb_code = pdb_code, id = peptide)]
+            #this_peptide_angles = []
             i = 1
             for position in histo_info['peptide_angle_info'][peptide]['angles']:
                 this_position = histo_info['peptide_angle_info'][peptide]['angles'][position]
                 phi_label = 'p{position}_phi'.format(position=i)
                 psi_label = 'p{position}_psi'.format(position=i)
+                phi_angle = simplify_angle(this_position['phi'])
+                psi_angle = simplify_angle(this_position['psi'])
                 if i == 1:
                     if psi_label not in peptide_angle_labels:
                         peptide_angle_labels.append(psi_label)
-                    this_peptide_angles.append(this_position['psi'])
+                    this_peptide_angles.append(psi_angle)
                 elif i == len(histo_info['peptide_angle_info'][peptide]['angles']):
                     if phi_label not in peptide_angle_labels:
                         peptide_angle_labels.append(phi_label)
-                    this_peptide_angles.append(this_position['phi'])
+                    this_peptide_angles.append(phi_angle)
                 else:
                     if phi_label not in peptide_angle_labels:
                         peptide_angle_labels.append(phi_label)
                     if psi_label not in peptide_angle_labels:
                         peptide_angle_labels.append(psi_label)
-                    this_peptide_angles.append(this_position['psi'])
-                    this_peptide_angles.append(this_position['phi'])
+                    this_peptide_angles.append(psi_angle)
+                    this_peptide_angles.append(phi_angle)
                 i += 1
             peptide_angles.append(this_peptide_angles)
         peptide_angle_data = {

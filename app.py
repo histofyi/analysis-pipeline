@@ -1,3 +1,4 @@
+from functions.pdb.rcsb import RCSB
 from functions.actions.structure_pipeline import measure_peptide_angles
 from flask import Flask, request, redirect, make_response, Response
 from flask_caching import Cache
@@ -87,7 +88,17 @@ def pdb_image_folder(pdb_code):
     return pdb_code[1:3]
 
 
-
+@app.template_filter()
+def allele_name(match_info):
+    if 'hla' in match_info['locus']:
+        locus = 'HLA-'
+        allele = match_info['allele'][0:7].upper()
+        display_name = locus + allele
+    if 'h-2' in match_info['locus']:
+        locus = match_info['locus'].upper()
+        allele = match_info['allele'].title()
+        display_name = locus + allele
+    return display_name
 
 
 def return_to(pdb_code):
@@ -575,6 +586,7 @@ def structure_info_handler(pdb_code):
     if pdb_code in unmatched['set']:
         unmatched_structure = True
 
+    pdb_file = RCSB().fetch(pdb_code)
 
     # get the constants about complexes
     complexes, success, errors = filesystem.get('constants/shared/complexes')
@@ -583,45 +595,27 @@ def structure_info_handler(pdb_code):
     # get or create the histo dataset for this structure
     histo_info, success, errors = histo.structureInfo(pdb_code).get()
 
-    rcsb = pdb.RCSB()
-
-    # get the rcscb held data, the rscb json data and the pdb data
-    pdb_info = rcsb.get_info(pdb_code)
-
-    pdb_file = rcsb.fetch(pdb_code)
-
-    assembly_count = pdb_info['rcsb_entry_info']['assembly_count']
-
-    # load the structure into BioPython
-    structure = rcsb.load_structure(pdb_code)
-
     # try to resolve the DOI in the rcsb data
-    try:
-        doi_url = rcsb.resolve_doi(pdb_info["rcsb_primary_citation"]["pdbx_database_id_doi"])
-    except:
+#    try:
+#        doi_url = rcsb.resolve_doi(pdb_info["rcsb_primary_citation"]["pdbx_database_id_doi"])
+#    except:
         # TODO handle this better
-        doi_url = None
+#        doi_url = None
     
-
-    # generate some basic information about the structure 
-    # TODO refactor this
-    basic_information = rcsb.generate_basic_information(structure, assembly_count)
-
 
     # build variables for the UI
     variables = {
         'pdb_code':pdb_code, 
-        'doi_url':doi_url,
+#        'doi_url':doi_url,
         'histo_info':histo_info,
         'unmatched':unmatched_structure
     }
     if 'api' in str(request.url_rule):
         return variables
     else:
-        variables['pdb_info'] = pdb_info
         variables['pdb_file'] = pdb_file
+        variables['histo_info'] = histo_info
         variables['complexes'] = complexes
-        variables['possible_complexes_labels'] = basic_information['possible_complexes_labels']
         return template.render('structure_info', variables)
 
 

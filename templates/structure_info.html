@@ -64,7 +64,14 @@
           <div class="column-full-width">
                 <div class="inner">
                     <div class="heading-medium">{{pdb_code | upper}}</div>
-                    <h1 class="heading-large">{{pdb_info.struct.title}}</h1>
+                    <h1 class="heading-large">
+                    {% if 'match_info' in histo_info and 'peptide_positions' in histo_info and 'chain_assignments in histo_info' %}
+                        {{histo_info.match_info | allele_name}} presenting {{histo_info.peptide_positions.length_name}} peptide {{histo_info.chain_assignments.class_i_peptide.sequences[0]}} at {{histo_info.rcsb_info.resolution_combined|join(', ')}}&#8491;
+                    {% else %}
+                    {{histo_info.rcsb_info.primary_citation.title}}
+                    {% endif %}
+                    </h1>
+
                     <div class="body-copy-smallest vertical-spacing-bottom"><a href="/structures/information/{{pdb_code}}/interesting/add">Mark as interesting</a> | <a href="/structures/information/{{pdb_code}}/edgecases/add">Mark as edge case</a> | <a href="/structures/information/{{pdb_code}}/exclude/add">Mark as excluded</a></div>
                 </div>
             </div>
@@ -149,14 +156,14 @@
                     <h3 class="heading-small vertical-spacing-top-0-5 vertical-spacing-bottom-0-25">Publication details</h3>
                     <div class="body-copy-small">
                         {% if doi_url %}
-                            <a href="{{doi_url}}" target="_new"> {{pdb_info.rcsb_primary_citation.title}}</a>
+                            <a href="{{doi_url}}" target="_new"> {{histo_info.rcsb_info.primary_citation.title}}</a>
                         {% else %}
-                            {{pdb_info.rcsb_primary_citation.title}}
+                            {{histo_info.rcsb_info.primary_citation.title}}
                         {% endif %}
                     </div>
                     <div class="body-copy-smallest">
-                            {{pdb_info.rcsb_primary_citation.rcsb_authors|join(', ')}}, <span class="journal_name">{{pdb_info.rcsb_primary_citation.journal_abbrev}}</span> <span class="journal_volume">Vol. {{pdb_info.rcsb_primary_citation.journal_volume }}</span>
-                            Pages {{pdb_info.rcsb_primary_citation.page_first}}-{{pdb_info.rcsb_primary_citation.page_first}} ({{pdb_info.rcsb_primary_citation.year}})
+                            {{histo_info.rcsb_info.primary_citation.rcsb_authors|join(', ')}}, <span class="journal_name">{{histo_info.rcsb_info.primary_citation.journal_abbrev}}</span> <span class="journal_volume">Vol. {{histo_info.rcsb_info.primary_citation.journal_volume }}</span>
+                            Pages {{histo_info.rcsb_info.primary_citation.page_first}}-{{histo_info.rcsb_info.primary_citation.page_last}} ({{histo_info.rcsb_info.primary_citation.year}})
                     </div>
                     <div class="body-copy-small vertical-spacing-top-0-5 vertical-spacing-bottom-0-25"><strong>Additional publication details:</strong></div>
                     <div>
@@ -271,17 +278,6 @@
             <div class="inner">
                 <h2 class="heading-small">Histo info</h2>
                 <textarea>{{histo_info|prettify_json}}</textarea>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <section class="vertical-spacing-top-0-5">
-        <div class="grid-container top-border">
-          <div class="column-full-width vertical-spacing-top-0-5">
-            <div class="inner">
-                <h2 class="heading-small">RCSB info</h2>
-                <textarea>{{pdb_info|prettify_json}}</textarea>
                 </div>
             </div>
         </div>

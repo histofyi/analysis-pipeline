@@ -63,19 +63,26 @@ def align_structure(mhc_class,pdb_code, complex_number, target_chain_id):
         logging.warn(baseline_res_aa)
         logging.warn(target_res_aa)
 
+        rmsd = None
+        try:
+            super_imposer = Bio.PDB.Superimposer()
+            super_imposer.set_atoms(baseline_atoms, target_atoms)
+            super_imposer.apply(target_model.get_atoms())
+            rmsd = super_imposer.rms
+        except Bio.PDB.PDBExceptions.PDBException as e:
+            rmsd = False
+            errors = str(e).replace(' ','_').lower()
 
-        super_imposer = Bio.PDB.Superimposer()
-        super_imposer.set_atoms(baseline_atoms, target_atoms)
-        super_imposer.apply(target_model.get_atoms())
-
-        aligned_filename = '{pdb_code}_{complex}.pdb'.format(pdb_code = pdb_code, complex = complex_number)
-        aligned_filepath = '../../data/structures/pdb_format/aligned/{filename}'.format(filename = aligned_filename)
+        if rmsd:
+            aligned_filename = '{pdb_code}_{complex}.pdb'.format(pdb_code = pdb_code, complex = complex_number)
+            aligned_filepath = '../../data/structures/pdb_format/aligned/{filename}'.format(filename = aligned_filename)
 
 
-        io = Bio.PDB.PDBIO()
-        io.set_structure(target) 
-        io.save(aligned_filepath)
+            io = Bio.PDB.PDBIO()
+            io.set_structure(target) 
+            io.save(aligned_filepath)
+            errors = None
 
-        return super_imposer.rms
+        return rmsd, errors
     else:
-        return False
+        return False, 'unable_to_load_target'

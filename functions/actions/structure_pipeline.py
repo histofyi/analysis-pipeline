@@ -127,7 +127,7 @@ def automatic_assignment(pdb_code):
         # load the structure into BioPDB
         structure = rcsb.load_structure(pdb_code)
     except:
-        step_errors.append({'error':'unable_to_load_structure'})
+        step_errors.append({'error':'unable_to_load_structure', 'pdb_code':pdb_code})
 
     if len(step_errors) == 0:
         # predict some initial chain assignments
@@ -138,7 +138,7 @@ def automatic_assignment(pdb_code):
             alike_chains = structure_stats['alike_chains']
             histo_info, success, errors = structureInfo(pdb_code).put('alike_chains', alike_chains)
         else:
-            step_errors.append({'error':'no_alike_chains'})
+            step_errors.append({'error':'no_alike_chains', 'pdb_code':pdb_code})
 
         if structure_stats and 'best_match' in structure_stats:
             best_match = structure_stats['best_match']
@@ -162,17 +162,17 @@ def automatic_assignment(pdb_code):
                 data, success, errors = structureSet('probable_' + best_match['best_match']).add(pdb_code)
             else:
                 data, success, errors = structureSet('unmatched').add(pdb_code)
-                step_errors.append({'error':'not_matched'})
+                step_errors.append({'error':'not_matched', 'pdb_code':pdb_code})
         else:
             data, success, errors = structureSet('error').add(pdb_code)
-            step_errors.append({'error':'not_matched'})
+            step_errors.append({'error':'not_matched', 'pdb_code':pdb_code})
     
     if len(step_errors) == 0:
         data = {
             'histo_info': histo_info
         }
         step_errors = None
-        success = Trus
+        success = True
     else:
         data = None
         success = False
@@ -189,7 +189,7 @@ def split_structure(pdb_code):
         # load the structure into BioPDB
         current_assembly = rcsb.load_structure(pdb_code)
     except:
-        step_errors.append({'error':'unable_to_load_structure'})
+        step_errors.append({'error':'unable_to_load_structure', 'pdb_code':pdb_code})
 
     if len(step_errors) == 0:
         split_information = split_assemblies(histo_info, current_assembly, pdb_code)
@@ -197,9 +197,9 @@ def split_structure(pdb_code):
             if len(split_information) > 0:
                 histo_info, success, errors = structureInfo(pdb_code).put('split_info', split_information)
             else:
-                step_errors.append({'error':'unable_to_split_structure'})
+                step_errors.append({'error':'unable_to_split_structure', 'pdb_code':pdb_code})
         else:
-            step_errors.append({'error':'unable_to_split_structure'})
+            step_errors.append({'error':'unable_to_split_structure', 'pdb_code':pdb_code})
     if len(step_errors) == 0:
         data = {
             'histo_info': histo_info
@@ -218,33 +218,45 @@ def align_structures(pdb_code):
         mhc_alpha_chains = []
         aligned_assignment = ''
         for chain in histo_info['chain_assignments']:
-            if 'class_i_alpha' in histo_info['chain_assignments'][chain]['label']:
-                mhc_alpha_chains = histo_info['chain_assignments'][chain]['chains']
-                aligned_assignment = 'class_i_alpha'
-        i = 1
-        for complex in histo_info['split_info']['complexes']:
-            for chain in mhc_alpha_chains:
-                current_alignment = None
-                if chain in complex['chains']:
-                    complex_number = 'complex_' + str(i)
-                    current_alignment = {
-                        'aligned_chain': chain,
-                        'chain_assignment': aligned_assignment,
-                        'filename': complex['filename']
-                    }
-                    if current_alignment:
-                        align_information = align_structure('class_i', pdb_code, str(i), chain)
-                        if align_information:
-                            current_alignment['rms'] = align_information
+            logging.warn(pdb_code)
+            logging.warn(chain)
+            logging.warn(histo_info['chain_assignments'][chain])
+            if chain != 'unassigned':
+                if 'label' in histo_info['chain_assignments'][chain]:
+                    if 'class_i_alpha' in histo_info['chain_assignments'][chain]['label']:
+                        mhc_alpha_chains = histo_info['chain_assignments'][chain]['chains']
+                        aligned_assignment = 'class_i_alpha'
+                else:
+                    aligned_assignment = 'unassigned'    
+            else:
+                aligned_assignment = 'unassigned'
+        if aligned_assignment == 'class_i_alpha':
+            i = 1
+            for complex in histo_info['split_info']['complexes']:
+                for chain in mhc_alpha_chains:
+                    current_alignment = None
+                    if chain in complex['chains']:
+                        complex_number = 'complex_' + str(i)
+                        current_alignment = {
+                            'aligned_chain': chain,
+                            'chain_assignment': aligned_assignment,
+                            'filename': complex['filename']
+                        }
+                        if current_alignment:
+                            align_information, errors = align_structure('class_i', pdb_code, str(i), chain)
+                            if align_information:
+                                current_alignment['rms'] = align_information
+                            else:
+                                step_errors.append({'error':errors, 'pdb_code':pdb_code})
                         else:
-                            step_errors.append(['unable_to_load'])
-                    else:
-                        step_errors.append({'error':'unable_to_align'})
-                    align_info[complex_number] = current_alignment
-            i += 1
-        histo_info, success, errors = structureInfo(pdb_code).put('align_info', align_info)  
+                            step_errors.append({'error':'unable_to_align', 'pdb_code':pdb_code})
+                        align_info[complex_number] = current_alignment
+                i += 1
+            histo_info, success, errors = structureInfo(pdb_code).put('align_info', align_info)  
+        else:
+            step_errors.append({'error':'unassigned_chains', 'pdb_code':pdb_code})
     else:
-        step_errors.append({'error':'structure_not_split'})
+        step_errors.append({'error':'structure_not_split', 'pdb_code':pdb_code})
     if len(step_errors) == 0:
         data = {
             'histo_info': histo_info
@@ -327,9 +339,9 @@ def match_structure(pdb_code):
             data, success, errors = structureSet('alleles/' + species + '/'+ match_info['locus'] + '/' + match_info['allele'].replace(':','_').replace('*','')).add(pdb_code)
         else:
             data, success, errors = structureSet('alleles/nomatch').add(pdb_code)
-            step_errors.append({'error':'no_match_possible'})
+            step_errors.append({'error':'no_match_possible', 'pdb_code':pdb_code})
     else:
-        step_errors.append({'error':'structure_not_assigned_as_class_i'})
+        step_errors.append({'error':'structure_not_assigned_as_class_i', 'pdb_code':pdb_code})
     if len(step_errors) == 0:
         data = {
             'histo_info': histo_info
@@ -344,62 +356,68 @@ def peptide_positions(pdb_code):
     mhc_class = 'class_i'
     step_errors = []
     histo_info, success, errors = structureInfo(pdb_code).get()
-    current_assembly = RCSB().load_structure(pdb_code)
-    extension = []
-    if histo_info['neighbour_info']:
-        for chain in current_assembly.get_chains():
-            if chain.id == histo_info['chain_assignments']['class_i_peptide']['chains'][0]:
-                sequence_array = [residue.resname for residue in chain]
-                clean_array = [residue for residue in sequence_array if residue not in hetatms]
-                sequence_array = clean_array
-                peptide_length = len(sequence_array)
-                if histo_info['neighbour_info']['extended_peptide']:
-                    extension_positions = histo_info['neighbour_info']['extension_positions']
-                    extension_positions.sort()
-                    i = 0
-                    for position in extension_positions:
-                        extension.append(sequence_array[position - 1])                        
-                        i += 1
-                    peptide_length -= i
-                if peptide_length >= 8:
-                    peptide_lengths, success, errors = filesystem.get('constants/shared/peptide_lengths')
-                    peptide_sequence = histo_info['chain_assignments']['class_i_peptide']['sequences'][0]
-                    if len(sequence_array) < 20:
-                        for peptide_type in peptide_lengths:
-                            if peptide_lengths[peptide_type]['length'] == len(sequence_array):
-                                length_name = peptide_type
-                                data, success, errors = structureSet('peptides/' + mhc_class + '/lengths/' + length_name).add(pdb_code)
-                    data, success, errors = structureSet('peptides/' + mhc_class + '/sequences/' + peptide_sequence).add(pdb_code)
-                    peptide_positions = {
-                        'p1':sequence_array[0],
-                        'p2':sequence_array[1],                        
-                        'p3':sequence_array[2],
-                        'pn-2':sequence_array[peptide_length - 3],
-                        'pn-1':sequence_array[peptide_length - 2],
-                        'pn':sequence_array[peptide_length - 1],
-                        'bulge': sequence_array[3:peptide_length - 3],
-                        'bulge_length': peptide_length - 6,
-                        'extension': extension,
-                        'length_name': length_name
-                    }
-                else:
-                    peptide_positions = None
-        if peptide_positions:
-            
-            data, success, errors = structureSet('peptides/class_i/positions/p1/'+ peptide_positions['p1'].lower()).add(pdb_code)
-            data, success, errors = structureSet('peptides/class_i/positions/p2/'+ peptide_positions['p2'].lower()).add(pdb_code)
-            data, success, errors = structureSet('peptides/class_i/positions/p3/'+ peptide_positions['p3'].lower()).add(pdb_code)
-            data, success, errors = structureSet('peptides/class_i/positions/pn-2/'+ peptide_positions['pn-2'].lower()).add(pdb_code)
-            data, success, errors = structureSet('peptides/class_i/positions/pn-1/'+ peptide_positions['pn-1'].lower()).add(pdb_code)
-            data, success, errors = structureSet('peptides/class_i/positions/pn/'+ peptide_positions['pn'].lower()).add(pdb_code)
-            data, success, errors = structureSet('peptides/class_i/bulges/length_'+ str(peptide_positions['bulge_length'])).add(pdb_code)
-            if len(peptide_positions['extension']) > 0:
-                data, success, errors = structureSet('peptides/class_i/extensions/length_'+ str(len(peptide_positions['extension']))).add(pdb_code)
+    current_assembly = None
+    try:
+        current_assembly = RCSB().load_structure(pdb_code +'_1', directory='structures/pdb_format/single_assemblies')
+    except:
+        step_errors.append({'error':'file_not_found', 'pdb_code':pdb_code})
 
-            histo_info, success, errors = structureInfo(pdb_code).put('peptide_positions', peptide_positions)
-            
-    else:
-        step_errors.append({'error':'no_neighbour_info'})
+    if current_assembly:
+        extension = []
+        if histo_info['neighbour_info']:
+            for chain in current_assembly.get_chains():
+                if chain.id == histo_info['chain_assignments']['class_i_peptide']['chains'][0]:
+                    sequence_array = [residue.resname for residue in chain]
+                    clean_array = [residue for residue in sequence_array if residue not in hetatms]
+                    sequence_array = clean_array
+                    peptide_length = len(sequence_array)
+                    if histo_info['neighbour_info']['extended_peptide']:
+                        extension_positions = histo_info['neighbour_info']['extension_positions']
+                        extension_positions.sort()
+                        i = 0
+                        for position in extension_positions:
+                            extension.append(sequence_array[position - 1])                        
+                            i += 1
+                        peptide_length -= i
+                    if peptide_length >= 8:
+                        peptide_lengths, success, errors = filesystem.get('constants/shared/peptide_lengths')
+                        peptide_sequence = histo_info['chain_assignments']['class_i_peptide']['sequences'][0]
+                        if len(sequence_array) < 20:
+                            for peptide_type in peptide_lengths:
+                                if peptide_lengths[peptide_type]['length'] == len(sequence_array):
+                                    length_name = peptide_type
+                                    data, success, errors = structureSet('peptides/' + mhc_class + '/lengths/' + length_name).add(pdb_code)
+                        data, success, errors = structureSet('peptides/' + mhc_class + '/sequences/' + peptide_sequence).add(pdb_code)
+                        peptide_positions = {
+                            'p1':sequence_array[0],
+                            'p2':sequence_array[1],                        
+                            'p3':sequence_array[2],
+                            'pn-2':sequence_array[peptide_length - 3],
+                            'pn-1':sequence_array[peptide_length - 2],
+                            'pn':sequence_array[peptide_length - 1],
+                            'bulge': sequence_array[3:peptide_length - 3],
+                            'bulge_length': peptide_length - 6,
+                            'extension': extension,
+                            'length_name': length_name
+                        }
+                    else:
+                        peptide_positions = None
+            if peptide_positions:
+                
+                data, success, errors = structureSet('peptides/class_i/positions/p1/'+ peptide_positions['p1'].lower()).add(pdb_code)
+                data, success, errors = structureSet('peptides/class_i/positions/p2/'+ peptide_positions['p2'].lower()).add(pdb_code)
+                data, success, errors = structureSet('peptides/class_i/positions/p3/'+ peptide_positions['p3'].lower()).add(pdb_code)
+                data, success, errors = structureSet('peptides/class_i/positions/pn-2/'+ peptide_positions['pn-2'].lower()).add(pdb_code)
+                data, success, errors = structureSet('peptides/class_i/positions/pn-1/'+ peptide_positions['pn-1'].lower()).add(pdb_code)
+                data, success, errors = structureSet('peptides/class_i/positions/pn/'+ peptide_positions['pn'].lower()).add(pdb_code)
+                data, success, errors = structureSet('peptides/class_i/bulges/length_'+ str(peptide_positions['bulge_length'])).add(pdb_code)
+                if len(peptide_positions['extension']) > 0:
+                    data, success, errors = structureSet('peptides/class_i/extensions/length_'+ str(len(peptide_positions['extension']))).add(pdb_code)
+
+                histo_info, success, errors = structureInfo(pdb_code).put('peptide_positions', peptide_positions)
+                
+        else:
+            step_errors.append({'error':'no_neighbour_info', 'pdb_code':pdb_code})
     if len(step_errors) == 0:
         data = {
             'histo_info': histo_info
@@ -428,140 +446,147 @@ def peptide_neighbours(pdb_code):
     step_errors = []
     histo_info, success, errors = structureInfo(pdb_code).get()
     is_class_i = check_mhc_class(histo_info, 'class_i')
-    current_assembly = RCSB().load_structure(pdb_code +'_1', directory='structures/pdb_format/single_assemblies')
-    all_atoms = []
 
-    peptide_set = {}
-    peptide_length = 0
+    current_assembly = None
+    try:
+        current_assembly = RCSB().load_structure(pdb_code +'_1', directory='structures/pdb_format/single_assemblies')
+    except:
+        step_errors.append({'error':'file_not_found', 'pdb_code':pdb_code})
 
-    if is_class_i:
-        class_i_alpha = histo_info['chain_assignments']['class_i_alpha']['chains'][0]
-        class_i_peptide = histo_info['chain_assignments']['class_i_peptide']['chains'][0]
-        peptide_length = histo_info['chain_assignments']['class_i_peptide']['lengths'][0]
-        for chain in current_assembly.get_chains():
-            if chain.id == class_i_peptide:
-                for residue in chain:
-                    if residue.id[0] == ' ':
-                        residue_id = offset_id(histo_info, 'class_i_peptide', residue.id[1])
-                        peptide_set[residue_id] = {'residue':residue.resname,'position':residue_id}
+    if current_assembly:
+        all_atoms = []
 
-        chains_to_test = [histo_info['chain_assignments'][chain]['chains'][0] for chain in histo_info['chain_assignments'] if chain in ['class_i_alpha','class_i_peptide']]                      
-        
-        for chain in current_assembly.get_chains():
-            if chain.get_id() in chains_to_test:
-                for residue in chain:
-                    if residue.id[0] == ' ':
-                        for atom in residue:
-                            all_atoms.append(atom)
+        peptide_set = {}
+        peptide_length = 0
 
-        neighbor = Bio.PDB.NeighborSearch(all_atoms)
-        neighbours = neighbor.search_all(5, level='R')
+        if is_class_i:
+            class_i_alpha = histo_info['chain_assignments']['class_i_alpha']['chains'][0]
+            class_i_peptide = histo_info['chain_assignments']['class_i_peptide']['chains'][0]
+            peptide_length = histo_info['chain_assignments']['class_i_peptide']['lengths'][0]
+            for chain in current_assembly.get_chains():
+                if chain.id == class_i_peptide:
+                    for residue in chain:
+                        if residue.id[0] == ' ':
+                            residue_id = offset_id(histo_info, 'class_i_peptide', residue.id[1])
+                            peptide_set[residue_id] = {'residue':residue.resname,'position':residue_id}
 
-        contacts = {
-            class_i_alpha:{},
-            class_i_peptide:{}
-        }
-
-        for residue_pair in neighbours:
-            residue_1 = residue_pair[0]
-            residue_2 = residue_pair[1]
-            if residue_1.get_parent().id != residue_2.get_parent().id:
-                chain_pair = [residue_1.get_parent().id, residue_2.get_parent().id]
-                if class_i_peptide in chain_pair and class_i_alpha in chain_pair:
-                    if residue_1.get_parent().id == class_i_alpha:
-                        class_i_details = {'residue':residue_1.resname, 'position':residue_1.get_id()[1]}
-                        peptide_details = {'residue':residue_2.resname, 'position':residue_2.get_id()[1]}
-                    else:
-                        peptide_details = {'residue':residue_1.resname, 'position':residue_1.get_id()[1]}
-                        class_i_details = {'residue':residue_2.resname, 'position':residue_2.get_id()[1]}
-
-
-                    class_i_residue_id = offset_id(histo_info, 'class_i_alpha', class_i_details['position'])
-                    peptide_residue_id = offset_id(histo_info, 'class_i_peptide', peptide_details['position'])
-
-                    class_i_details['position'] = class_i_residue_id
-                    peptide_details['position'] = peptide_residue_id
-
-
-                    if class_i_residue_id not in contacts[class_i_alpha]:
-                        contacts[class_i_alpha][class_i_residue_id] = {'position':class_i_residue_id, 'residue':class_i_details['residue'], 'neighbours':[] }
-                    contacts[class_i_alpha][class_i_residue_id]['neighbours'].append(peptide_details)
-
-                    if peptide_residue_id not in contacts[class_i_peptide]:
-                        contacts[class_i_peptide][peptide_residue_id] = {'position':peptide_residue_id, 'residue':peptide_details['residue'], 'neighbours':[] }
-                    contacts[class_i_peptide][peptide_residue_id]['neighbours'].append(class_i_details)
-
-        sorted_peptide = dict(sorted(contacts[class_i_peptide].items()))
-        
-
-
-        i = 1
-        extended_peptide = False
-        exposed_bulge = False
-        extension_positions = []
-        extension_length = 0
-        for residue in peptide_set:
-            if residue not in sorted_peptide:
-                sorted_peptide[residue] = {'position':residue, 'residue': peptide_set[residue]['residue'], 'neighbours': []}
-                extension_positions.append(residue)
-        sorted_peptide = dict(sorted(sorted_peptide.items()))
-
-
-        last_position = False
-        for position in sorted_peptide:
-            if last_position:
-                if position not in extension_positions:
-                    extension_positions.append(position)
-                    extended_peptide = True
-
-            abd_contacts = [neighbour['position'] for neighbour in sorted_peptide[position]['neighbours']]
-            if 116 in abd_contacts and 143 in abd_contacts:
-                logging.warn('116/143')
-                logging.warn('LAST POSITION')
-                logging.warn(sorted_peptide[position])
-                last_position = True
+            chains_to_test = [histo_info['chain_assignments'][chain]['chains'][0] for chain in histo_info['chain_assignments'] if chain in ['class_i_alpha','class_i_peptide']]                      
             
-        sorted_peptide = dict(sorted(sorted_peptide.items()))
-        sorted_abd = dict(sorted(contacts[class_i_alpha].items()))
+            for chain in current_assembly.get_chains():
+                if chain.get_id() in chains_to_test:
+                    for residue in chain:
+                        if residue.id[0] == ' ':
+                            for atom in residue:
+                                all_atoms.append(atom)
 
-        for position in extension_positions:
-            if position == peptide_length and peptide_length > 8:
-                extended_peptide = True
-        if not extended_peptide and len(extension_positions) > 0 and peptide_length > 8:
-            exposed_bulge = True
+            neighbor = Bio.PDB.NeighborSearch(all_atoms)
+            neighbours = neighbor.search_all(5, level='R')
 
-        if len(extension_positions) == peptide_length:
-            logging.warn(extension_positions)
-            logging.warn('MISMATCHED COMPLEX')
-            data, success, errors = structureSet('possible_mismatched_chains').add(pdb_code)
-
-
-        else:
-            if extended_peptide and len(peptide_set) > 8:
-                data, success, errors = structureSet('possible_extended_peptide').add(pdb_code)
-            if exposed_bulge and len(peptide_set) > 8:
-                data, success, errors = structureSet('possible_exposed_bulge').add(pdb_code)
-
-            neighbour_info = {
-                'class_i_peptide': sorted_peptide,
-                'class_i_alpha': sorted_abd,
-                'extended_peptide': extended_peptide,
-                'exposed_bulge': exposed_bulge
+            contacts = {
+                class_i_alpha:{},
+                class_i_peptide:{}
             }
 
-            if extended_peptide:
-                neighbour_info['extension_positions'] = extension_positions
-            if exposed_bulge:
-                neighbour_info['exposed_bulge_positions'] = extension_positions
+            for residue_pair in neighbours:
+                residue_1 = residue_pair[0]
+                residue_2 = residue_pair[1]
+                if residue_1.get_parent().id != residue_2.get_parent().id:
+                    chain_pair = [residue_1.get_parent().id, residue_2.get_parent().id]
+                    if class_i_peptide in chain_pair and class_i_alpha in chain_pair:
+                        if residue_1.get_parent().id == class_i_alpha:
+                            class_i_details = {'residue':residue_1.resname, 'position':residue_1.get_id()[1]}
+                            peptide_details = {'residue':residue_2.resname, 'position':residue_2.get_id()[1]}
+                        else:
+                            peptide_details = {'residue':residue_1.resname, 'position':residue_1.get_id()[1]}
+                            class_i_details = {'residue':residue_2.resname, 'position':residue_2.get_id()[1]}
 
-            if extension_positions or exposed_bulge:
-                logging.warn(neighbour_info)
 
-            histo_info, success, errors = structureInfo(pdb_code).put('neighbour_info', neighbour_info)
-        
-        logging.warn(sorted_peptide)
-    else:
-        step_errors.append({'error':'structure_not_assigned_as_class_i'})
+                        class_i_residue_id = offset_id(histo_info, 'class_i_alpha', class_i_details['position'])
+                        peptide_residue_id = offset_id(histo_info, 'class_i_peptide', peptide_details['position'])
+
+                        class_i_details['position'] = class_i_residue_id
+                        peptide_details['position'] = peptide_residue_id
+
+
+                        if class_i_residue_id not in contacts[class_i_alpha]:
+                            contacts[class_i_alpha][class_i_residue_id] = {'position':class_i_residue_id, 'residue':class_i_details['residue'], 'neighbours':[] }
+                        contacts[class_i_alpha][class_i_residue_id]['neighbours'].append(peptide_details)
+
+                        if peptide_residue_id not in contacts[class_i_peptide]:
+                            contacts[class_i_peptide][peptide_residue_id] = {'position':peptide_residue_id, 'residue':peptide_details['residue'], 'neighbours':[] }
+                        contacts[class_i_peptide][peptide_residue_id]['neighbours'].append(class_i_details)
+
+            sorted_peptide = dict(sorted(contacts[class_i_peptide].items()))
+            
+
+
+            i = 1
+            extended_peptide = False
+            exposed_bulge = False
+            extension_positions = []
+            extension_length = 0
+            for residue in peptide_set:
+                if residue not in sorted_peptide:
+                    sorted_peptide[residue] = {'position':residue, 'residue': peptide_set[residue]['residue'], 'neighbours': []}
+                    extension_positions.append(residue)
+            sorted_peptide = dict(sorted(sorted_peptide.items()))
+
+
+            last_position = False
+            for position in sorted_peptide:
+                if last_position:
+                    if position not in extension_positions:
+                        extension_positions.append(position)
+                        extended_peptide = True
+
+                abd_contacts = [neighbour['position'] for neighbour in sorted_peptide[position]['neighbours']]
+                if 116 in abd_contacts and 143 in abd_contacts:
+                    logging.warn('116/143')
+                    logging.warn('LAST POSITION')
+                    logging.warn(sorted_peptide[position])
+                    last_position = True
+                
+            sorted_peptide = dict(sorted(sorted_peptide.items()))
+            sorted_abd = dict(sorted(contacts[class_i_alpha].items()))
+
+            for position in extension_positions:
+                if position == peptide_length and peptide_length > 8:
+                    extended_peptide = True
+            if not extended_peptide and len(extension_positions) > 0 and peptide_length > 8:
+                exposed_bulge = True
+
+            if len(extension_positions) == peptide_length:
+                logging.warn(extension_positions)
+                logging.warn('MISMATCHED COMPLEX')
+                data, success, errors = structureSet('possible_mismatched_chains').add(pdb_code)
+
+
+            else:
+                if extended_peptide and len(peptide_set) > 8:
+                    data, success, errors = structureSet('possible_extended_peptide').add(pdb_code)
+                if exposed_bulge and len(peptide_set) > 8:
+                    data, success, errors = structureSet('possible_exposed_bulge').add(pdb_code)
+
+                neighbour_info = {
+                    'class_i_peptide': sorted_peptide,
+                    'class_i_alpha': sorted_abd,
+                    'extended_peptide': extended_peptide,
+                    'exposed_bulge': exposed_bulge
+                }
+
+                if extended_peptide:
+                    neighbour_info['extension_positions'] = extension_positions
+                if exposed_bulge:
+                    neighbour_info['exposed_bulge_positions'] = extension_positions
+
+                if extension_positions or exposed_bulge:
+                    logging.warn(neighbour_info)
+
+                histo_info, success, errors = structureInfo(pdb_code).put('neighbour_info', neighbour_info)
+            
+            logging.warn(sorted_peptide)
+        else:
+            step_errors.append({'error':'structure_not_assigned_as_class_i', 'pdb_code':pdb_code})
     if len(step_errors) == 0:
         data = {
             'histo_info': histo_info
@@ -579,16 +604,19 @@ def extract_peptides(pdb_code):
         i = 0
         for complex in histo_info['align_info']:
             filename = histo_info['align_info'][complex]['filename']
-            current_complex = RCSB().load_structure(filename.replace('.pdb',''), directory = 'structures/pdb_format/aligned')
-            current_complex_peptide = histo_info['chain_assignments']['class_i_peptide']['chains'][i]
-            extract_info = extract_peptide(current_complex_peptide, filename, current_complex)
+            try:
+                current_complex = RCSB().load_structure(filename.replace('.pdb',''), directory = 'structures/pdb_format/aligned')
+                current_complex_peptide = histo_info['chain_assignments']['class_i_peptide']['chains'][i]
+                extract_info = extract_peptide(current_complex_peptide, filename, current_complex)
+            except:
+                step_errors.append({'error':'file_not_found', 'pdb_code':pdb_code})
             i += 1
         data = {
             'histo_info': histo_info
         }
         return data, success, errors
     else:
-        step_errors.append({'error':'no_align_info'})
+        step_errors.append({'error':'no_align_info', 'pdb_code':pdb_code})
     if len(step_errors) == 0:
         data = {
             'histo_info': histo_info
@@ -614,7 +642,7 @@ def measure_peptide_angles(pdb_code):
                 peptide_angle_info = generate_peptide_angles(current_complex)
                 angle_info[i] = {'peptide': i, 'angles': peptide_angle_info}
             except(FileNotFoundError):
-                step_errors.append({'error':'file_not_found', 'filename':filename})
+                step_errors.append({'error':'file_not_found', 'filename':filename, 'pdb_code':pdb_code})
             i += 1
         if len(angle_info) > 0:
             histo_info, success, errors = structureInfo(pdb_code).put('peptide_angle_info', angle_info)
@@ -622,7 +650,7 @@ def measure_peptide_angles(pdb_code):
             'histo_info': histo_info
         }
     else:
-        step_errors.append({'error':'no_align_info'})
+        step_errors.append({'error':'no_align_info', 'pdb_code':pdb_code})
     if len(step_errors) == 0:
         data = {
             'histo_info': histo_info

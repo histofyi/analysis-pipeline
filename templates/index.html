@@ -3,14 +3,41 @@
 {% block main %}
 
 
-<section class="proto-style-block typography vertical-spacing-top">
+<section class="vertical-spacing-top">
   <div class="grid-container">
     <div class="column-full-width">
-      <div class="inner bottom-border">
+      <div class="inner">
         <h1 class="vertical-spacing-bottom">Welcome to Pipeline</h1>
         <p>
           Pipeline is a place for generating/curating the data sets which sit behind the experiments.
         </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+ <section class="vertical-spacing-top">
+  <div class="grid-container">
+    <div class="column-full-width">
+      <div class="inner">
+        <h2>Structure quick lookup</h2>
+        <p>Enter a PDB code to be taken to the page with the information on that structure.</p>
+        <p>
+          <form action="/structures/lookup" method="POST">
+            <label for="pdb_code">PDB code</label><br />
+            <input id="pdb_code" name="pdb_code"/>
+            <div class="vertical-spacing-top-0-25"><input type="submit" value="submit" /></div>
+          </form>
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="vertical-spacing-top">
+  <div class="grid-container">
+    <div class="column-full-width">
+      <div class="inner">
         <p>Status: {{message}}</p>
       </div>
     </div>

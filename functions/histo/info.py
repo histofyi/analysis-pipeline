@@ -17,6 +17,11 @@ class structureInfo():
         pass
 
 
+    def check_exists(self):
+        exists = file.check_exists(self.build_info_path())
+        return exists
+
+
     def build_info_path(self):
         path = 'structures/histo_info/{pdb_code}'.format(pdb_code = self.pdb_code)
         return path

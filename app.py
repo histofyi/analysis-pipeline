@@ -266,6 +266,17 @@ def sets_create_action_handler():
 
 
 
+@app.post('/structures/lookup')
+def structure_lookup_handler():
+    variables = common.request_variables(['pdb_code'])
+    pdb_code = variables['pdb_code'].strip().lower()[0:4]
+    exists = histo.structureInfo(pdb_code).check_exists()
+    if exists:
+        return redirect(return_to(pdb_code))
+    else:
+        return "nope"
+
+
 
 
 

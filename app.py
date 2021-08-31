@@ -89,7 +89,18 @@ def pdb_image_folder(pdb_code):
 
 
 @app.template_filter()
-def allele_name(match_info):
+def structure_title(description):
+    title = ''
+    return title
+
+
+def return_to(pdb_code):
+    return '/structures/information/{pdb_code}'.format(pdb_code=pdb_code)
+
+
+
+
+def get_allele_display_name(match_info):
     if 'hla' in match_info['locus']:
         locus = 'HLA-'
         allele = match_info['allele'][0:7].upper()
@@ -101,9 +112,19 @@ def allele_name(match_info):
     return display_name
 
 
-def return_to(pdb_code):
-    return '/structures/information/{pdb_code}'.format(pdb_code=pdb_code)
 
+def describe_complex(histo_info):
+    if 'match_info' in histo_info and 'peptide_positions' in histo_info and 'chain_assignments' in histo_info:
+        description_block = {
+            'allele_name': get_allele_display_name(histo_info['match_info']),
+            'peptide_length': histo_info['peptide_positions']['length_name'],
+            'peptide_sequence': histo_info['chain_assignments']['class_i_peptide']['sequences'][0],
+            'features': '',
+            'resolution': histo_info['rcsb_info']['resolution_combined']
+        }
+    else:
+        description_block = None
+    return description_block
 
 
 
@@ -616,6 +637,7 @@ def structure_info_handler(pdb_code):
         variables['pdb_file'] = pdb_file
         variables['histo_info'] = histo_info
         variables['complexes'] = complexes
+        variables['description_block'] = describe_complex(histo_info)
         return template.render('structure_info', variables)
 
 

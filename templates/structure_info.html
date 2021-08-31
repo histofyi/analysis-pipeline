@@ -65,8 +65,8 @@
                 <div class="inner">
                     <div class="heading-medium">{{pdb_code | upper}}</div>
                     <h1 class="heading-large">
-                    {% if 'match_info' in histo_info and 'peptide_positions' in histo_info and 'chain_assignments in histo_info' %}
-                        {{histo_info.match_info | allele_name}} presenting {{histo_info.peptide_positions.length_name}} peptide {{histo_info.chain_assignments.class_i_peptide.sequences[0]}} at {{histo_info.rcsb_info.resolution_combined|join(', ')}}&#8491;
+                    {% if description_block %}
+                        {{description_block.allele_name}} presenting {{description_block.peptide_length}} peptide {{description_block.peptide_sequence}} at {{description_block.resolution|join(', ')}}&#8491;
                     {% else %}
                     {{histo_info.rcsb_info.primary_citation.title}}
                     {% endif %}
@@ -84,50 +84,47 @@
                 <div class="inner">
                     {% if not unmatched %}
                     <script src="https://cdnjs.cloudflare.com/ajax/libs/3Dmol/1.4.0/3Dmol-min.js"></script>
-
-                    <div style="height: 600px; width: 550px; position: relative;" id="viewer" ></div>  
-
                     {% if histo_info.align_info %}
-                        {{ histo_info.align_info }}
+                            
+                            {% set data_url = "/static/structures/pdb_format/aligned/" + pdb_code + "_1.pdb"%}
+                            
+
                     {% else %}
                         {% if histo_info.split_info %}
-                            {{ histo_info.split_info }}
+                            {% set data_url = "/static/structures/pdb_format/aligned/" + pdb_code + "_1.pdb"%}
                         {% endif %}
                     {% endif %}
 
-                    <script>
-                        var viewer = $3Dmol.createViewer($("#viewer"));
-                            $3Dmol.download("pdb:{{pdb_code|upper}}",
-                            viewer,{multimodel:false, frames:true},function(){
-                            viewer.setBackgroundColor(0xffffff);
-                            {% for chain in histo_info.chain_assignments %}
-                            {% set this_chain = histo_info.chain_assignments[chain] %}
+                    <div id="element1" style="height: 600px; width: 550px; position: relative;" class="viewer_3Dmoljs"
+                            
+                        data-href={{data_url}}
+                            
+                        data-backgroundcolor="0xffffff"
+                            
+                        {% for chain in histo_info.chain_assignments %}
+                        {% set this_chain = histo_info.chain_assignments[chain] %}
                             {% for chain in this_chain.chains %}
-                            {% if loop.index == 1 %}
-                            {% if this_chain.label == 'class_i_peptide' %}
-                            viewer.setStyle({chain:'{{chain}}'}, { stick: {colorscheme:'yellowCarbon'}});
-                            {% else %}
-                            {% if this_chain.label %}
-                                viewer.setStyle({chain:'{{chain}}'}, { cartoon: {color: '{{complexes.chains[this_chain.label].webglcolor}}'}}); //{{this_chain.label}}
-                            {% else %}
-                                viewer.setStyle({chain:'{{chain}}'}, { cartoon: {color: '0xbbbbbb'}}); //{{this_chain.label}}
-                            {% endif%}
+                                {% if loop.index == 1 %}
 
-                            
-                            {% endif %}
-                            {% else %}
-                            viewer.setStyle({chain:'{{chain}}'}, { line: { hidden: true }})
-                            {% endif %}
-                            {% endfor %}
-                            {% endfor %}
-                            
-                  	        viewer.render();
-                            });
+                                    {% if this_chain.label == "class_i_peptide" %}
+                                        data-select{{chain}}="chain:{{chain}}" data-style{{chain}}="stick:colorscheme=yellowCarbon"
+                                    {% else %}
+                                    {% if this_chain.label %}
+                                        data-select{{chain}}="chain:{{chain}}" data-style{{chain}}="cartoon:color={{complexes.chains[this_chain.label].webglcolor}}" 
+                                    {% else %}
+                                        data-select{{chain}}='chain:{{chain}}' data-style{{chain}}='cartoon:color=0xbbbbbb' 
+                                    {% endif %}
+                                    {% endif %}
 
-                    </script>
+                                {% endif %}
+
+                                {% endfor %}
+                        {% endfor %}
+                    ></div>
+                    
                     {% else %}
-                    <div class="body-copy-smallest">This structure has not yet been assigned to a complex type</div>
-                    <img class="pdb-image" src="https://cdn.rcsb.org/images/structures/{{pdb_code|pdb_image_folder}}/{{pdb_code}}/{{pdb_code}}_assembly-1.jpeg" alt="Structure of {{pdb_code}}"/>
+                        <div class="body-copy-smallest">This structure has not yet been assigned to a complex type</div>
+                        <img class="pdb-image" src="https://cdn.rcsb.org/images/structures/{{pdb_code|pdb_image_folder}}/{{pdb_code}}/{{pdb_code}}_assembly-1.jpeg" alt="Structure of {{pdb_code}}"/>
                     {% endif %}
                     <div class="body-copy-smallest"><a href="https://www.rcsb.org/structure/{{pdb_code}}" target="_new">View {{pdb_code}} entry on RCSB</a> | <a href="https://www.rcsb.org/3d-view/{{pdb_code}}/1" target="_new">Visualise {{pdb_code}} entry on RCSB</a></div>
                 </div>

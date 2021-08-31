@@ -617,17 +617,17 @@ def structure_info_handler(pdb_code):
     histo_info, success, errors = histo.structureInfo(pdb_code).get()
 
     # try to resolve the DOI in the rcsb data
-#    try:
-#        doi_url = rcsb.resolve_doi(pdb_info["rcsb_primary_citation"]["pdbx_database_id_doi"])
-#    except:
+    try:
+        doi_url = RCSB().resolve_doi(histo_info['rcsb_info']['primary_citation']['pdbx_database_id_doi'])
+    except:
         # TODO handle this better
-#        doi_url = None
+        doi_url = None
     
 
     # build variables for the UI
     variables = {
         'pdb_code':pdb_code, 
-#        'doi_url':doi_url,
+        'doi_url':doi_url,
         'histo_info':histo_info,
         'unmatched':unmatched_structure
     }
@@ -636,6 +636,7 @@ def structure_info_handler(pdb_code):
     else:
         variables['pdb_file'] = pdb_file
         variables['histo_info'] = histo_info
+        variables['doi_url'] = doi_url
         variables['complexes'] = complexes
         variables['description_block'] = describe_complex(histo_info)
         return template.render('structure_info', variables)

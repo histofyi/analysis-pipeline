@@ -15,6 +15,8 @@ from functions.actions import sequence_pipeline
 from functions.lists import structureSet
 
 from ..providers import filesystemProvider
+from ..textanalysis import levenshtein_ratio_and_distance
+
 
 hetatms = ['HOH','EDO','GOL', ' CA', ' CD', ' CU', ' MG', ' NA', ' NI', ' ZN', 'EDO', 'FMT', 'IOD', 'NAG', 'P4G', 'SO4', ' CL']
 filesystem = filesystemProvider(None)
@@ -315,29 +317,69 @@ def second_pass_sequence_match(sequence_to_test):
     return match_info
 
 
+def third_pass_sequence_match(sequence_to_test):
+    match_info = None
+    best_ratio = 0
+    for locus in sequence_sets:
+        locus_set, success, errors = get_simplified_sequence_set('class_i', locus)
+        species = locus_set['species']
+        for allele_group in  locus_set['sequences']:
+            this_sequence = locus_set['sequences'][allele_group]['alleles'][0]['sequence']
+            if len(sequence_to_test) < len(this_sequence):
+                this_sequence = this_sequence[0:len(sequence_to_test)]
+                ratio, distance = levenshtein_ratio_and_distance(this_sequence, sequence_to_test)
+            if ratio > 0.97 and ratio > best_ratio:
+                best_ratio = ratio
+                match_info = {
+                    'species': species,
+                    'allele': locus_set['sequences'][allele_group]['alleles'][0]['allele'],
+                    'allele_group': locus_set['sequences'][allele_group]['alleles'][0]['allele_group'],
+                    'locus':locus,
+                    'match_type':'fuzzy',
+                    'confidence': ratio
+                }
+    return match_info
+
 def match_structure(pdb_code):
     histo_info, success, errors = structureInfo(pdb_code).get()
     step_errors = []
     match_info = None
+    # first of all, check if it's actually been assigned as a Class I molecule, some of the steps in this are expensive so we don't want to d
     has_class_i_alpha = check_mhc_class(histo_info, 'class_i')
     if has_class_i_alpha:
+        # get the relevant sequence to test, at the moment we're just picking the first one, which may not be optimal
         sequence_to_test = histo_info['chain_assignments']['class_i_alpha']['sequences'][0]
+        # the stored sequences are all 275 long, so trim the sequence to match, at some point doing this less bluntly would be better
         if len(sequence_to_test) > 275:
             sequence_to_test = sequence_to_test[0:275]
+        # then get testing, first pass tests against the first allele in a group, i.e. A*02:01:01:01 which is often the most common
         match_info = first_pass_sequence_match(sequence_to_test)
         if not match_info:
+            # if it doesn't match against the first one, we then run through again against all alleles
+            step_errors.append({'error':'first_match_failure', 'pdb_code':pdb_code})
             match_info = second_pass_sequence_match(sequence_to_test)
+            if not match_info:
+                # if that doesn't match we go for the more expensive option which is a fuzzy match, at the moment this is done against all alleles which is quite slow
+                step_errors.append({'error':'second_match_failure', 'pdb_code':pdb_code})
+                match_info = third_pass_sequence_match(sequence_to_test)
+                if not match_info:
+                    step_errors.append({'error':'third_match_failure', 'pdb_code':pdb_code})
         if match_info:
-            histo_info, success, errors = structureInfo(pdb_code).put('match_info', match_info)
+            # if we get a match, we clear the step errors
+            step_errors = []
+            # and add the match information to the record
             if 'species' in match_info:
                 species = match_info['species']
             else:
                 species = 'other'
+            histo_info, success, errors = structureInfo(pdb_code).put('match_info', match_info)
+            # then we add the structure to the relevant sets
             data, success, errors = structureSet('alleles/' + species + '/all').add(pdb_code)
             data, success, errors = structureSet('alleles/' + species + '/'+ match_info['locus'] + '/all').add(pdb_code)
             data, success, errors = structureSet('alleles/' + species + '/'+ match_info['locus'] + '/' + match_info['allele_group'].replace('*','')).add(pdb_code)
             data, success, errors = structureSet('alleles/' + species + '/'+ match_info['locus'] + '/' + match_info['allele'].replace(':','_').replace('*','')).add(pdb_code)
         else:
+            # if we don't get a match, we add it to the nomatch set for error checking and more manual matching 
             data, success, errors = structureSet('alleles/nomatch').add(pdb_code)
             step_errors.append({'error':'no_match_possible', 'pdb_code':pdb_code})
     else:
@@ -659,5 +701,6 @@ def measure_peptide_angles(pdb_code):
         data = None
         success = False
     return data, success, step_errors
+
 
 

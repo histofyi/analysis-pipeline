@@ -234,27 +234,32 @@ def align_structures(pdb_code):
                 aligned_assignment = 'unassigned'
         if aligned_assignment == 'class_i_alpha':
             i = 1
-            for complex in histo_info['split_info']['complexes']:
-                for chain in mhc_alpha_chains:
-                    current_alignment = None
-                    if chain in complex['chains']:
-                        complex_number = 'complex_' + str(i)
-                        current_alignment = {
-                            'aligned_chain': chain,
-                            'chain_assignment': aligned_assignment,
-                            'filename': complex['filename']
-                        }
-                        if current_alignment:
-                            align_information, errors = align_structure('class_i', pdb_code, str(i), chain)
-                            if align_information:
-                                current_alignment['rms'] = align_information
+            logging.warn(pdb_code)
+            logging.warn(histo_info['split_info'])
+            if histo_info['split_info'] is not None:
+                for complex in histo_info['split_info']['complexes']:
+                    for chain in mhc_alpha_chains:
+                        current_alignment = None
+                        if chain in complex['chains']:
+                            complex_number = 'complex_' + str(i)
+                            current_alignment = {
+                                'aligned_chain': chain,
+                                'chain_assignment': aligned_assignment,
+                                'filename': complex['filename']
+                            }
+                            if current_alignment:
+                                align_information, errors = align_structure('class_i', pdb_code, str(i), chain)
+                                if align_information:
+                                    current_alignment['rms'] = align_information
+                                else:
+                                    step_errors.append({'error':errors, 'pdb_code':pdb_code})
                             else:
-                                step_errors.append({'error':errors, 'pdb_code':pdb_code})
-                        else:
-                            step_errors.append({'error':'unable_to_align', 'pdb_code':pdb_code})
-                        align_info[complex_number] = current_alignment
-                i += 1
-            histo_info, success, errors = structureInfo(pdb_code).put('align_info', align_info)  
+                                step_errors.append({'error':'unable_to_align', 'pdb_code':pdb_code})
+                            align_info[complex_number] = current_alignment
+                    i += 1
+                histo_info, success, errors = structureInfo(pdb_code).put('align_info', align_info) 
+            else:
+                step_errors.append({'error':'no_split_complexes', 'pdb_code':pdb_code}) 
         else:
             step_errors.append({'error':'unassigned_chains', 'pdb_code':pdb_code})
     else:
@@ -320,6 +325,7 @@ def second_pass_sequence_match(sequence_to_test):
 def third_pass_sequence_match(sequence_to_test):
     match_info = None
     best_ratio = 0
+    ratio = 0
     for locus in sequence_sets:
         locus_set, success, errors = get_simplified_sequence_set('class_i', locus)
         species = locus_set['species']
@@ -413,7 +419,7 @@ def peptide_positions(pdb_code):
                     clean_array = [residue for residue in sequence_array if residue not in hetatms]
                     sequence_array = clean_array
                     peptide_length = len(sequence_array)
-                    if histo_info['neighbour_info']['extended_peptide']:
+                    if 'extension_positions' in histo_info['neighbour_info']:
                         extension_positions = histo_info['neighbour_info']['extension_positions']
                         extension_positions.sort()
                         i = 0

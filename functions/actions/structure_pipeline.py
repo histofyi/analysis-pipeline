@@ -95,7 +95,8 @@ def fetch_pdb_data(pdb_code):
         rcsb_info['primary_citation'] = pdb_info['rcsb_primary_citation']
         if 'pdbx_descriptor' in pdb_info['struct']:
             rcsb_info['description'] = ['pdbx_descriptor']
-        rcsb_info['resolution_combined'] = pdb_info['rcsb_entry_info']['resolution_combined']
+        if 'resolution_combined' in pdb_info['rcsb_entry_info']:
+            rcsb_info['resolution_combined'] = pdb_info['rcsb_entry_info']['resolution_combined']
         rcsb_info['title'] = pdb_info['struct']['title']
         rcsb_info['assembly_count'] = pdb_info['rcsb_entry_info']['assembly_count']
         rcsb_info['pdb_code'] = pdb_code
@@ -114,8 +115,7 @@ def fetch_pdb_data(pdb_code):
     return data, success, errors
 
 
-# Step 2
-def automatic_assignment(pdb_code):
+def assign_chains(pdb_code, override_assembly_count=None):
     step_errors = []
     rcsb = RCSB()
 
@@ -123,7 +123,10 @@ def automatic_assignment(pdb_code):
     histo_info, success, errors = structureInfo(pdb_code).get()
 
     # pull out the assembly count
-    assembly_count = histo_info['rcsb_info']['assembly_count']
+    if override_assembly_count:
+        assembly_count = override_assembly_count
+    else:
+        assembly_count = histo_info['rcsb_info']['assembly_count']
 
     try:
         # load the structure into BioPDB
@@ -178,7 +181,15 @@ def automatic_assignment(pdb_code):
     else:
         data = None
         success = False
+    return data, success, step_errors
+ 
 
+
+# Step 2
+def automatic_assignment(pdb_code):
+    data, success, step_errors = assign_chains(pdb_code)
+    if not data:
+        data, success, step_errors = assign_chains(pdb_code, override_assembly_count=1)
     return data, success, step_errors
 
 

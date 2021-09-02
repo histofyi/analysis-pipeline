@@ -189,23 +189,28 @@ class RCSB():
                     # first check there's an example sequence in the possible chain to compare against. In future this should be an array of sequences
                     if 'example' in possible_chain:
                         if len(possible_chain['example']) > 1:
-                            ratio, distance = levenshtein_ratio_and_distance(possible_chain['example'], current_chain['sequences'][0])
+                            try:
+                                ratio, distance = levenshtein_ratio_and_distance(possible_chain['example'], current_chain['sequences'][0])
+                            except:
+                                ratio = None
+
                             logging.warn(ratio)
-                            # next see if the score is above the acceptable distance 
-                            if ratio > possible_chain['acceptable_distance']:
-                                if not possible_chain_label in chain_assignments:
-                                    # and if this is the case and that chain is not in the assignments already, then add it to them
-                                    chain_assignments[possible_chain_label] = {'chains':current_chain['chains'],'sequences':current_chain['sequences'],'lengths':current_chain['lengths']}
-                                    chain_assignments[possible_chain_label]['chunked_sequence'] = current_chain['chunked_sequence']                                
-                                    chain_assignments[possible_chain_label]['confidence'] = ratio
-                                    chain_assignments[possible_chain_label]['label'] = possible_chain_label
-                                    chain_assigned = True
-                                # if we see a good match for one of the Class I or Class II chains, we can assign that complex
-                                logging.warn(possible_chain_label)
-                                if 'class_i_' in possible_chain_label:
-                                    possible_class = 'class_i'
-                                elif 'class_ii_' in possible_chain_label:
-                                    possible_class = 'class_ii'
+                            if ratio:
+                                # next see if the score is above the acceptable distance 
+                                if ratio > possible_chain['acceptable_distance']:
+                                    if not possible_chain_label in chain_assignments:
+                                        # and if this is the case and that chain is not in the assignments already, then add it to them
+                                        chain_assignments[possible_chain_label] = {'chains':current_chain['chains'],'sequences':current_chain['sequences'],'lengths':current_chain['lengths']}
+                                        chain_assignments[possible_chain_label]['chunked_sequence'] = current_chain['chunked_sequence']                                
+                                        chain_assignments[possible_chain_label]['confidence'] = ratio
+                                        chain_assignments[possible_chain_label]['label'] = possible_chain_label
+                                        chain_assigned = True
+                                    # if we see a good match for one of the Class I or Class II chains, we can assign that complex
+                                    logging.warn(possible_chain_label)
+                                    if 'class_i_' in possible_chain_label:
+                                        possible_class = 'class_i'
+                                    elif 'class_ii_' in possible_chain_label:
+                                        possible_class = 'class_ii'
             # we can now reassign the chain marked as 'peptide' into either a Class I or Class II bound peptide        
             if 'peptide' in chain_assignments and possible_class is not None:
                 chain_assignments[possible_class +'_peptide'] = chain_assignments['peptide']

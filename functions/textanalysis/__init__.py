@@ -38,5 +38,8 @@ def levenshtein_ratio_and_distance(s, t):
                                  distance[row-1][col-1] + cost)     # Cost of substitutions
     
     # Computation of the Levenshtein Distance Ratio
-    ratio = ((len(s)+len(t)) - distance[row][col]) / (len(s)+len(t))
-    return ratio, distance[row][col]
+    try:
+        ratio = ((len(s)+len(t)) - distance[row][col]) / (len(s)+len(t))
+        return ratio, distance[row][col]
+    except:
+        return None, None

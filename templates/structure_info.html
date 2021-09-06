@@ -85,13 +85,14 @@
                     {% if not unmatched %}
                     <script src="https://cdnjs.cloudflare.com/ajax/libs/3Dmol/1.4.0/3Dmol-min.js"></script>
                     {% if histo_info.align_info %}
-                            
+                            {% if 'errors' in histo_info.align_info.complex_1 %}
+                            {% set data_url = "/static/structures/pdb_format/single_assemblies/" + pdb_code + "_1.pdb"%}
+                            {% else %}
                             {% set data_url = "/static/structures/pdb_format/aligned/" + pdb_code + "_1.pdb"%}
-                            
-
+                            {% endif %}
                     {% else %}
                         {% if histo_info.split_info %}
-                            {% set data_url = "/static/structures/pdb_format/aligned/" + pdb_code + "_1.pdb"%}
+                            {% set data_url = "/static/structures/pdb_format/single_assemblies/" + pdb_code + "_1.pdb"%}
                         {% endif %}
                     {% endif %}
 

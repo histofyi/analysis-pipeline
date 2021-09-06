@@ -46,15 +46,17 @@ pipeline_actions = {
     'peptide_positions': {'action':actions.peptide_positions},
     'peptide_neighbours': {'action':actions.peptide_neighbours},
     'peptide_angles': {'action':actions.measure_peptide_angles},
-    'extract_peptides': {'action':actions.extract_peptides}
+    'extract_peptides': {'action':actions.extract_peptides},
+    'cleft_angles': {'action': actions.measure_neighbour_angles}   
 }
+
 
 
 representation_actions = {
     'flare': {'action':actions.generate_flare_file},
     'peptide_phipsi': {'action':actions.peptide_phi_psi, 'format':'csv'},
     'peptide_sidechain': {'action':None, 'format':'csv'},
-    'abd_sidechain': {'action':None, 'format':'csv'}
+    'abd_sidechain': {'action':actions.abd_sidechain_angles, 'format':'csv'}
 }
 
 
@@ -179,7 +181,6 @@ def pipeline_set_handler(route, slug):
 @app.get('/structures/pipeline/<string:route>/<string:pdb_code>')
 def pipeline_item_handler(route, pdb_code):
     data, success, errors = pipeline_actions[route]['action'](pdb_code)
-    logging.warn(errors)
     if data:
         if 'histo_info' in data:
             return data['histo_info']
@@ -372,6 +373,48 @@ def set_representation_handler(route, set_name):
 
 
 
+
+@app.get('/statistics/abd_neighbour_positions/single/<string:pdb_code>')
+def abd_neighbours_handler(pdb_code):
+    data, success, errors = actions.abd_neighbours(pdb_code)
+    return data
+
+
+@app.get('/statistics/abd_neighbour_positions/set/<path:set_name>')
+def set_abd_neighbours_handler(set_name):
+    neighbours = {}
+    step_errors = []
+    register_shift_list = []
+    no_neighbour_list = []
+    structureset, success, errors = lists.structureSet(set_name).get()
+    for pdb_code in structureset['set']:
+        data, success, errors = actions.abd_neighbours(pdb_code)
+        if data:
+            for position in data:
+                residue = data[position]['residue'] 
+                if position not in neighbours:
+                    neighbours[position] = {'position':position, 'residues':{}}
+                if residue not in neighbours[position]['residues']:
+                    neighbours[position]['residues'][residue] = {'examples':[], 'count':0}
+                neighbours[position]['residues'][residue]['examples'].append(pdb_code)
+                neighbours[position]['residues'][residue]['count'] += 1
+        for error in errors:
+            step_errors.append(error)
+            if error['error'] == 'register_shift':
+                register_shift_list.append(pdb_code)
+            if error['error'] == 'no_neighbour_info':
+                no_neighbour_list.append(pdb_code)
+
+    if len(neighbours) > 0:
+        for neighbour in neighbours:
+            this_neighbour = neighbours[neighbour]
+            for residue in this_neighbour['residues']:
+                this_residue = this_neighbour['residues'][residue]
+                if this_residue['count'] > 20:
+                    this_residue['examples'] = []
+            
+
+    return {'neighbours':neighbours, 'errors':{'register_shift_list':register_shift_list, 'no_neighbour_list':no_neighbour_list}}
 
 
 ### REFACTOR ALL BELOW THE FOLD TO THIN CONTROLLERS AND REMOVING UNUSED CODE/HANDLERS ###

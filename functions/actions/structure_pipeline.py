@@ -5,7 +5,7 @@ import operator
 from ..histo import structureInfo
 from ..pdb import RCSB
 from ..lists import structureSet
-from ..structure import split_assemblies, align_structure, extract_peptide, generate_peptide_angles
+from ..structure import split_assemblies, align_structure, extract_peptide, generate_peptide_angles, generate_cleft_torsion_angles
 
 from .sequence_pipeline import get_simplified_sequence_set
 
@@ -19,6 +19,8 @@ from ..textanalysis import levenshtein_ratio_and_distance
 
 
 hetatms = ['HOH','EDO','GOL', ' CA', ' CD', ' CU', ' MG', ' NA', ' NI', ' ZN', 'EDO', 'FMT', 'IOD', 'NAG', 'P4G', 'SO4', ' CL']
+structurally_assigned = [5,7,9,24,25,33,34,45,59,62,63,64,65,66,67,68,69,70,72,73,74,75,76,77,78,80,81,84,95,97,99,114,116,123,124,133,139,140,142,143,144,146,147,152,155,156,157,158,159,160,163,164,167,168,171]
+
 filesystem = filesystemProvider(None)
 
 
@@ -719,5 +721,38 @@ def measure_peptide_angles(pdb_code):
         success = False
     return data, success, step_errors
 
+
+def measure_neighbour_angles(pdb_code):
+    histo_info, success, errors = structureInfo(pdb_code).get()
+    step_errors = []
+    torsion_angle_info = {}
+    if 'align_info' in histo_info:
+        i = 1
+        for complex in histo_info['align_info']:
+            filename = histo_info['align_info'][complex]['filename']
+            complex_filename = filename.split('.pdb')[0]
+            chain_id = histo_info['align_info'][complex]['aligned_chain']
+            try:
+                current_complex = RCSB().load_structure(complex_filename, directory = 'structures/pdb_format/single_assemblies')
+                complex_torsion_angle_info = generate_cleft_torsion_angles(current_complex, chain_id)
+                torsion_angle_info[i] = {'complex': i, 'angles': complex_torsion_angle_info}
+            except(FileNotFoundError):
+                step_errors.append({'error':'file_not_found', 'filename':filename, 'pdb_code':pdb_code})
+            i += 1
+        if len(torsion_angle_info) > 0:
+            histo_info, success, errors = structureInfo(pdb_code).put('cleft_angle_info', torsion_angle_info)
+        data = {
+            'histo_info': histo_info
+        }
+    else:
+        step_errors.append({'error':'no_align_info', 'pdb_code':pdb_code})
+    if len(step_errors) == 0:
+        data = {
+            'histo_info': histo_info
+        }
+    else:
+        data = None
+        success = False
+    return data, success, step_errors
 
 

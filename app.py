@@ -647,6 +647,8 @@ def update_structure_information_handler(pdb_code,information_section):
 def structure_info_handler(pdb_code):
     unmatched, success, errors = lists.structureSet('unmatched').get()
     unmatched_structure = False
+    if '_' in pdb_code:
+        pdb_code = pdb_code.split('_')[0]
     if pdb_code in unmatched['set']:
         unmatched_structure = True
 

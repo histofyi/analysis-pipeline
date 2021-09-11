@@ -1,9 +1,10 @@
-from flask import Blueprint, current_app, request, redirect, make_response, Response
+from flask import Blueprint, current_app, request, redirect
+
+from functions.template import templated, render
 
 import logging
 import json
 
-import functions.template as template
 import functions.common as common
 
 import functions.lists as lists
@@ -22,6 +23,13 @@ structure_views = Blueprint('structure_views', __name__)
 ### REFACTOR ALL BELOW THE FOLD TO THIN CONTROLLERS AND REMOVING UNUSED CODE/HANDLERS ###
 
 
+# static view
+@structure_views.get('')
+@templated('structures/index')
+def structures_handler():
+    return {}
+
+
 @structure_views.post('/lookup')
 def structure_lookup_handler():
     variables = common.request_variables(['pdb_code'])
@@ -30,12 +38,12 @@ def structure_lookup_handler():
     if exists:
         return redirect(common.return_to(pdb_code))
     else:
-        return "nope"
-
+        return redirect('/')
 
 
 #@structure_views.get('/api/v1/structures/information/<string:pdb_code>')
 @structure_views.get('/information/<string:pdb_code>')
+@templated('structures/information')
 def structure_info_handler(pdb_code):
     unmatched, success, errors = lists.structureSet('unmatched').get()
     unmatched_structure = False
@@ -68,12 +76,9 @@ def structure_info_handler(pdb_code):
         'histo_info':histo_info,
         'unmatched':unmatched_structure
     }
-    if 'api' in str(request.url_rule):
-        return variables
-    else:
-        variables['pdb_file'] = pdb_file
-        variables['histo_info'] = histo_info
-        variables['doi_url'] = doi_url
-        variables['complexes'] = complexes
-        variables['description_block'] = common.describe_complex(histo_info)
-        return template.render('structure_info', variables)
+    variables['pdb_file'] = pdb_file
+    variables['histo_info'] = histo_info
+    variables['doi_url'] = doi_url
+    variables['complexes'] = complexes
+    variables['description_block'] = common.describe_complex(histo_info)
+    return variables

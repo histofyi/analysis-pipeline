@@ -1,10 +1,10 @@
-<li><span class="is-site-name" href="/">Pipeline</a></span>
+<li><span class="is-site-name">Pipeline</span>
 {% if not nav %}
     <li><a class="is-active" href="/">Home</a></li>
 {% else %}
     <li><a href="/">Home</a></li>
 {% endif %}
-{% set navitems = ['structures','sets','peptides','weeknotes'] %}
+{% set navitems = ['structures','sets','peptides','alleles'] %}
 {% for navitem in navitems %}
     {% if nav == navitem %}
         <li><a class="is-active" href="/{{navitem}}">{{navitem|title}}</a></li>

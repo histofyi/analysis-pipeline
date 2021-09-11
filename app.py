@@ -8,18 +8,21 @@ import functions.providers as providers
 import functions.template as template
 import functions.common as common
 
+from functions.template import templated
+
 
 from pipeline import pipeline_views
 from sets import set_views
 from structures import structure_views
-
+from alleles import allele_views
 #from representations import represention_views
 
 
 config = {
     "DEBUG": True,          # some Flask specific configs
     "CACHE_TYPE": "SimpleCache",  # Flask-Caching related configs
-    "CACHE_DEFAULT_TIMEOUT": 300
+    "CACHE_DEFAULT_TIMEOUT": 300,
+    "TEMPLATE_DIRS": "templates"
 }
 
 
@@ -30,6 +33,7 @@ app.config.from_mapping(config)
 app.register_blueprint(pipeline_views, url_prefix='/pipeline')
 app.register_blueprint(set_views, url_prefix='/sets')
 app.register_blueprint(structure_views, url_prefix='/structures')
+app.register_blueprint(allele_views, url_prefix='/alleles')
 #app.register_blueprint(represention_views, url_prefix='/representations')
 #app.register_blueprint(statistics_views, url_prefix='/statistics')
 
@@ -67,26 +71,22 @@ def structure_title(description):
     return title
 
 
-
+### static (mostly) basic views
 
 
 # mostly static view
 @app.get('/')
+@templated('index')
 def home_handler():
     scratch_json, success, errors = filesystem.get('scratch/hello')
-    return template.render('index', scratch_json)
+    return scratch_json
 
 
-# static view
-@app.get('/structures')
-def structures_handler():
-    return template.render('structures', {})
-
-
-
+# design system display, cribbed from Catalyst styles developed by @futurefabric (Guy Moorhouse)
 @app.get('/design-system')
+@templated('design-system')
 def design_system_hander():
-    return template.render('design_system', {})
+    return {}
 
 
 

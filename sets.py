@@ -1,10 +1,12 @@
 from flask import Blueprint, current_app, request, redirect, make_response, Response
-from flask_caching import Cache
+from cache import cache
+
 
 import logging
 import json
 
-import functions.template as template
+from functions.template import templated
+
 import functions.common as common
 
 import functions.lists as lists
@@ -13,11 +15,10 @@ import functions.histo as histo
 
 set_views = Blueprint('set_views', __name__)
 
-
 ### Sets views ###
 
 
-#@cache.memoize(timeout=300) - TODO FIX THIS
+@cache.memoize(timeout=300)
 def get_hydrated_structure_set(slug):
     structureset, success, errors = lists.structureSet(slug).get()
     structureset['histo_info'] = {}
@@ -31,12 +32,14 @@ def get_hydrated_structure_set(slug):
 
 
 @set_views.get('/<path:slug>')
+@templated('sets/display')
 def sets_display_handler(slug):
     structureset = get_hydrated_structure_set(slug)
-    return template.render('set', {'nav':'sets','set':structureset})
+    return {'set':structureset}
 
 
 @set_views.get('/')
+@templated('sets/index')
 def sets_list_handler():
     set_list = {
         'publications':['open_access','paywalled','missing_publication'],
@@ -49,7 +52,7 @@ def sets_list_handler():
         sets[category] = {}
         for set in set_list[category]:
             sets[category][set], success, errors = lists.structureSet(set).get()
-    return template.render('sets', {'nav':'sets','sets':sets})
+    return {'sets':sets}
 
 
 @set_views.get('/intersection')
@@ -57,12 +60,20 @@ def sets_intersection_handler():
     return template.render('sets_intersection', {'setlist':{}})
 
 
+@set_views.get('/<string:current_set>/add/<string:pdb_code>')
+def add_to_structureset_handler(current_set,pdb_code):
+    data, success, errors = lists.structureSet(current_set).add(pdb_code)
+    return redirect(common.return_to(pdb_code))
+
+
 @set_views.get('/create')
+@templated('sets/create')
 def sets_create_form_handler():
-    return template.render('sets_create', {'variables':{},'structureset':None,'errors':['no_data']})
+    return {'variables':{},'structureset':None,'errors':['no_data']}
 
 
 @set_views.post('/create')
+@templated('sets/create')
 def sets_create_action_handler():
     params = ['set_ui_text','set_members']
     variables = {}
@@ -98,5 +109,5 @@ def sets_create_action_handler():
         else:
             structureset, success, errors = lists.structureSet(slug).get()
             errors.append('already_exists')
-    return template.render('sets_create', {'variables':variables,'errors':errors,'structureset':structureset,'errors':errors})
+    return {'variables':variables,'errors':errors,'structureset':structureset,'errors':errors}
 

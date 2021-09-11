@@ -1,5 +1,5 @@
 from flask import Flask, request, redirect, make_response, Response
-from flask_caching import Cache
+from cache import cache
 
 
 import toml
@@ -27,17 +27,24 @@ config = {
 
 
 
-app = Flask(__name__)
-app.config.from_file('config.toml', toml.load)
-app.config.from_mapping(config)
-app.register_blueprint(pipeline_views, url_prefix='/pipeline')
-app.register_blueprint(set_views, url_prefix='/sets')
-app.register_blueprint(structure_views, url_prefix='/structures')
-app.register_blueprint(allele_views, url_prefix='/alleles')
+def create_app():
+    app = Flask(__name__)
+    app.config.from_file('config.toml', toml.load)
+    app.config.from_mapping(config)
+    cache.init_app(app)
+    app.register_blueprint(pipeline_views, url_prefix='/pipeline')
+    app.register_blueprint(set_views, url_prefix='/sets')
+    app.register_blueprint(structure_views, url_prefix='/structures')
+    app.register_blueprint(allele_views, url_prefix='/alleles')
+    return app
+
+
+app = create_app()
+
+
 #app.register_blueprint(represention_views, url_prefix='/representations')
 #app.register_blueprint(statistics_views, url_prefix='/statistics')
 
-cache = Cache(app)
 
 filesystem = providers.filesystemProvider(app.config['BASEDIR'])
 
@@ -71,6 +78,16 @@ def structure_title(description):
     return title
 
 
+@cache.memoize(timeout=5)
+def check_filestore():
+    scratch_json, success, errors = filesystem.get('scratch/hello')
+    if success:
+        return scratch_json
+    else:
+        return {'error':'unable to connect'}
+
+
+
 ### static (mostly) basic views
 
 
@@ -78,7 +95,7 @@ def structure_title(description):
 @app.get('/')
 @templated('index')
 def home_handler():
-    scratch_json, success, errors = filesystem.get('scratch/hello')
+    scratch_json = check_filestore()
     return scratch_json
 
 

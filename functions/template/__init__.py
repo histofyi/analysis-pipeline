@@ -22,6 +22,10 @@ def templated(template=None):
                 ctx = {}
             elif not isinstance(ctx, dict):
                 return ctx
+            else:
+                if '/' in template_name:
+                    section = template_name.split('/')[0]
+                    ctx['nav'] = section
             return render(template_name, ctx)
         return decorated_function
     return decorator

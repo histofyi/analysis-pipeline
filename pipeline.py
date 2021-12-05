@@ -81,6 +81,13 @@ def simplify_sequence_set_handler(mhc_class, locus):
 
 
 
+### Positions pipeline ###
+@pipeline_views.get('/<string:mhc_class>/cluster_positions')
+def cluster_positions_handler(mhc_class):
+    data, success, errors = actions.cluster_positions()
+    return {'message':'WIP'}
+
+
 
 
 

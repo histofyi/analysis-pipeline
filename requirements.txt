@@ -5,4 +5,8 @@ python-doi
 toml
 biopython==1.79
 numpy
+pandas
+sklearn
+matplotlib
+seaborn
 Flask-Caching

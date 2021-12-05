@@ -94,8 +94,13 @@ def sets_create_action_handler():
             try:
                 if '\'' in variables['set_members']:
                     variables['set_members'] = variables['set_members'].replace('\'','"')
-                members = json.loads(variables['set_members'])
-                members = [member.lower() for member in members]
+                try:
+                    members = json.loads(variables['set_members'])
+                except:
+                    if ',' in variables['set_members']:
+                        members = variables['set_members'].split(',')
+                if members:    
+                    members = [member.lower().strip() for member in members]
             except:
                 errors.append('not_json')
         else:

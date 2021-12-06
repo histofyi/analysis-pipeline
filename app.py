@@ -32,10 +32,12 @@ def create_app():
     app.config.from_file('config.toml', toml.load)
     app.config.from_mapping(config)
     cache.init_app(app)
+
     app.register_blueprint(pipeline_views, url_prefix='/pipeline')
     app.register_blueprint(set_views, url_prefix='/sets')
     app.register_blueprint(structure_views, url_prefix='/structures')
     app.register_blueprint(allele_views, url_prefix='/alleles')
+    
     return app
 
 

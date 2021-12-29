@@ -38,6 +38,14 @@ pipeline_actions = {
         'fetch_information':{'action':fetch_rcsb_info,'next':'alike_chains'},
         'alike_chains':{'action':alike_chains,'next':'match_chains'},
         'match_chains':{'action':match_chains,'next':'split_structure'}
+        # TODO re-implement/refactor these actions
+#        'split': {'action':split_structure, 'blocks':['split_info']}, # splits structure into single assemblies
+#        'align': {'action':align_structures, 'blocks':['align_info']}, # aligns structure against canonical one
+#        'peptide_neighbours': {'action':peptide_neighbours, 'blocks':['neighbour_info']},
+#        'peptide_positions': {'action':peptide_positions, 'blocks':['peptide_positions']},
+#        'peptide_angles': {'action':measure_peptide_angles, 'blocks':['peptide_angle_info']},
+#        'extract_peptides': {'action':extract_peptides, 'blocks':[]},
+#        'cleft_angles': {'action': measure_neighbour_angles, 'blocks':['cleft_angle_info']}           
     },
     'class_ii': {}
 }

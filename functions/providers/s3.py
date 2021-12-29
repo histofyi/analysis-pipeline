@@ -6,17 +6,19 @@ import json
 class s3Provider():
 
     client = None
+    bucket = None
 
-    def __init__(self, aws_access_key_id, aws_secret_access_key):
+    def __init__(self, aws_config):
+        
         self.client = boto3.client('s3',
-        aws_access_key_id = aws_access_key_id,
-        aws_secret_access_key = aws_secret_access_key)
+        aws_access_key_id = aws_config['aws_access_key_id'],
+        aws_secret_access_key = aws_config['aws_access_secret'])
+        self.bucket = aws_config['s3_bucket']
 
 
-    def get(self, bucket, key, data_format='json'):
-        data = self.client.get_object(Bucket=bucket, Key=key)['Body'].read()
+    def get(self, key, data_format='json'):
+        data = self.client.get_object(Bucket=self.bucket, Key=key)['Body'].read()
         try:
-            data = self.client.get_object(Bucket=bucket, Key=key)['Body'].read()
             if len(data) > 0:
                 if data_format == 'json':
                     try:
@@ -24,11 +26,13 @@ class s3Provider():
                         return data, True, []
                     except:
                         return None, False, ['not_json']
+            else:
+               return None, False, ['no_data'] 
         except:
             return None, False, ['not_json']
 
 
-    def put(self, bucket, key, contents, data_format='json'):
+    def put(self, key, contents, data_format='json'):
         if len(contents) > 0:
             if key:
                 if data_format == 'json':
@@ -38,10 +42,10 @@ class s3Provider():
                         return None, False, ['not_json']
                 else:
                     contents = contents
-                try:
-                    self.client.put_object(Body=contents, Bucket=bucket, Key=key)
+                if contents:
+                    self.client.put_object(Body=contents, Bucket=self.bucket, Key=key)
                     return contents, True, []
-                except:
+                else:
                     return None, False, ['unable_to_persist_to_s3']
             else:
                 return None, False, ['no_key_provided']

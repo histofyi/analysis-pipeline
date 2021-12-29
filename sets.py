@@ -34,7 +34,7 @@ def get_hydrated_structure_set(slug):
 @set_views.get('/<path:slug>')
 @templated('sets/display')
 def sets_display_handler(slug):
-    structureset = get_hydrated_structure_set(slug)
+    structureset, success, errors = lists.structureSet(slug).get()
     return {'set':structureset}
 
 

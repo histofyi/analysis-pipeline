@@ -1,0 +1,137 @@
+from Bio.PDB import *
+from io import StringIO, TextIOWrapper
+import numpy as np
+
+
+from .s3 import s3Provider
+
+from .constants import HETATOMS, AMINOACIDS
+import logging
+
+
+
+def build_s3_block_key(pdb_code, facet, domain, privacy='public'):
+    s3_key = 'structures/{domain}/{privacy}/{pdb_code}/{facet}.json'.format(domain=domain, privacy=privacy, pdb_code=pdb_code, facet=facet)
+    return s3_key
+
+
+def build_s3_structure_key(pdb_code, structure_contents, privacy='public'):
+    s3_key = 'structures/files/{privacy}/{structure_contents}/{pdb_code}.pdb'.format(privacy=privacy,structure_contents=structure_contents,pdb_code=pdb_code)
+    return s3_key
+
+
+def build_s3_sequence_key(mhc_class, locus, privacy='public'):
+    s3_key = 'sequences/files/{privacy}/{mhc_class}/{locus}.json'.format(privacy=privacy,mhc_class=mhc_class,locus=locus)
+    return s3_key
+
+
+def pdb_loader(pdb_data):
+    pdb_file = StringIO(pdb_data.decode('utf-8'))
+    parser = PDBParser(PERMISSIVE=1)
+    try:
+        structure = parser.get_structure('mhc', pdb_file)
+        return structure
+    except:
+        return None
+
+
+def update_block(pdb_code, facet, domain, update, aws_config, privacy='public'):
+    key = build_s3_block_key(pdb_code, facet, domain)
+    s3 = s3Provider(aws_config)
+    data, success, errors = s3.get(key)
+    if success:
+        for item in update:
+            data[item] = update[item]
+        s3.put(key, data)
+        return data, True, []
+    else:
+        return None, False, ['no_matching_item']
+
+
+def get_hetatoms():
+    return sorted(set(HETATOMS))
+
+
+def three_letter_to_one(residue):
+    if residue.upper() not in get_hetatoms():
+        try:
+            one_letter = AMINOACIDS["natural"]["translations"]["three_letter"][residue.lower()]
+        except:
+            logging.warn('NEW HET ATOM ' + residue)
+            one_letter = 'z'
+    else:
+        one_letter = 'x'
+    return one_letter
+
+
+def one_letter_to_three(self, residue):
+    if residue.upper() not in ['Z']:
+        try:
+            three_letter = AMINOACIDS["natural"]["translations"]["one_letter"][residue.lower()]
+        except:
+            logging.warn('UNNATURAL ' + residue)
+            three_letter = 'ZZZ'
+    else:
+        three_letter = 'ZZZ'
+    return three_letter
+
+
+
+def chunk_one_letter_sequence(self, sequence, residues_per_line):
+    # splits sequence into blocks
+    chunked_sequence = []
+    length = len(sequence)
+
+    while length > residues_per_line:
+        chunked_sequence.append(sequence[0:residues_per_line])
+        sequence = sequence[residues_per_line:]
+        length = len(sequence)
+    chunked_sequence.append(sequence)
+    return chunked_sequence
+
+
+def slugify(string):
+    return string.replace(' ','_').lower()
+
+def levenshtein_ratio_and_distance(s, t):
+    """ levenshtein_ratio_and_distance:
+        Calculates levenshtein distance between two strings.
+        If ratio_calc = True, the function computes the
+        levenshtein distance ratio of similarity between two strings
+        For all i and j, distance[i,j] will contain the Levenshtein
+        distance between the first i characters of s and the
+        first j characters of t
+        
+        Adapted from
+        
+        https://www.datacamp.com/community/tutorials/fuzzy-string-python
+    """
+    # Initialize matrix of zeros
+    rows = len(s)+1
+    cols = len(t)+1
+
+    distance = np.zeros((rows,cols),dtype = int)
+
+    # Populate matrix of zeros with the indeces of each character of both strings
+    for i in range(1, rows):
+        for k in range(1,cols):
+            distance[i][0] = i
+            distance[0][k] = k
+
+    # Iterate over the matrix to compute the cost of deletions,insertions and/or substitutions    
+    for col in range(1, cols):
+        for row in range(1, rows):
+            if s[row-1] == t[col-1]:
+                cost = 0 # If the characters are the same in the two strings in a given position [i,j] then the cost is 0
+            else:
+                cost = 1
+            distance[row][col] = min(distance[row-1][col] + 1,      # Cost of deletions
+                                 distance[row][col-1] + 1,          # Cost of insertions
+                                 distance[row-1][col-1] + cost)     # Cost of substitutions
+    
+    # Computation of the Levenshtein Distance Ratio
+    try:
+        ratio = ((len(s)+len(t)) - distance[row][col]) / (len(s)+len(t))
+        return ratio, distance[row][col]
+    except:
+        return None, None

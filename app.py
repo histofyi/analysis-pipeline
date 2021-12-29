@@ -1,8 +1,10 @@
-from flask import Flask, request, redirect, make_response, Response
+from flask import Flask, request, redirect, make_response, Response, render_template
 from cache import cache
+from os import environ
 
 
 import toml
+import logging
 
 import functions.providers as providers
 import functions.template as template
@@ -11,7 +13,7 @@ import functions.common as common
 from functions.template import templated
 
 
-from pipeline import pipeline_views
+from structure_pipeline import structure_pipeline_views
 from sets import set_views
 from structures import structure_views
 from alleles import allele_views
@@ -30,10 +32,17 @@ config = {
 def create_app():
     app = Flask(__name__)
     app.config.from_file('config.toml', toml.load)
+    app.config['USE_LOCAL_S3'] = False
+
+
+    if environ.get('FLASK_ENV'):
+        if environ.get('FLASK_ENV') == 'development' and app.config['LOCAL_S3']:
+            app.config['USE_LOCAL_S3'] = True
+
     app.config.from_mapping(config)
     cache.init_app(app)
 
-    app.register_blueprint(pipeline_views, url_prefix='/pipeline')
+    app.register_blueprint(structure_pipeline_views, url_prefix='/pipeline/structures')
     app.register_blueprint(set_views, url_prefix='/sets')
     app.register_blueprint(structure_views, url_prefix='/structures')
     app.register_blueprint(allele_views, url_prefix='/alleles')
@@ -53,6 +62,7 @@ filesystem = providers.filesystemProvider(app.config['BASEDIR'])
 
 
 ### Template filters ###
+
 
 @app.template_filter()
 def timesince(start_time):

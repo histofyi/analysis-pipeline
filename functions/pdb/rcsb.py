@@ -29,6 +29,7 @@ class RCSB():
         self.complexes, success, errors = file.get('constants/shared/complexes')
         self.peptide_cutoff = 30
 
+
     def fetch(self, pdb_code):
         filepath = 'structures/pdb_format/raw/{pdb_code}'.format(pdb_code = pdb_code)
         pdb_data, success, errors = file.get(filepath, format='pdb')

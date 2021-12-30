@@ -1,0 +1,1 @@
+from .process_ipd_bulk_fasta_block import process_ipd_bulk_fasta

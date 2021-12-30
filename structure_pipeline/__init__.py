@@ -7,7 +7,7 @@ import logging
 import json
 
 
-structure_pipeline_views = Blueprint('sequence_pipeline_views', __name__)
+structure_pipeline_views = Blueprint('structure_pipeline_views', __name__)
 
 
 def get_aws_config():

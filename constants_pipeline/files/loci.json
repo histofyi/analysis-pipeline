@@ -1,0 +1,39 @@
+{
+    "homo_sapiens": {
+        "class_i":{
+            "alpha":["hla-a","hla-b","hla-c","hla-e","hla-f","hla-g"]
+        },
+        "class_ii":{
+            "alpha":["hla-dra","hla-dpa","hla-dqa"],
+            "beta":["hla-drb","hla-dpb","hla-dqb"]
+        }
+    },
+    "mus_musculus": {
+        "class_i":{
+            "alpha":["h2-k","h2-d","h2-l"]
+        },
+        "class_ii":{
+            "alpha":["h2-aalpha", "h2-ealpha"],
+            "beta":["h2-abeta", "h2-ebeta"]
+        }
+    },
+    "rat": {
+        "class_i":{
+            "alpha":["rano-a1","rano-a2","rano-a","rano-ba","rano-bb"]
+        },
+        "class_ii":{
+            "alpha":["rano-da"],
+            "beta":["rano-db1"]
+        }
+    },
+    "pig":{
+        "class_i":{
+            "alpha":["sla-1","sla-2","sla-3","sla-6"]
+        },
+        "class_ii":{
+            "alpha":["sla-dra","sla-dqa"],
+            "beta":["sla-drb1","sla-drb2","sla-dqa"]
+        }
+    },
+    "rhesus_macaque":{}
+}

@@ -16,6 +16,8 @@ from functions.template import templated
 
 from structure_pipeline import structure_pipeline_views
 from sequence_pipeline import sequence_pipeline_views
+from constants_pipeline import constants_views
+
 from sets import set_views
 from structures import structure_views
 from alleles import allele_views
@@ -50,6 +52,10 @@ def create_app():
 
     app.register_blueprint(structure_pipeline_views, url_prefix='/pipeline/structures')
     app.register_blueprint(sequence_pipeline_views, url_prefix='/pipeline/sequences')
+    app.register_blueprint(constants_views, url_prefix='/pipeline/constants')
+
+
+
     app.register_blueprint(set_views, url_prefix='/sets')
     app.register_blueprint(structure_views, url_prefix='/structures')
     app.register_blueprint(allele_views, url_prefix='/alleles')
@@ -127,6 +133,7 @@ def home_handler():
 @templated('design-system')
 def design_system_hander():
     return {}
+
 
 
 

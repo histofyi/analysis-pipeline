@@ -1,0 +1,123 @@
+{
+    "class_i_alpha":{
+        "length":275,
+        "range":[-25,10],
+        "features":["class", "i", "alpha"],
+        "label":"class_i_alpha",
+        "ui_text":"Class I alpha",
+        "webglcolor":"0x77DDBB"
+    },
+    "truncated_class_i_alpha":{
+        "length":180,
+        "range":[-10,10],
+        "features":["class", "i", "alpha"],
+        "label":"truncated_class_i_alpha",
+        "ui_text":"Class I alpha (truncated)",
+        "webglcolor":"0x77DDBB"
+    },
+    "beta2m":{
+        "length":95,
+        "range":[-12,12],
+        "features":["beta", "2", "microglobulin"],
+        "label":"beta2m",
+        "ui_text":"Beta 2 microglobulin",
+        "webglcolor":"0xFF9955"
+    },
+    "class_ii_alpha":{
+        "length":180,
+        "range":[-10,10],
+        "features":[],
+        "label":"class_ii_alpha",
+        "ui_text":"Class II alpha",
+        "example":""
+    },
+    "class_ii_beta":{
+        "length":180,
+        "range":[-10,10],
+        "features":[],
+        "label":"class_ii_beta",
+        "ui_text":"Class II beta",
+        "example":""
+
+    },
+    "tcr_alpha":{
+        "length":200,
+        "range":[-10,10],
+        "features":[],
+        "label":"tcr_alpha",
+        "ui_text":"T cell receptor alpha",
+        "webglcolor":"0xFF44BB"
+    },
+    "tcr_beta":{
+        "length":240,
+        "range":[-10,10],
+        "features":[],
+        "label":"tcr_beta",
+        "ui_text":"T cell receptor beta",
+        "webglcolor":"0x99DD55"
+    },
+    "pre_tcr_beta":{
+        "length":240,
+        "range":[-10,10],
+        "features":[],
+        "label":"pre_tcr_beta",
+        "ui_text":"pre T cell receptor beta",
+        "webglcolor":"0x99DD55"
+    },
+    "tcr_gamma":{
+        "length":200,
+        "range":[-10,10],
+        "features":[],
+        "label":"tcr_gamma",
+        "ui_text":"T cell receptor gamma",
+        "webglcolor":"0xFF44BB"
+    },
+    "tcr_delta":{
+        "length":240,
+        "range":[-10,10],
+        "features":[],
+        "label":"tcr_delta",
+        "ui_text":"T cell receptor delta",
+        "webglcolor":"0x99DD55"
+    },
+    "peptide":{
+        "length":9,
+        "range":[-7,7],
+        "features":["peptide"],
+        "label":"peptide",
+        "ui_text":"Unassigned peptide",
+        "webglcolor":"0x908EA8"
+    },
+    "class_i_peptide":{
+        "length":9,
+        "range":[-7,7],
+        "features":["peptide"],
+        "label":"class_i_peptide",
+        "ui_text":"Class I peptide",
+        "webglcolor":"0x908EA8"
+    },
+    "class_i_peptide_nter":{
+        "length":2,
+        "range":[0,3],
+        "features":[],
+        "label":"class_i_peptide_nter",
+        "ui_text":"Class I peptide N-terminal fragment",
+        "webglcolor":"0x666666"
+    },
+    "class_i_peptide_cter":{
+        "length":2,
+        "range":[-1,1],
+        "features":[],
+        "label":"class_i_peptide_cter",
+        "ui_text":"Class I peptide C-terminal fragment",
+        "webglcolor":"0x666666"
+    },
+    "class_ii_peptide":{
+        "length":11,
+        "range":[-2,10],
+        "features":[],
+        "label":"class_ii_peptide",
+        "ui_text":"Class II peptide"
+    }
+
+}

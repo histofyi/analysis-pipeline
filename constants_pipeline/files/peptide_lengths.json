@@ -1,0 +1,59 @@
+{
+    "dimer": {
+        "length": 2
+    },
+    "trimer": {
+        "length": 3
+    },
+    "tetramer": {
+        "length": 4
+    },
+    "pentamer": {
+        "length": 5
+    },
+    "hexamer": {
+        "length": 6
+    },
+    "heptamer": {
+        "length": 7
+    },
+    "octamer": {
+        "length": 8
+    },
+    "nonamer": {
+        "length": 9
+    },
+    "decamer": {
+        "length": 10
+    },
+    "undecamer": {
+        "length": 11
+    },
+    "dodecamer": {
+        "length": 12
+    },
+    "tridecamer": {
+        "length": 13
+    },
+    "tetradecamer": {
+        "length": 14
+    },
+    "pentadecamer": {
+        "length": 15
+    },
+    "hexadecamer": {
+        "length": 16
+    },
+    "heptadecamer": {
+        "length": 17
+    },
+    "octadecamer": {
+        "length": 18
+    },
+    "nonadecamer": {
+        "length": 19
+    },
+    "eicosamer": {
+        "length": 20
+    }
+}

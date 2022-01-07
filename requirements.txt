@@ -10,3 +10,4 @@ sklearn
 matplotlib
 seaborn
 Flask-Caching
+beautifulsoup4

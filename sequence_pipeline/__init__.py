@@ -1,6 +1,6 @@
 from flask import Blueprint, current_app, request
 
-from .pipeline_actions import process_ipd_bulk_fasta
+from .pipeline_actions import split_ipd_bulk_fasta, process_ipd_bulk_fasta, fetch_ipd_species
 
 
 import logging
@@ -31,7 +31,9 @@ def get_aws_config():
 
 
 pipeline_actions = {
-        'split_ipd':{'action':process_ipd_bulk_fasta,'next':'process_ipd'}
+        'split_ipd':{'action':split_ipd_bulk_fasta,'next':'process_ipd'},
+        'fetch_ipd_species':{'action':fetch_ipd_species,'next':'process_ipd'},
+        'process_ipd':{'action':process_ipd_bulk_fasta,'next':'process_hla'}
 }
 
 
@@ -39,9 +41,6 @@ pipeline_actions = {
 @sequence_pipeline_views.get('/<string:route>')
 def pipeline_handler(route):
     data, success, errors = pipeline_actions[route]['action'](aws_config=get_aws_config())
-    data = {}
-    success = True
-    errors = []
     if success:
         return {'data':data, 'next':pipeline_actions[route]['next']}
     else:
@@ -53,9 +52,6 @@ def pipeline_handler(route):
 @sequence_pipeline_views.get('/<string:route>/<string:file_name>')
 def pipeline_item_handler(route, file_name):
     data, success, errors = pipeline_actions[route]['action'](file_name, aws_config=get_aws_config())
-    data = {}
-    success = True
-    errors = []
     if success:
         return {'data':data, 'next':pipeline_actions[route]['next'], 'file_name':file_name}
     else:

@@ -1,6 +1,6 @@
 from flask import Blueprint, current_app, request
 
-from .pipeline_actions import load_constants
+from .pipeline_actions import upload_constants
 
 import logging
 import json
@@ -30,7 +30,7 @@ def get_aws_config():
 
 
 pipeline_actions = {
-        'load':{'action':load_constants,'next':None}
+        'upload':{'action':upload_constants,'next':None}
 }
 
 

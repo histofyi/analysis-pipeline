@@ -7,10 +7,10 @@ import logging
 
 fs = filesystemProvider('constants_pipeline/files')
 
-constants_files = ['amino_acids','chains','hetatoms','loci','peptide_lengths','species_overrides']
+constants_files = ['amino_acids','chains','hetatoms','loci','peptide_lengths','species_overrides','species']
 
 
-def load_constants(aws_config):
+def upload_constants(aws_config):
     s3 = s3Provider(aws_config)
     for filename in constants_files:
         data, success, errors = fs.get(filename)

@@ -1,50 +1,660 @@
 {
-    "homo_sapiens":{
-
+    "homo_sapiens": {
+        "class_i":["a","b","c","e","f","g","h"],
+        "class_ii":["dra","dpa","dqa","drb","dpb","dqb"],
+        "scientific_name":"Homo sapiens",
+        "stem":"hla",
+        "common_name":"human"
     },
-    "mus_musculus":{
-
+    "mus_musculus": {
+        "class_i":["k","d","l"],
+        "class_ii":["aalpha", "ealpha","abeta", "ebeta"],
+        "scientific_name":"Mus musculus",
+        "stem":"h2",
+        "common_name":"mouse"
     },
-    "rattus_norvegicus":{
-
-    },
-    "sus_scrofa":{
-
-    },
-    "macaca_mulatta":{
-
-    },
-    "bos_taurus":{
-
-    },
-    "felis_catus":{
-
-    },
-    "pteropus_alecto":{
-
-    },
-    "canis_lupus_familiaris":{
-
-    },
-    "equus_caballus":{
-
-    },
-    "gallus_gallus":{
-
-    },
-    "ailuropoda_melanoleuca":{
-
-    },
-    "ginglymostoma_cirratum":{
-
-    },
-    "anas_platyrhynchos":{
-
-    },
-    "oryctolagus_cuniculus":{
-
-    },
-    "anolis_carolinensis":{
-        
-    }
+	"alouatta_pigra": {
+		"class_i": [],
+		"class_ii": ["drb"],
+		"scientific_name": "Alouatta pigra",
+		"stem": "alpi",
+		"common_name": "Guatemalan black howler"
+	},
+	"aotus_azarai": {
+		"class_i": [],
+		"class_ii": ["drb", "drb3"],
+		"scientific_name": "Aotus azarai",
+		"stem": "aoaz",
+		"common_name": "Azara's Night Monkey"
+	},
+	"aotus_lemurinus": {
+		"class_i": ["f"],
+		"class_ii": ["dpb1", "dqa1", "dqb1"],
+		"scientific_name": "Aotus lemurinus",
+		"stem": "aole",
+		"common_name": "Gray-bellied Night Monkey"
+	},
+	"aotus_nancymaae": {
+		"class_i": [],
+		"class_ii": ["dpb1", "dqa1", "dqb1", "dqb2", "dra", "drb", "drb1", "drb3"],
+		"scientific_name": "Aotus nancymaae",
+		"stem": "aona",
+		"common_name": "Nancy Ma's Night Monkey"
+	},
+	"aotus_nigriceps": {
+		"class_i": [],
+		"class_ii": ["drb", "drb1", "drb3"],
+		"scientific_name": "Aotus nigriceps",
+		"stem": "aoni",
+		"common_name": "Black-headed Night Monkey"
+	},
+	"aotus_trivirgatus": {
+		"class_i": ["e", "g", "ps2"],
+		"class_ii": ["dqb2", "drb", "drb1", "drb3"],
+		"scientific_name": "Aotus trivirgatus",
+		"stem": "aotr",
+		"common_name": "Three-striped Night Monkey"
+	},
+	"aotus_vociferans": {
+		"class_i": [],
+		"class_ii": ["dra", "drb", "drb1", "drb3"],
+		"scientific_name": "Aotus vociferans",
+		"stem": "aovo",
+		"common_name": "Spix's Night Monkey"
+	},
+	"ateles_belzebuth": {
+		"class_i": ["b", "e", "g"],
+		"class_ii": ["drb"],
+		"scientific_name": "Ateles belzebuth",
+		"stem": "atbe",
+		"common_name": "White-fronted Spider Monkey"
+	},
+	"ateles_fusciceps": {
+		"class_i": ["b", "e", "g"],
+		"class_ii": [],
+		"scientific_name": "Ateles fusciceps",
+		"stem": "atfu",
+		"common_name": "Black-headed Spider Monkey"
+	},
+	"callithrix_jacchus": {
+		"class_i": ["b", "b1", "b2", "b3", "b4", "b5", "b6", "b7", "b8", "b9", "e", "f1", "f2", "f3", "f4", "f5", "f6", "f7", "g", "g10ps", "g11ps", "g13ps", "g14ps", "g2ps", "g4ps", "g5ps", "g6ps", "g8ps", "g9ps", "ps2"],
+		"class_ii": ["dpa1", "dpb1", "dqa1", "dqb1", "dqb2", "drb", "drb1"],
+		"scientific_name": "Callithrix jacchus",
+		"stem": "caja",
+		"common_name": "Common Marmoset"
+	},
+	"callicebus_moloch": {
+		"class_i": [],
+		"class_ii": ["drb", "drb1", "drb11", "drb3"],
+		"scientific_name": "Callicebus moloch",
+		"stem": "camo",
+		"common_name": "Red-bellied Titi"
+	},
+	"callithrix_pygmaea": {
+		"class_i": [],
+		"class_ii": ["drb", "drb1"],
+		"scientific_name": "Callithrix pygmaea",
+		"stem": "capy",
+		"common_name": "Pygmy Marmoset"
+	},
+	"cebus_albifrons": {
+		"class_i": [],
+		"class_ii": ["drb"],
+		"scientific_name": "Cebus albifrons",
+		"stem": "ceal",
+		"common_name": "White-fronted capuchin"
+	},
+	"cebus_apella": {
+		"class_i": [],
+		"class_ii": ["drb"],
+		"scientific_name": "Cebus apella",
+		"stem": "ceap",
+		"common_name": "Tufted Capuchin"
+	},
+	"cercocebus_atys": {
+		"class_i": ["a1", "aw1", "aw2", "b", "e", "f", "i"],
+		"class_ii": [],
+		"scientific_name": "Cercocebus atys",
+		"stem": "ceat",
+		"common_name": "Sooty Mangabey"
+	},
+	"cebus_capucinus": {
+		"class_i": [],
+		"class_ii": ["drb"],
+		"scientific_name": "Cebus capucinus",
+		"stem": "ceca",
+		"common_name": "White-faced capuchin"
+	},
+	"cebus_imitator": {
+		"class_i": [],
+		"class_ii": ["drb"],
+		"scientific_name": "Cebus imitator",
+		"stem": "ceim",
+		"common_name": "Panamanian White-faced Capuchin"
+	},
+	"cebus_kaapori": {
+		"class_i": [],
+		"class_ii": ["drb"],
+		"scientific_name": "Cebus kaapori",
+		"stem": "ceka",
+		"common_name": "Kaapori capuchin"
+	},
+	"cercopithecus_mitis": {
+		"class_i": ["a", "b"],
+		"class_ii": ["dqa1"],
+		"scientific_name": "Cercopithecus mitis",
+		"stem": "cemi",
+		"common_name": "Blue Monkey"
+	},
+	"cercopithecus_neglectus": {
+		"class_i": [],
+		"class_ii": ["dqa1"],
+		"scientific_name": "Cercopithecus neglectus",
+		"stem": "cene",
+		"common_name": "De Brazza's monkey"
+	},
+	"cebus_olivaceus": {
+		"class_i": [],
+		"class_ii": ["drb"],
+		"scientific_name": "Cebus olivaceus",
+		"stem": "ceol",
+		"common_name": "Wedge-capped capuchin"
+	},
+	"chlorocebus_aethiops": {
+		"class_i": ["a", "b", "g"],
+		"class_ii": ["dqa1", "dqb1", "drb", "drb1", "drb5", "drb6"],
+		"scientific_name": "Chlorocebus aethiops",
+		"stem": "chae",
+		"common_name": "Grivet"
+	},
+	"chlorocebus_pygerythrus": {
+		"class_i": ["a", "b"],
+		"class_ii": [],
+		"scientific_name": "Chlorocebus pygerythrus",
+		"stem": "chpy",
+		"common_name": "vervet monkey"
+	},
+	"chlorocebus_sabaeus": {
+		"class_i": ["a", "ag", "b", "e"],
+		"class_ii": ["dpa1", "dpb1", "dqa1", "dqb1", "dra", "drb", "drb1", "drb5"],
+		"scientific_name": "Chlorocebus sabaeus",
+		"stem": "chsa",
+		"common_name": "Green Monkey"
+	},
+	"colobus_guereza": {
+		"class_i": [],
+		"class_ii": ["dqa1"],
+		"scientific_name": "Colobus guereza",
+		"stem": "cogu",
+		"common_name": "Mantled Guereza"
+	},
+	"gorilla_beringei": {
+		"class_i": ["a", "b", "c", "e", "g", "h", "oko"],
+		"class_ii": ["dmb", "dpa1", "dpb1", "dqa1", "dqa2", "dqb1", "dqb2", "drb", "drb1", "drb3", "drb5", "drb6"],
+		"scientific_name": "Gorilla beringei",
+		"stem": "gobe",
+		"common_name": "eastern gorilla"
+	},
+	"gorilla_gorilla": {
+		"class_i": ["a", "b", "c", "e", "f", "g", "h", "oko"],
+		"class_ii": ["dmb", "dpa1", "dpb1", "dqa1", "dqa2", "dqb1", "dqb2", "dra", "drb", "drb1", "drb3", "drb5", "drb6"],
+		"scientific_name": "Gorilla gorilla",
+		"stem": "gogo",
+		"common_name": "Gorilla"
+	},
+	"hylobates_lar": {
+		"class_i": ["a", "b"],
+		"class_ii": ["dqa1", "dqa2", "dqb1", "dqb2"],
+		"scientific_name": "Hylobates lar",
+		"stem": "hyla",
+		"common_name": "Lar Gibbon"
+	},
+	"hylobates_moloch": {
+		"class_i": [],
+		"class_ii": ["drb", "drb1"],
+		"scientific_name": "Hylobates moloch",
+		"stem": "hymo",
+		"common_name": "Silvery Javan Gibbon"
+	},
+	"leontopithecus_rosalia": {
+		"class_i": ["g"],
+		"class_ii": [],
+		"scientific_name": "Leontopithecus rosalia",
+		"stem": "lero",
+		"common_name": "Golden Lion Tamarin"
+	},
+	"lophocebus_aterrimus": {
+		"class_i": [],
+		"class_ii": ["dqa1"],
+		"scientific_name": "Lophocebus aterrimus",
+		"stem": "loat",
+		"common_name": "Black Crested Mangabey"
+	},
+	"macaca_arctoides": {
+		"class_i": ["a1", "b", "i"],
+		"class_ii": ["dpa1", "dqa1", "dqb1", "drb1", "drb5"],
+		"scientific_name": "Macaca arctoides",
+		"stem": "maar",
+		"common_name": "Stump-tailed Macaque"
+	},
+	"macaca_assamensis": {
+		"class_i": ["a1", "b", "i"],
+		"class_ii": [],
+		"scientific_name": "Macaca assamensis",
+		"stem": "maas",
+		"common_name": "Assam Macaque"
+	},
+	"macaca_fascicularis": {
+		"class_i": ["a", "a1", "a2", "a3", "a4", "a5", "a6", "a8", "ag", "ag1", "ag2", "ag3", "ag4", "ag5", "ag6", "agw1", "agw2", "b", "b02ps", "b10ps", "b11l", "b14ps", "b16", "b17", "b19ps", "b21ps", "b22", "e", "f", "g", "i", "j", "k", "l", "n", "s", "v", "w", "x", "z"],
+		"class_ii": ["dma", "dmb", "doa", "dob", "dpa1", "dpa3", "dpb1", "dpb2", "dqa1", "dqb1", "dra", "drb", "drb1", "drb3", "drb4", "drb5", "drb6", "drb9"],
+		"scientific_name": "Macaca fascicularis",
+		"stem": "mafa",
+		"common_name": "Crab-eating Macaque"
+	},
+	"macaca_fuscata": {
+		"class_i": [],
+		"class_ii": ["drb", "drb1", "drb3"],
+		"scientific_name": "Macaca fuscata",
+		"stem": "mafu",
+		"common_name": "Japanese Macaque"
+	},
+	"mandrillus_leucophaeus": {
+		"class_i": [],
+		"class_ii": ["drb1"],
+		"scientific_name": "Mandrillus leucophaeus",
+		"stem": "male",
+		"common_name": "Drill"
+	},
+	"macaca_leonina": {
+		"class_i": ["a1", "a2", "a3", "b", "i"],
+		"class_ii": ["dma", "dmb", "doa", "dob", "dpa1", "dpb1", "dqa1", "dqb1", "dra", "drb", "drb1", "drb3"],
+		"scientific_name": "Macaca leonina",
+		"stem": "malo",
+		"common_name": "Northern Pig-tailed Macaque"
+	},
+	"macaca_mulatta": {
+		"class_i": ["a1", "a2", "a3", "a4", "a5", "a6", "a7", "ag", "ag1", "ag2", "ag3", "ag4", "ag5", "ag6", "agw1", "agw2", "b", "b02ps", "b10ps", "b11l", "b14ps", "b16", "b17", "b18", "b21ps", "e", "f", "g", "i", "j"],
+		"class_ii": ["dma", "dmb", "dpa1", "dpb1", "dpb2", "dqa1", "dqb1", "dra", "drb", "drb1", "drb3", "drb4", "drb5", "drb6"],
+		"scientific_name": "Macaca mulatta",
+		"stem": "mamu",
+		"common_name": "rhesus monkey"
+	},
+	"macaca_nemestrina": {
+		"class_i": ["a1", "a2", "a3", "a4", "a5", "a6", "a7", "ag", "b", "b12", "b16", "b17", "b20", "e", "f", "i"],
+		"class_ii": ["dpa1", "dpb1", "dqa1", "dqb1", "dra", "drb", "drb1", "drb3", "drb5", "drb6"],
+		"scientific_name": "Macaca nemestrina",
+		"stem": "mane",
+		"common_name": "Southern Pig-tailed Macaque"
+	},
+	"macaca_silenus": {
+		"class_i": [],
+		"class_ii": ["drb", "drb1", "drb4"],
+		"scientific_name": "Macaca silenus",
+		"stem": "masi",
+		"common_name": "Lion-tailed Macaque"
+	},
+	"mandrillus_sphinx": {
+		"class_i": [],
+		"class_ii": ["drb", "drb1", "drb3", "drb5", "drb6"],
+		"scientific_name": "Mandrillus sphinx",
+		"stem": "masp",
+		"common_name": "Mandrill"
+	},
+	"macaca_thibetana": {
+		"class_i": ["a1", "a2", "b", "i"],
+		"class_ii": ["dma", "dmb", "dpa1", "dpb1", "dqb1", "dra"],
+		"scientific_name": "Macaca thibetana",
+		"stem": "math",
+		"common_name": "Milne Edward's Macaque"
+	},
+	"papio_anubis": {
+		"class_i": ["a", "ag", "b", "f"],
+		"class_ii": ["dpa1", "dpb1", "dqa1", "dqb1", "dra", "drb", "drb1", "drb3", "drb5", "drb6"],
+		"scientific_name": "Papio anubis",
+		"stem": "paan",
+		"common_name": "Olive Baboon"
+	},
+	"papio_cynocephalus": {
+		"class_i": ["a", "b", "e"],
+		"class_ii": ["dqa1"],
+		"scientific_name": "Papio cynocephalus",
+		"stem": "pacy",
+		"common_name": "Yellow Baboon"
+	},
+	"papio_hamadryas": {
+		"class_i": ["a", "b"],
+		"class_ii": ["dp1", "dpa1", "dpb1", "dqa1", "dqb1", "dra", "drb1"],
+		"scientific_name": "Papio hamadryas",
+		"stem": "paha",
+		"common_name": "Hamadryas Baboon"
+	},
+	"pan_paniscus": {
+		"class_i": ["a", "b", "c", "g", "h"],
+		"class_ii": ["dmb", "dpb1", "drb1", "drb6"],
+		"scientific_name": "Pan paniscus",
+		"stem": "papa",
+		"common_name": "Bonobo"
+	},
+	"papio_papio": {
+		"class_i": [],
+		"class_ii": ["dqa1"],
+		"scientific_name": "Papio papio",
+		"stem": "papp",
+		"common_name": "Guinea Baboon"
+	},
+	"pan_troglodytes": {
+		"class_i": ["a", "al", "b", "c", "e", "f", "g", "h"],
+		"class_ii": ["dmb", "dob", "dpa1", "dpb1", "dqa1", "dqa2", "dqb1", "dqb2", "dra", "drb", "drb1", "drb3", "drb4", "drb5", "drb6", "drb7"],
+		"scientific_name": "Pan troglodytes",
+		"stem": "patr",
+		"common_name": "Common Chimpanzee"
+	},
+	"papio_ursinus": {
+		"class_i": [],
+		"class_ii": ["drb", "drb1", "drb5", "drb6"],
+		"scientific_name": "Papio ursinus",
+		"stem": "paur",
+		"common_name": "Chacma Baboon"
+	},
+	"pithecia_pithecia": {
+		"class_i": ["b", "e", "g"],
+		"class_ii": ["drb", "drb3"],
+		"scientific_name": "Pithecia pithecia",
+		"stem": "pipi",
+		"common_name": "White-faced Saki"
+	},
+	"pongo_abelii": {
+		"class_i": ["a", "b", "c", "f"],
+		"class_ii": ["dpa1", "dpb1", "dqa1", "dqb1", "dra", "drb", "drb1", "drb3", "drb5"],
+		"scientific_name": "Pongo abelii",
+		"stem": "poab",
+		"common_name": "Sumatran Orangutan"
+	},
+	"pongo_pygmaeus": {
+		"class_i": ["a", "ap", "b", "c", "e", "f", "h"],
+		"class_ii": ["dmb", "dpa1", "dpb1", "dqa1", "dqa2", "dqb1", "dqb2", "dra", "drb", "drb1", "drb5", "drb6"],
+		"scientific_name": "Pongo pygmaeus",
+		"stem": "popy",
+		"common_name": "Bornean Orangutan"
+	},
+	"rhinopithecus_roxellana": {
+		"class_i": [],
+		"class_ii": ["dpb1", "dqa1", "dqb1", "drb1", "drb2"],
+		"scientific_name": "Rhinopithecus roxellana",
+		"stem": "rhro",
+		"common_name": "golden snub-nosed monkey"
+	},
+	"sapajus_cay": {
+		"class_i": [],
+		"class_ii": ["drb"],
+		"scientific_name": "Sapajus cay",
+		"stem": "saca",
+		"common_name": "Hooded Capuchin"
+	},
+	"saguinus_fuscicollis": {
+		"class_i": ["g", "ps1", "ps2"],
+		"class_ii": [],
+		"scientific_name": "Saguinus fuscicollis",
+		"stem": "safu",
+		"common_name": "Brown-mantled Tamarin"
+	},
+	"saguinus_geoffroyi": {
+		"class_i": ["ps1", "ps2"],
+		"class_ii": [],
+		"scientific_name": "Saguinus geoffroyi",
+		"stem": "sage",
+		"common_name": "Geoffroy's Tamarin"
+	},
+	"saguinus_labiatus": {
+		"class_i": ["g"],
+		"class_ii": ["drb", "drb1"],
+		"scientific_name": "Saguinus labiatus",
+		"stem": "sala",
+		"common_name": "White-lipped Tamarin"
+	},
+	"sapajus_libidinosus": {
+		"class_i": [],
+		"class_ii": ["drb"],
+		"scientific_name": "Sapajus libidinosus",
+		"stem": "sali",
+		"common_name": "Black-striped capuchin"
+	},
+	"sapajus_apella_macrocephalus": {
+		"class_i": [],
+		"class_ii": ["drb"],
+		"scientific_name": "Sapajus apella macrocephalus",
+		"stem": "sama",
+		"common_name": "Large-headed Capuchin"
+	},
+	"saguinus_mystax": {
+		"class_i": ["ps1", "ps2"],
+		"class_ii": [],
+		"scientific_name": "Saguinus mystax",
+		"stem": "samy",
+		"common_name": "Moustached Tamarin"
+	},
+	"sapajus_nigritus": {
+		"class_i": [],
+		"class_ii": ["drb"],
+		"scientific_name": "Sapajus nigritus",
+		"stem": "sani",
+		"common_name": "Black capuchin"
+	},
+	"saguinus_oedipus": {
+		"class_i": ["c", "e", "f", "g", "n1", "n3", "n4", "ps1"],
+		"class_ii": ["dpb1", "dqa1", "dqb1", "dqb2", "drb", "drb1", "drb11", "drb3", "drb5"],
+		"scientific_name": "Saguinus oedipus",
+		"stem": "saoe",
+		"common_name": "Cottontop Tamarin"
+	},
+	"saimiri_sciureus": {
+		"class_i": ["g"],
+		"class_ii": ["dpa1", "drb"],
+		"scientific_name": "Saimiri sciureus",
+		"stem": "sasc",
+		"common_name": "Common squirrel monkey"
+	},
+	"sapajus_xanthosternos": {
+		"class_i": [],
+		"class_ii": ["drb"],
+		"scientific_name": "Sapajus xanthosternos",
+		"stem": "saxa",
+		"common_name": "Golden-bellied capuchin"
+	},
+	"semnopithecus_entellus": {
+		"class_i": [],
+		"class_ii": ["dpb1"],
+		"scientific_name": "Semnopithecus entellus",
+		"stem": "seen",
+		"common_name": "Northern Plains Gray Langur"
+	},
+	"theropithecus_gelada": {
+		"class_i": [],
+		"class_ii": ["dqa1"],
+		"scientific_name": "Theropithecus gelada",
+		"stem": "thge",
+		"common_name": "Gelada"
+	},
+	"canis_adustus": {
+		"class_i": [],
+		"class_ii": ["dqa1", "dqb1", "drb1"],
+		"scientific_name": "Canis adustus",
+		"stem": "dla",
+		"common_name": "Side-striped jackal"
+	},
+	"canis_aureus": {
+		"class_i": [],
+		"class_ii": ["dqa1", "dqb1", "drb1"],
+		"scientific_name": "Canis aureus",
+		"stem": "dla",
+		"common_name": "Golden jackal"
+	},
+	"canis_lupus_baileyi ": {
+		"class_i": [],
+		"class_ii": [],
+		"scientific_name": "Canis lupus baileyi ",
+		"stem": "dla",
+		"common_name": "Mexican Gray Wolf"
+	},
+	"canis_latrans": {
+		"class_i": [],
+		"class_ii": ["dqa1", "dqb1", "drb1"],
+		"scientific_name": "Canis latrans",
+		"stem": "dla",
+		"common_name": "Coyote"
+	},
+	"canis_lupus": {
+		"class_i": ["12", "64", "79", "88", "88l"],
+		"class_ii": ["dqa1", "dqb1", "drb1"],
+		"scientific_name": "Canis lupus",
+		"stem": "dla",
+		"common_name": "Wolf"
+	},
+	"Ccnis_mesomelas": {
+		"class_i": [],
+		"class_ii": ["dqa1", "dqb1", "drb1"],
+		"scientific_name": "Canis mesomelas",
+		"stem": "dla",
+		"common_name": "Black-backed jackal"
+	},
+	"canis_rufus": {
+		"class_i": [],
+		"class_ii": ["dqa1", "drb1"],
+		"scientific_name": "Canis rufus",
+		"stem": "dla",
+		"common_name": "Red Wolf"
+	},
+	"canis_simensis": {
+		"class_i": [],
+		"class_ii": ["dqa1", "dqb1", "drb1"],
+		"scientific_name": "Canis simensis",
+		"stem": "dla",
+		"common_name": "Ethiopian Wolf"
+	},
+	"cuon_alpinus": {
+		"class_i": [],
+		"class_ii": ["dqa1", "dqb1", "drb1"],
+		"scientific_name": "Cuon alpinus",
+		"stem": "dla",
+		"common_name": "Dhole"
+	},
+	"lycaon_pictus": {
+		"class_i": [],
+		"class_ii": ["dqa1", "dqb1"],
+		"scientific_name": "Lycaon pictus",
+		"stem": "dla",
+		"common_name": "Lycaon"
+	},
+	"oncorhynchus_mykiss": {
+		"class_i": ["uba"],
+		"class_ii": ["daa", "dab"],
+		"scientific_name": "Oncorhynchus mykiss",
+		"stem": "onmy",
+		"common_name": "Rainbow Trout"
+	},
+	"salmo_salar": {
+		"class_i": ["uba"],
+		"class_ii": ["daa", "dab"],
+		"scientific_name": "Salmo salar",
+		"stem": "sasa",
+		"common_name": "Atlantic Salmon"
+	},
+	"ovis_aries": {
+		"class_i": ["n"],
+		"class_ii": ["dqa1", "dqa2", "dqa2like", "dqb1", "dqb2", "dqb2like", "dra", "drb1"],
+		"scientific_name": "Ovis aries",
+		"stem": "ovar",
+		"common_name": "Domestic Sheep"
+	},
+	"ovis_canadensis": {
+		"class_i": [],
+		"class_ii": ["dra", "drb1"],
+		"scientific_name": "Ovis canadensis",
+		"stem": "ovca",
+		"common_name": "Bighorn Sheep"
+	},
+	"bos_frontalis": {
+		"class_i": [],
+		"class_ii": ["dqb", "dqb1"],
+		"scientific_name": "Bos frontalis",
+		"stem": "bofr",
+		"common_name": "Gayal"
+	},
+	"bos_grunniens": {
+		"class_i": ["nc1", "nc10", "nc6", "nc7", "nc8", "nc9", "6"],
+		"class_ii": ["dqa1", "dqa2", "dqb"],
+		"scientific_name": "Bos grunniens",
+		"stem": "bogr",
+		"common_name": "domestic yak"
+	},
+	"bos_sp.": {
+		"class_i": ["n", "nc1", "nc10", "nc2", "nc3", "nc4", "nc5", "nc6", "nc7", "nc8", "nc9", "1", "2", "3", "4", "5", "6"],
+		"class_ii": ["dqa", "dqa1", "dqb", "dra", "drb3"],
+		"scientific_name": "Bos sp.",
+		"stem": "bola",
+		"common_name": "Cattle"
+	},
+	"bubalus_bubalis": {
+		"class_i": [],
+		"class_ii": ["dqa", "dqb"],
+		"scientific_name": "Bubalus bubalis",
+		"stem": "bubu",
+		"common_name": "Water Buffalo"
+	},
+	"equus_caballus": {
+		"class_i": ["n", "1", "2", "3", "4", "6", "7", "16", "17", "18"],
+		"class_ii": ["dmb", "dob", "dqa1", "dqa2", "dqa3", "dqb1", "dqb2", "dqb3", "dra", "drb1", "drb2", "drb3"],
+		"scientific_name": "Equus caballus",
+		"stem": "eqca",
+		"common_name": "Horse"
+	},
+	"phacochoerus_africanus": {
+		"class_i": [],
+		"class_ii": [],
+		"scientific_name": "Phacochoerus africanus",
+		"stem": "phaf",
+		"common_name": "Common warthog"
+	},
+	"sus_domesticus": {
+		"class_i": [],
+		"class_ii": [],
+		"scientific_name": "Sus domesticus",
+		"stem": "sudo",
+		"common_name": "Domestic Pig"
+	},
+	"sus_scrofa": {
+		"class_i": ["mic1", "mic2", "tap1", "tap2", "1", "2", "3", "4", "5", "6", "7", "8", "9", "11", "12"],
+		"class_ii": ["dma", "dmb", "doa", "dob1", "dqa", "dqb1", "dra", "drb1", "drb2", "drb3", "drb4", "drb5"],
+		"scientific_name": "Sus scrofa",
+		"stem": "unkn",
+		"common_name": "Feral Pig"
+	},
+	"rattus_norvegicus": {
+		"class_i": ["a", "a1", "a2", "a3", "ba", "bb", "c", "c113", "cc22", "cc23", "cc9", "ce1", "ce10", "ce11", "ce12", "ce13", "ce14", "ce15", "ce16", "ce2", "ce3", "ce4", "ce5", "ce7", "clw2", "e", "ec2", "ec3", "k", "l1", "l2", "l3", "m1-2", "m1-4", "m1-5", "m10-1", "m10-3", "m2", "m3-1", "m5", "m6-1", "n1", "n2", "n3", "o1", "s2", "t18", "t24-1", "t24-3", "t24-4", "u2", "9.5", "9.6", "119"],
+		"class_ii": ["da", "db1", "db2", "dma", "dmb", "doa", "dob"],
+		"scientific_name": "Rattus norvegicus",
+		"stem": "rano",
+		"common_name": "Norway Rat"
+	},
+	"rattus_rattus": {
+		"class_i": [],
+		"class_ii": [],
+		"scientific_name": "Rattus rattus",
+		"stem": "rara",
+		"common_name": "Black Rat"
+	},
+	"gallus_gallus": {
+		"class_i": ["bf1", "bf2", "blb1"],
+		"class_ii": [],
+		"scientific_name": "Gallus gallus",
+		"stem": "gaga",
+		"common_name": "Chicken"
+	},
+	"capra_hircus": {
+		"class_i": [],
+		"class_ii": ["drb1", "drb3"],
+		"scientific_name": "Capra hircus",
+		"stem": "cahi",
+		"common_name": "Goat"
+	}
 }

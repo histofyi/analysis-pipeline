@@ -1,3 +1,4 @@
+from io import StringIO
 
 
 def build_s3_sequence_key(item, privacy='public', format='json'):
@@ -13,13 +14,22 @@ def trim_class_i_alpha_sequence(sequence):
     abd_sequence = trimmed_sequence[0:180]
     return trimmed_sequence, abd_sequence
 
+
 def trim_class_ii_alpha_sequence(sequence):
     pass
+
 
 def trim_class_ii_beta_sequence(sequence):
     pass
 
 
-
 def slugify(string):
     return string.replace(' ','_').lower()
+
+
+def generate_fasta_file_handle(data, format='bytes'):
+    if format == 'bytes':
+        fasta_file = StringIO(data.decode('utf-8'))
+    else:
+        fasta_file = StringIO(data)
+    return fasta_file

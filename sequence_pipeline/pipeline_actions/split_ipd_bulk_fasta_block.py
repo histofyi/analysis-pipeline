@@ -1,24 +1,41 @@
 from Bio import SeqIO
-from io import StringIO
 
 from .s3 import s3Provider
-from .common import build_s3_sequence_key
+from .http import httpProvider
+
+from .common import build_s3_sequence_key, generate_fasta_file_handle
 
 import logging
 
 class_ii_alpha_loci = ['dra','dpa','dqa','doa','dma']
 class_ii_beta_loci = ['drb','dpb','dqb','dob','dmb']
 
-def split_ipd_bulk_fasta(aws_config):
+
+ipd_file_url = 'https://raw.githubusercontent.com/ANHIG/IPDMHC/Latest/MHC_prot.fasta'
+
+
+def fetch_ipd_data_remote():
+    data = httpProvider().get(ipd_file_url, 'txt')
+    if data:
+        return data, True, []
+    else:
+        return {}, False, ['unable_to_fetch_ipd_data']
+
+def fetch_local_ipd_data(s3):
+    key = build_s3_sequence_key('mhc_prot_ipd', format='fasta')
+    return s3.get(key, data_format='fasta')
+
+
+
+def split_ipd_bulk_fasta(aws_config, remote=True):
+    s3 = s3Provider(aws_config)
     loci = {}
     step_errors = []
     all_alleles = []
     locus_list = []
-    s3 = s3Provider(aws_config)
-    key = build_s3_sequence_key('mhc_prot_ipd', format='fasta')
-    data, success, errors = s3.get(key, data_format='fasta')
+    data, success, errors = fetch_ipd_data_remote()
     if data:
-        fasta_file = StringIO(data.decode('utf-8'))
+        fasta_file = generate_fasta_file_handle(data, format='txt')
         all_sequences = SeqIO.parse(fasta_file, "fasta")
         for record in all_sequences:
             description_parts = record.description.split(' ')
@@ -49,6 +66,16 @@ def split_ipd_bulk_fasta(aws_config):
                 loci[organism][locus][allele_group]['alleles'].append(allele_info)
             else:
                 pass
+
+    locus_set = []
+    for species in loci:
+        for locus in loci[species]:
+            key = build_s3_sequence_key('raw/' +locus, format='json')
+            locus_set.append(locus)
+            s3.put(key, loci[species][locus])
+    key = build_s3_sequence_key('locus_list', format='json')
+    s3.put(key, locus_list)
+
             
     species_map = {}
     for species in loci:
@@ -79,6 +106,9 @@ def split_ipd_bulk_fasta(aws_config):
             else:
                 if locus not in species_map[species]['class_i']['alpha']:
                     species_map[species]['class_i']['alpha'].append(locus)
+    key = build_s3_sequence_key('species_map', format='json')
+    s3.put(key, species_map)
+    
 
 
-    return {'loci':loci}, True, step_errors
+    return {'loci':locus_set}, True, step_errors

@@ -1,6 +1,6 @@
 from flask import Blueprint, current_app, request
 
-from .pipeline_actions import split_ipd_bulk_fasta, process_ipd_bulk_fasta, fetch_ipd_species
+from .pipeline_actions import split_ipd_bulk_fasta, process_ipd_bulk_fasta, fetch_ipd_species, check_ipd_version
 
 
 import logging
@@ -31,6 +31,7 @@ def get_aws_config():
 
 
 pipeline_actions = {
+        'check_ipd':{'action':check_ipd_version,'next':'split_ipd'},
         'split_ipd':{'action':split_ipd_bulk_fasta,'next':'process_ipd'},
         'fetch_ipd_species':{'action':fetch_ipd_species,'next':'process_ipd'},
         'process_ipd':{'action':process_ipd_bulk_fasta,'next':'process_hla'}

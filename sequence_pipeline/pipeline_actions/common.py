@@ -6,6 +6,11 @@ def build_s3_sequence_key(item, privacy='public', format='json'):
     return s3_key
 
 
+def build_s3_constants_key(item, privacy='public', format='json'):
+    s3_key = 'constants/{item}.{format}'.format(item=item, format=format)
+    return s3_key
+
+
 def trim_class_i_alpha_sequence(sequence):
     # TODO first chop out the signal peptide
     # TODO then cut to length (275)

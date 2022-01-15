@@ -1,14 +1,10 @@
 from .s3 import s3Provider
 
-from .common import build_s3_sequence_key
-
-import logging
-
-class_i_starts = ["AHVT","AIHT","ALHS","AQHN","ASHP","ATHS","CSHS","EHKV","EHTI","EHHT","ELHT","EPHV","GHPK","GHLH","GAHS","GIHS","GFHS","GLYS","GSNS","GSHC","GPHS","GSHP","GSHS","GSHT","GSHF","GSHW","GSPR","GSQS","GSRS","GSRW","GTHS","GWHS","GYHS","HQTV","THAL","THSL","TNTL","VIHS","VSHS","VTHS","SSHS","SHSF","SHSL","SHSM","SHTI","SHTL","SHTV","SHTY","SHSW","SSYS","HSLR"]
+from .common import build_s3_sequence_key, build_s3_constants_key
 
 
 
-def process_class_i(raw_class_i_loci, class_i_loci, species, s3):
+def process_class_i(raw_class_i_loci, class_i_loci, class_i_starts, species, s3):
     unknown_start = []
     for locus in raw_class_i_loci:
         key = build_s3_sequence_key('raw/' +locus, format='json')
@@ -41,20 +37,34 @@ def process_class_i(raw_class_i_loci, class_i_loci, species, s3):
     return class_i_loci, unknown_start
 
 
+# TODO Class II beta chain processing
+def process_class_ii_alpha():
+    return {}
+
+
+# TODO Class II beta chain processing
+def process_class_ii_beta():
+    return {}
+
 
 
 def process_ipd_bulk_fasta(aws_config):
     s3 = s3Provider(aws_config)
     key = build_s3_sequence_key('species_map', format='json')
     data, success, errors = s3.get(key)
+    key = build_s3_constants_key('class_i_starts')
+    class_i_starts, success, errors = s3.get(key)
     class_i_loci = {}
-    class_ii_alpha_loci = []
-    class_ii_beta_loci = []
+    class_ii_alpha_loci = {}
+    class_ii_beta_loci = {}
     for species in data:
         species_data = data[species]
-        class_i_loci, unknown_start = process_class_i(species_data['class_i']['alpha'], class_i_loci, species, s3)
-        for locus in species_data['class_ii']['alpha']:
-            class_ii_alpha_loci.append(locus)
-        for locus in species_data['class_ii']['beta']:
-            class_ii_beta_loci.append(locus)
+        class_i_loci, unknown_start = process_class_i(species_data['class_i']['alpha'], class_i_loci, class_i_starts, species, s3)
+        
+        # TODO process Class II
+        #for locus in species_data['class_ii']['alpha']:
+            #class_ii_alpha_loci.append(locus)
+        #for locus in species_data['class_ii']['beta']:
+            #class_ii_beta_loci.append(locus)
+
     return {'class_i_starts':class_i_starts, 'class_i_loci': class_i_loci, 'unknown_start':unknown_start}, success, errors

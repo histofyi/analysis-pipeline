@@ -4,7 +4,7 @@
 {% else %}
     <li><a href="/">Home</a></li>
 {% endif %}
-{% set navitems = ['structures','sets','peptides','alleles'] %}
+{% set navitems = ['sequences','structures','admin'] %}
 {% for navitem in navitems %}
     {% if nav == navitem %}
         <li><a class="is-active" href="/{{navitem}}">{{navitem|title}}</a></li>
@@ -12,3 +12,9 @@
         <li><a href="/{{navitem}}">{{navitem|title}}</a></li>
     {% endif %}
 {% endfor %}
+<li>|</li>
+{% if user %}
+    <li><a href="/logout">Logout</a> | {{user.given_name}}</li>
+{% else %}
+    <li><a href="/login">Login</a></li>
+{% endif %}

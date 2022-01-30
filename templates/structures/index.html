@@ -8,23 +8,12 @@
     <div class="column-full-width">
       <div class="inner bottom-border">
         <h1 class="vertical-spacing-bottom">Structures</h1>
-        <h2 class="vertical-spacing-bottom-0-25">MHC Class I</h2>
+        <h2 class="vertical-spacing-bottom">MHC Class I</h2>
         <div class="vertical-spacing-bottom">
-          <div>
-            <a href="/structures/search/class_i">search</a> 
-          </div>
-          <div>
-            browse
-          </div>
-          {% set sets = ["class_i_with_peptide", "probable_class_i_with_peptide", "class_i_with_peptide_fragments", "class_i_with_truncated_peptide", "class_i_with_modified_peptide"]%}
-          <ul>
-            {% for set in sets %}
-            <li><a href='/sets/{{set}}'>{{set|deslugify}}</a></li>
-            {% endfor %}
-          </ul>
+          <h3>Pipeline</h3>
           
-        </div>
 
+        </div>
         <h2 class="vertical-spacing-bottom-0-25">
           Non-classical MHC Class I
         </h2>

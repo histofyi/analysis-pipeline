@@ -1,5 +1,7 @@
 from flask import Blueprint, current_app, request
 
+from functions.decorators import requires_auth
+
 from .pipeline_actions import upload_constants
 
 import logging
@@ -32,6 +34,13 @@ def get_aws_config():
 pipeline_actions = {
         'upload':{'action':upload_constants,'next':None}
 }
+
+
+@constants_views.get('/')
+@requires_auth
+def constants_home_handler():
+    return 'hello'
+
 
 
 # Named bulk step handler

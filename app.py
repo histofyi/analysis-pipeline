@@ -1,6 +1,14 @@
-from flask import Flask, request, redirect, make_response, Response, render_template
+from flask import Flask, request, redirect, make_response, Response, render_template, g
 from cache import cache
 from os import environ
+
+
+from authlib.integrations.flask_client import OAuth
+from six.moves.urllib.parse import urlencode
+import jwt
+
+
+from functions.decorators import requires_auth, check_user
 
 
 import toml
@@ -37,6 +45,8 @@ config = {
 def create_app():
     app = Flask(__name__)
     app.config.from_file('config.toml', toml.load)
+    app.secret_key = app.config['SECRET_KEY']
+
     app.config['USE_LOCAL_S3'] = False
 
 
@@ -67,6 +77,25 @@ def create_app():
 
 app = create_app()
 
+@app.before_request
+def before_request_func():
+    g.jwt_secret = app.config['JWT_SECRET']
+    g.jwt_cookie_name = app.config['JWT_COOKIE_NAME']
+    g.users = app.config['USERS']
+
+
+oauth = OAuth(app)
+auth0 = oauth.register(
+    'auth0',
+    client_id = app.config['AUTH0_CLIENT_ID'],
+    client_secret = app.config['AUTH0_CLIENT_SECRET'],
+    api_base_url = app.config['AUTH0_API_BASE_URL'],
+    access_token_url = app.config['AUTH0_ACCESS_TOKEN_URL'],
+    authorize_url = app.config['AUTH0_AUTHORIZE_URL'],
+    client_kwargs={
+        'scope': 'openid profile email',
+    },
+)
 
 
 # TODO refactor this out to use the AWS S3/Minio BOTO procvider
@@ -122,10 +151,54 @@ def check_filestore():
 # mostly static view
 # TODO pull in statistics on the datastore (how many structures etc)
 @app.get('/')
+@check_user
 @templated('index')
-def home_handler():
+def home_handler(userobj):
     scratch_json = check_filestore()
-    return scratch_json
+    return {'message':scratch_json, 'user': userobj}
+
+
+
+
+
+@app.get('/login')
+def login_handler():
+    return auth0.authorize_redirect(redirect_uri='http://localhost:5000/callback')
+
+
+
+@app.get('/logout')
+def logout_handler():
+    return_to = request.url.rsplit('/', 1)[0] + '/'
+    params = {'returnTo': return_to, 'client_id': app.config['AUTH0_CLIENT_ID']}
+    response = make_response(redirect(auth0.api_base_url + '/v2/logout?' + urlencode(params)))
+    response.delete_cookie(app.config['JWT_COOKIE_NAME'])
+    return response
+
+
+@app.get('/callback')
+def callback_handler():
+    response = make_response(redirect('/'))
+    # Handles response from token endpoint
+    try:
+        auth0.authorize_access_token()
+        resp = auth0.get('userinfo')
+        userinfo = resp.json()
+        if userinfo['email'] in app.config['USERS']:
+            token = jwt.encode(payload=userinfo, key=app.config['JWT_SECRET'], algorithm='HS256')
+            if 'histo.fyi' in request.host:
+                response.set_cookie(app.config['JWT_COOKIE_NAME'], token, domain=app.config['JWT_COOKIE_DOMAIN'])
+            else:
+                response.set_cookie(app.config['JWT_COOKIE_NAME'], token)
+            return response
+        else:
+            return redirect('/not-allowed')
+    except:
+        return redirect('/')
+
+
+
+
 
 
 # design system display, cribbed from Catalyst styles developed by @futurefabric (Guy Moorhouse)

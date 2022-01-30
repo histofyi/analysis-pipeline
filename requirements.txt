@@ -11,3 +11,5 @@ matplotlib
 seaborn
 Flask-Caching
 beautifulsoup4
+authlib
+six

@@ -1,0 +1,27 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+requests = "*"
+boto3 = "*"
+python-doi = "*"
+toml = "*"
+biopython = "==1.79"
+numpy = "*"
+pandas = "*"
+sklearn = "*"
+matplotlib = "*"
+seaborn = "*"
+beautifulsoup4 = "*"
+six = "*"
+Flask = "*"
+Flask-Caching = "*"
+Authlib = "*"
+pyjwt = "*"
+
+[dev-packages]
+
+[requires]
+python_version = "3.8"

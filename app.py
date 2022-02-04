@@ -9,14 +9,14 @@ import json
 from common.decorators import requires_privilege, check_user, templated
 from common.blueprints.auth import auth_handlers
 import common.providers as providers
-#import common.functions as functions
+import common.functions as functions
 
 
 import toml
 import logging
+import datetime
 
-import common.providers as providers
-#import common.functions as functions
+
 
 
 
@@ -121,16 +121,56 @@ def get_aws_config():
 
 
 
+### Template filters ###
+
+
+@app.template_filter()
+def timesince(start_time):
+    return functions.timesince(start_time)
+
+
+@app.template_filter()
+def deslugify(slug):
+    return functions.de_slugify(slug)
+
+
+@app.template_filter()
+def prettify_json(this_json):
+    return functions.functions.prettify_json(this_json)
+
+@app.template_filter()
+def prettify_dict(this_dict):
+    return functions.prettify_json(json.dumps(this_dict))
+
+
+# for displaying images from RCSB
+# TODO decide if this is needed - think probably not for "legal-ish" reasons
+@app.template_filter()
+def pdb_image_folder(pdb_code):
+    return pdb_code[1:3]
+
+
+@app.template_filter()
+def structure_title(description):
+    title = ''
+    return title
+
+
+
+
+
+
 
 
 # TODO refactor this to check the AWS S3/Minio connection not the filesystem
 @cache.memoize(timeout=5)
 def check_datastore():
     scratch_json, success, errors = providers.s3Provider(get_aws_config()).get('scratch/hello.json')
-    if success:
-        return scratch_json
-    else:
-        return {'error':'unable to connect'}
+    if not success:
+        scratch_json = {'error':'unable to connect'}
+    scratch_json['cached'] = datetime.datetime.now()
+    return scratch_json
+
 
 
 
@@ -145,7 +185,7 @@ def check_datastore():
 def home_handler(userobj):
     logging.warn(userobj)
     scratch_json = check_datastore()
-    return {'message':scratch_json, 'userobj': userobj}
+    return {'message':scratch_json, 'userobj': userobj, }
 
 
 

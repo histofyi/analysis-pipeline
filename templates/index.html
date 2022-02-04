@@ -38,7 +38,11 @@
   <div class="grid-container">
     <div class="column-full-width">
       <div class="inner">
-        <p>Status: {{message.message}}</p>
+        {% if not message.error %}
+          <p>Status: {{message.message}} {{message.cached|timesince}}</p>
+        {% else %}
+          <p>Status: {{message.error}} {{message.cached|timesince}}</p>
+        {% endif %}
       </div>
     </div>
   </div>

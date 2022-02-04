@@ -1,35 +1,29 @@
 from flask import Flask, request, redirect, make_response, Response, render_template, g
 from cache import cache
 from os import environ
-
-
 from authlib.integrations.flask_client import OAuth
-from six.moves.urllib.parse import urlencode
-import jwt
 
 
-from functions.decorators import requires_auth, check_user
+import json
+
+from common.decorators import requires_privilege, check_user, templated
+from common.blueprints.auth import auth_handlers
+import common.providers as providers
+#import common.functions as functions
 
 
 import toml
 import logging
 
-import functions.providers as providers
-import functions.template as template
-import functions.common as common
+import common.providers as providers
+#import common.functions as functions
 
 
-from functions.template import templated
 
+#from structure_pipeline import structure_pipeline_views
+#from sequence_pipeline import sequence_pipeline_views
+#from constants_pipeline import constants_views
 
-from structure_pipeline import structure_pipeline_views
-from sequence_pipeline import sequence_pipeline_views
-from constants_pipeline import constants_views
-
-from sets import set_views
-from structures import structure_views
-from alleles import allele_views
-#from representations import represention_views
 
 
 config = {
@@ -57,25 +51,46 @@ def create_app():
     app.config.from_mapping(config)
     cache.init_app(app)
 
+
+    app.register_blueprint(auth_handlers, url_prefix='/auth')
+
+
+
     # most of the work is done by Blueprints so that the system is modular
     # TODO revise and refactor the Blueprints. Some of them should be in the frontend application
 
-    app.register_blueprint(structure_pipeline_views, url_prefix='/pipeline/structures')
-    app.register_blueprint(sequence_pipeline_views, url_prefix='/pipeline/sequences')
-    app.register_blueprint(constants_views, url_prefix='/pipeline/constants')
+    #app.register_blueprint(structure_pipeline_views, url_prefix='/pipeline/structures')
+    #app.register_blueprint(sequence_pipeline_views, url_prefix='/pipeline/sequences')
+    #app.register_blueprint(constants_views, url_prefix='/pipeline/constants')
 
 
 
-    app.register_blueprint(set_views, url_prefix='/sets')
-    app.register_blueprint(structure_views, url_prefix='/structures')
-    app.register_blueprint(allele_views, url_prefix='/alleles')
-    #app.register_blueprint(represention_views, url_prefix='/representations')
-    #app.register_blueprint(statistics_views, url_prefix='/statistics')
-    
+#    app.register_blueprint(set_views, url_prefix='/sets')
+#    app.register_blueprint(structure_views, url_prefix='/structures')
+#    app.register_blueprint(allele_views, url_prefix='/alleles')
+#    app.register_blueprint(represention_views, url_prefix='/representations')
+#    app.register_blueprint(statistics_views, url_prefix='/statistics')
+
+
+
+
+    oauth = OAuth(app)
+    app.auth0 = oauth.register(
+        'auth0',
+        client_id = app.config['AUTH0_CLIENT_ID'],
+        client_secret = app.config['AUTH0_CLIENT_SECRET'],
+        api_base_url = app.config['AUTH0_API_BASE_URL'],
+        access_token_url = app.config['AUTH0_ACCESS_TOKEN_URL'],
+        authorize_url = app.config['AUTH0_AUTHORIZE_URL'],
+        client_kwargs={
+            'scope': 'openid profile email',
+        },
+    )
     return app
 
 
 app = create_app()
+
 
 @app.before_request
 def before_request_func():
@@ -84,60 +99,34 @@ def before_request_func():
     g.users = app.config['USERS']
 
 
-oauth = OAuth(app)
-auth0 = oauth.register(
-    'auth0',
-    client_id = app.config['AUTH0_CLIENT_ID'],
-    client_secret = app.config['AUTH0_CLIENT_SECRET'],
-    api_base_url = app.config['AUTH0_API_BASE_URL'],
-    access_token_url = app.config['AUTH0_ACCESS_TOKEN_URL'],
-    authorize_url = app.config['AUTH0_AUTHORIZE_URL'],
-    client_kwargs={
-        'scope': 'openid profile email',
-    },
-)
+def get_aws_config():
+    if app.config['USE_LOCAL_S3'] == True:
+        return {
+            'aws_access_key_id':app.config['LOCAL_ACCESS_KEY_ID'],
+            'aws_access_secret':app.config['LOCAL_ACCESS_SECRET'],
+            'aws_region':app.config['AWS_REGION'],
+            's3_url':app.config['LOCAL_S3_URL'],
+            'local':True,
+            's3_bucket':app.config['S3_BUCKET'] 
+        }
+    else:
+        return {
+            'aws_access_key_id':app.config['AWS_ACCESS_KEY_ID'],
+            'aws_access_secret':app.config['AWS_ACCESS_SECRET'],
+            'aws_region':app.config['AWS_REGION'],
+            'local':False,
+            's3_bucket':app.config['S3_BUCKET'] 
+        }
 
 
-# TODO refactor this out to use the AWS S3/Minio BOTO procvider
-filesystem = providers.filesystemProvider(app.config['BASEDIR'])
 
 
-
-### Template filters ###
-
-
-@app.template_filter()
-def timesince(start_time):
-    return common.timesince(start_time)
-
-
-@app.template_filter()
-def deslugify(slug):
-    return common.de_slugify(slug)
-
-
-@app.template_filter()
-def prettify_json(this_json):
-    return common.prettify_json(this_json)
-
-
-# for displaying images from RCSB
-# TODO decide if this is needed - think probably not for "legal-ish" reasons
-@app.template_filter()
-def pdb_image_folder(pdb_code):
-    return pdb_code[1:3]
-
-
-@app.template_filter()
-def structure_title(description):
-    title = ''
-    return title
 
 
 # TODO refactor this to check the AWS S3/Minio connection not the filesystem
 @cache.memoize(timeout=5)
-def check_filestore():
-    scratch_json, success, errors = filesystem.get('scratch/hello')
+def check_datastore():
+    scratch_json, success, errors = providers.s3Provider(get_aws_config()).get('scratch/hello.json')
     if success:
         return scratch_json
     else:
@@ -154,49 +143,9 @@ def check_filestore():
 @check_user
 @templated('index')
 def home_handler(userobj):
-    scratch_json = check_filestore()
-    return {'message':scratch_json, 'user': userobj}
-
-
-
-
-
-@app.get('/login')
-def login_handler():
-    return auth0.authorize_redirect(redirect_uri='http://localhost:5000/callback')
-
-
-
-@app.get('/logout')
-def logout_handler():
-    return_to = request.url.rsplit('/', 1)[0] + '/'
-    params = {'returnTo': return_to, 'client_id': app.config['AUTH0_CLIENT_ID']}
-    response = make_response(redirect(auth0.api_base_url + '/v2/logout?' + urlencode(params)))
-    response.delete_cookie(app.config['JWT_COOKIE_NAME'])
-    return response
-
-
-@app.get('/callback')
-def callback_handler():
-    response = make_response(redirect('/'))
-    # Handles response from token endpoint
-    try:
-        auth0.authorize_access_token()
-        resp = auth0.get('userinfo')
-        userinfo = resp.json()
-        if userinfo['email'] in app.config['USERS']:
-            token = jwt.encode(payload=userinfo, key=app.config['JWT_SECRET'], algorithm='HS256')
-            if 'histo.fyi' in request.host:
-                response.set_cookie(app.config['JWT_COOKIE_NAME'], token, domain=app.config['JWT_COOKIE_DOMAIN'])
-            else:
-                response.set_cookie(app.config['JWT_COOKIE_NAME'], token)
-            return response
-        else:
-            return redirect('/not-allowed')
-    except:
-        return redirect('/')
-
-
+    logging.warn(userobj)
+    scratch_json = check_datastore()
+    return {'message':scratch_json, 'userobj': userobj}
 
 
 

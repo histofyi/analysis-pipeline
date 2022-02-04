@@ -1,8 +1,9 @@
 from flask import Blueprint, current_app, request
 
-from functions.decorators import requires_auth
+from functions.decorators import requires_permission, templated
+from functions.decorators.authentication import check_user
 
-from .pipeline_actions import upload_constants
+from .pipeline_actions import list_constants, view_constants, upload_constants
 
 import logging
 import json
@@ -32,24 +33,28 @@ def get_aws_config():
 
 
 pipeline_actions = {
-        'upload':{'action':upload_constants,'next':None}
+        'list':{'action':list_constants,'next':None, 'name':'List constants'},
+        'view':{'action':view_constants,'next':None, 'name':'View constants'},
+        'upload':{'action':upload_constants,'next':None, 'name':'Upload constants'}
 }
 
 
 @constants_views.get('/')
-@requires_auth
-def constants_home_handler():
-    return 'hello'
+@check_user
+@requires_permission
+@templated('constants_index')
+def constants_home_handler(userobj):
+    return {'userobj': userobj}
 
 
 
 # Named bulk step handler
 @constants_views.get('/<string:route>')
-def pipeline_handler(route):
+@check_user
+@requires_permission
+@templated('pipeline_view')
+def pipeline_handler(userobj, route):
     data, success, errors = pipeline_actions[route]['action'](aws_config=get_aws_config())
-    if success:
-        return {'data':data, 'next':pipeline_actions[route]['next']}
-    else:
-        return {'erors':errors}
+    return {'data':data, 'next':pipeline_actions[route]['next'], 'success': success, 'errors':errors, 'userobj':userobj, 'action':route, 'section':'Constants', 'action':pipeline_actions[route]['name'], 'items':'constants'}
 
 

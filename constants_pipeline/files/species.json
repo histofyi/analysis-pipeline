@@ -510,7 +510,7 @@
 		"stem": "dla",
 		"common_name": "Wolf"
 	},
-	"Ccnis_mesomelas": {
+	"canis_mesomelas": {
 		"class_i": [],
 		"class_ii": ["dqa1", "dqb1", "drb1"],
 		"scientific_name": "Canis mesomelas",

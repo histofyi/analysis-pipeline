@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% set title = section + ' | ' + action %}
+{% set pagetitle = section + ' | ' + action %}
 {% set nav = section %}
 
 
@@ -26,7 +26,7 @@
   <div class="grid-container">
     <div class="column-full-width">
       <div class="inner">
-        <h1 class="vertical-spacing-bottom">{{title}}</h1>
+        <h1 class="vertical-spacing-bottom">{{pagetitle|title}}</h1>
         <h2>Items processed</h2>
         {% if errors %}
         <p>

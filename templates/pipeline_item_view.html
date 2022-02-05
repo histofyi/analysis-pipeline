@@ -26,7 +26,8 @@
   <div class="grid-container">
     <div class="column-full-width">
       <div class="inner">
-        <h1 class="vertical-spacing-bottom">{{item.name}}</h1>
+        <h1 class="vertical-spacing-bottom">{{section|title}} | {{item.name}}</h1>
+        <p>{{item.description}}</p>
         <textarea readonly>{{item.data|prettify_json}}</textarea>
     </div>
     </div>

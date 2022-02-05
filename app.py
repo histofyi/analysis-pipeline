@@ -1,3 +1,4 @@
+from common.providers.aws import get_aws_config
 from flask import Flask, request, redirect, make_response, Response, render_template, g
 from cache import cache
 from os import environ
@@ -22,7 +23,7 @@ import datetime
 
 #from structure_pipeline import structure_pipeline_views
 #from sequence_pipeline import sequence_pipeline_views
-#from constants_pipeline import constants_views
+from constants_pipeline import constants_views
 
 
 
@@ -48,11 +49,20 @@ def create_app():
         if environ.get('FLASK_ENV') == 'development' and app.config['LOCAL_S3']:
             app.config['USE_LOCAL_S3'] = True
 
+
+    app.config['AWS_CONFIG'] = providers.aws.get_aws_config(app)
+
+
+
     app.config.from_mapping(config)
     cache.init_app(app)
 
 
     app.register_blueprint(auth_handlers, url_prefix='/auth')
+    
+    
+    app.jinja_env.trim_blocks = True
+    app.jinja_env.lstrip_blocks = True
 
 
 
@@ -61,7 +71,7 @@ def create_app():
 
     #app.register_blueprint(structure_pipeline_views, url_prefix='/pipeline/structures')
     #app.register_blueprint(sequence_pipeline_views, url_prefix='/pipeline/sequences')
-    #app.register_blueprint(constants_views, url_prefix='/pipeline/constants')
+    app.register_blueprint(constants_views, url_prefix='/pipeline/constants')
 
 
 
@@ -99,61 +109,15 @@ def before_request_func():
     g.users = app.config['USERS']
 
 
-def get_aws_config():
-    if app.config['USE_LOCAL_S3'] == True:
-        return {
-            'aws_access_key_id':app.config['LOCAL_ACCESS_KEY_ID'],
-            'aws_access_secret':app.config['LOCAL_ACCESS_SECRET'],
-            'aws_region':app.config['AWS_REGION'],
-            's3_url':app.config['LOCAL_S3_URL'],
-            'local':True,
-            's3_bucket':app.config['S3_BUCKET'] 
-        }
-    else:
-        return {
-            'aws_access_key_id':app.config['AWS_ACCESS_KEY_ID'],
-            'aws_access_secret':app.config['AWS_ACCESS_SECRET'],
-            'aws_region':app.config['AWS_REGION'],
-            'local':False,
-            's3_bucket':app.config['S3_BUCKET'] 
-        }
 
 
 
 
-### Template filters ###
 
 
-@app.template_filter()
-def timesince(start_time):
-    return functions.timesince(start_time)
 
 
-@app.template_filter()
-def deslugify(slug):
-    return functions.de_slugify(slug)
 
-
-@app.template_filter()
-def prettify_json(this_json):
-    return functions.functions.prettify_json(this_json)
-
-@app.template_filter()
-def prettify_dict(this_dict):
-    return functions.prettify_json(json.dumps(this_dict))
-
-
-# for displaying images from RCSB
-# TODO decide if this is needed - think probably not for "legal-ish" reasons
-@app.template_filter()
-def pdb_image_folder(pdb_code):
-    return pdb_code[1:3]
-
-
-@app.template_filter()
-def structure_title(description):
-    title = ''
-    return title
 
 
 
@@ -165,7 +129,7 @@ def structure_title(description):
 # TODO refactor this to check the AWS S3/Minio connection not the filesystem
 @cache.memoize(timeout=5)
 def check_datastore():
-    scratch_json, success, errors = providers.s3Provider(get_aws_config()).get('scratch/hello.json')
+    scratch_json, success, errors = providers.s3Provider(app.config['AWS_CONFIG']).get('scratch/hello.json')
     if not success:
         scratch_json = {'error':'unable to connect'}
     scratch_json['cached'] = datetime.datetime.now()
@@ -183,7 +147,6 @@ def check_datastore():
 @check_user
 @templated('index')
 def home_handler(userobj):
-    logging.warn(userobj)
     scratch_json = check_datastore()
     return {'message':scratch_json, 'userobj': userobj, }
 
@@ -204,5 +167,40 @@ def design_system_hander():
 
 
 
+
+
+### Template filters ###
+
+
+@app.template_filter()
+def timesince(start_time):
+    return functions.timesince(start_time)
+
+
+@app.template_filter()
+def deslugify(slug):
+    return functions.de_slugify(slug)
+
+
+@app.template_filter()
+def prettify_json(this_json):
+    return functions.prettify_json(this_json)
+
+@app.template_filter()
+def prettify_dict(this_dict):
+    return functions.prettify_json(json.dumps(this_dict))
+
+
+# for displaying images from RCSB
+# TODO decide if this is needed - think probably not for "legal-ish" reasons
+@app.template_filter()
+def pdb_image_folder(pdb_code):
+    return pdb_code[1:3]
+
+
+@app.template_filter()
+def structure_title(description):
+    title = ''
+    return title
 
 

@@ -10,9 +10,9 @@
         <h1 class="vertical-spacing-bottom">Constants</h1>
         <p>
         <ul>
-            <li>List</li>
-            <li>View</li>
-            <li>Upload</li>
+            {% for action in actions %}
+            <li><a href="/pipeline/constants/{{action.slug}}">{{action.name}}</a></li>
+            {% endfor %}
         </ul>
         </p>
       </div>

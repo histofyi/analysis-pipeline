@@ -9,8 +9,8 @@
         {
             width:100%;
             height:350px;
-            background-color: #0a0039;
-            color: #eef;
+            background-color: #fcfcfc;
+            color: #333;
             font-family:'Courier Prime','Courier New', Courier, monospace;
             font-size: 12pt;
         }
@@ -36,21 +36,21 @@
         {% endif %}
         <ul>
             {% for item in data[items] %}
-              {% if item is mapping %}
-                <li class="vertical-spacing-bottom">{{item.name}}
-                  {% if item.status %}
-                     | {{item.status}}
-                  {% endif %}
-                  {% if item.data %}
-                  <br />
-                  <textarea>{{item.data|prettify_json}}</textarea>
-                  {% else %}
-                    
-                  {% endif %}
-                </li>
-              {% else %}
-                <li>{{item}}</li>
-              {% endif %}
+            {% if item is mapping %}
+              <li class="vertical-spacing-bottom">{{item.name}}
+                {% if item.status %}
+                    | {{item.status}}
+                {% endif %}
+                {% if item.data %}
+                <br />
+                <textarea readonly>{{item.data|prettify_json}}</textarea>
+                {% else %}
+                  <div>{{item.description}}</div>
+                {% endif %}
+              </li>
+            {% else %}
+              <li>{{item}}</li>
+            {% endif %}
             {% endfor %}
           
         </ul>

@@ -1,7 +1,6 @@
 from flask import Blueprint, current_app, request
 
-from functions.decorators import requires_permission, templated
-from functions.decorators.authentication import check_user
+from common.decorators import check_user, requires_privilege, templated
 
 from .pipeline_actions import list_constants, view_constants, upload_constants
 
@@ -33,28 +32,28 @@ def get_aws_config():
 
 
 pipeline_actions = {
-        'list':{'action':list_constants,'next':None, 'name':'List constants'},
-        'view':{'action':view_constants,'next':None, 'name':'View constants'},
-        'upload':{'action':upload_constants,'next':None, 'name':'Upload constants'}
+        'list':{'action':list_constants,'next':None, 'name':'List constants', 'slug':'list'},
+        'view':{'action':view_constants,'next':None, 'name':'View constants', 'slug':'view'},
+        'upload':{'action':upload_constants,'next':None, 'name':'Upload constants', 'slug':'upload'}
 }
 
 
 @constants_views.get('/')
 @check_user
-@requires_permission
+@requires_privilege('users')
 @templated('constants_index')
 def constants_home_handler(userobj):
-    return {'userobj': userobj}
+    return {'userobj': userobj, 'actions':[pipeline_actions[action] for action in pipeline_actions]}
 
 
 
 # Named bulk step handler
 @constants_views.get('/<string:route>')
 @check_user
-@requires_permission
+@requires_privilege('users')
 @templated('pipeline_view')
 def pipeline_handler(userobj, route):
-    data, success, errors = pipeline_actions[route]['action'](aws_config=get_aws_config())
+    data, success, errors = pipeline_actions[route]['action'](aws_config=current_app.config['AWS_CONFIG'])
     return {'data':data, 'next':pipeline_actions[route]['next'], 'success': success, 'errors':errors, 'userobj':userobj, 'action':route, 'section':'Constants', 'action':pipeline_actions[route]['name'], 'items':'constants'}
 
 

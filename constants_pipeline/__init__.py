@@ -32,9 +32,9 @@ def get_aws_config():
 
 
 pipeline_actions = {
-        'list':{'action':list_constants,'next':None, 'name':'List constants', 'slug':'list'},
-        'view':{'action':view_constants,'next':None, 'name':'View constants', 'slug':'view'},
-        'upload':{'action':upload_constants,'next':None, 'name':'Upload constants', 'slug':'upload'}
+        'list':{'action':list_constants,'next':None, 'name':'List constants', 'slug':'list', 'show_in_list':True},
+        'view':{'action':view_constants,'next':None, 'name':'View constants', 'slug':'view', 'show_in_list':True},
+        'upload':{'action':upload_constants,'next':None, 'name':'Upload constants', 'slug':'upload', 'show_in_list':True}
 }
 
 

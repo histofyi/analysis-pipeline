@@ -4,8 +4,8 @@ from cache import cache
 from os import environ
 from authlib.integrations.flask_client import OAuth
 
-
 import json
+
 
 from common.decorators import requires_privilege, check_user, templated
 from common.blueprints.auth import auth_handlers
@@ -18,18 +18,12 @@ import logging
 import datetime
 
 
-
-
-
 #from structure_pipeline import structure_pipeline_views
 #from sequence_pipeline import sequence_pipeline_views
 from constants_pipeline import constants_views
 
 
-
 config = {
-    "DEBUG": True,          # some Flask specific configs
-    #TODO check what the "DEBUG" config does
     "CACHE_TYPE": "SimpleCache",  # Flask-Caching related configs
     "CACHE_DEFAULT_TIMEOUT": 300, # Flask-Caching related configs
     "TEMPLATE_DIRS": "templates" # Default template directory
@@ -38,41 +32,44 @@ config = {
 
 
 def create_app():
+    """
+    Creates an instance of the Flask app, and associated configuration and blueprints registration for specific routes. 
+
+    Configuration includes
+
+    - Relevant secrets stored in the config.toml file
+    - Storing in configuration a set of credentials for AWS (decided upon by the environment of the application e.g. development, live)
+    
+    Returns:
+            A configured instance of the Flask app
+
+    """
     app = Flask(__name__)
     app.config.from_file('config.toml', toml.load)
     app.secret_key = app.config['SECRET_KEY']
 
-    app.config['USE_LOCAL_S3'] = False
-
-
     if environ.get('FLASK_ENV'):
         if environ.get('FLASK_ENV') == 'development' and app.config['LOCAL_S3']:
             app.config['USE_LOCAL_S3'] = True
-
-
     app.config['AWS_CONFIG'] = providers.aws.get_aws_config(app)
 
 
-
+    # configuration of the cache from config
     app.config.from_mapping(config)
     cache.init_app(app)
 
-
-    app.register_blueprint(auth_handlers, url_prefix='/auth')
-    
-    
+    # removing whitespace from templated returns    
     app.jinja_env.trim_blocks = True
     app.jinja_env.lstrip_blocks = True
-
 
 
     # most of the work is done by Blueprints so that the system is modular
     # TODO revise and refactor the Blueprints. Some of them should be in the frontend application
 
+    app.register_blueprint(auth_handlers, url_prefix='/auth')
     #app.register_blueprint(structure_pipeline_views, url_prefix='/pipeline/structures')
     #app.register_blueprint(sequence_pipeline_views, url_prefix='/pipeline/sequences')
     app.register_blueprint(constants_views, url_prefix='/pipeline/constants')
-
 
 
 #    app.register_blueprint(set_views, url_prefix='/sets')
@@ -80,8 +77,6 @@ def create_app():
 #    app.register_blueprint(allele_views, url_prefix='/alleles')
 #    app.register_blueprint(represention_views, url_prefix='/representations')
 #    app.register_blueprint(statistics_views, url_prefix='/statistics')
-
-
 
 
     oauth = OAuth(app)
@@ -102,43 +97,17 @@ def create_app():
 app = create_app()
 
 
-@app.before_request
-def before_request_func():
-    g.jwt_secret = app.config['JWT_SECRET']
-    g.jwt_cookie_name = app.config['JWT_COOKIE_NAME']
-    g.users = app.config['USERS']
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 # TODO refactor this to check the AWS S3/Minio connection not the filesystem
 @cache.memoize(timeout=5)
 def check_datastore():
+    """
+    A function to return a small piece of JSON to indicate whether or not the connection to AWS is working
+    """
     scratch_json, success, errors = providers.s3Provider(app.config['AWS_CONFIG']).get('scratch/hello.json')
     if not success:
         scratch_json = {'error':'unable to connect'}
     scratch_json['cached'] = datetime.datetime.now()
     return scratch_json
-
-
-
-
-### static (mostly) basic views
 
 
 # mostly static view
@@ -147,10 +116,11 @@ def check_datastore():
 @check_user
 @templated('index')
 def home_handler(userobj):
+    """
+    Handler to return the homepage of the Pipeline application
+    """
     scratch_json = check_datastore()
     return {'message':scratch_json, 'userobj': userobj, }
-
-
 
 
 # design system display, cribbed from Catalyst styles developed by @futurefabric (Guy Moorhouse)
@@ -158,15 +128,6 @@ def home_handler(userobj):
 @templated('design-system')
 def design_system_hander():
     return {}
-
-
-
-
-
-
-
-
-
 
 
 ### Template filters ###

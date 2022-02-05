@@ -1,3 +1,6 @@
+from typing import Dict
+
+
 CONSTANTS_FILES = {
     'amino_acids':{'slug':'amino_acids','name':'Amino acids','description':'A set of mappings between one letter and three letter codes.'},
     'chains':{'slug':'chains','name':'Chains','description':'A set of standardised names, colours and details of individual chains of immune system complexes.'},
@@ -12,3 +15,9 @@ CONSTANTS_FILES = {
 
 def constants_array(constants_dict=CONSTANTS_FILES):
     return [CONSTANTS_FILES[constant] for constant in CONSTANTS_FILES]
+
+
+def constants_details(slug:str) -> Dict:
+    for constants in constants_array():
+        if constants['slug'] == slug:
+            return constants    

@@ -17,5 +17,5 @@ def view_constants(aws_config):
         key = build_s3_constants_key(filename)
         data, success, errors = s3.get(key)       
         if data:
-            constants.append({'name':filename, 'data':data})
+            constants.append({'slug':filename, 'data':data})
     return {'constants':constants}, True, []

@@ -2,11 +2,10 @@ from flask import Blueprint, current_app, request
 
 from common.decorators import check_user, requires_privilege, templated
 
-from .pipeline_actions import list_constants, view_constants, upload_constants
+from .pipeline_actions import list_constants, view_constants, upload_constants, view_item
 
 import logging
 import json
-
 
 constants_views = Blueprint('constants_views', __name__)
 
@@ -32,28 +31,59 @@ def get_aws_config():
 
 
 pipeline_actions = {
-        'list':{'action':list_constants,'next':None, 'name':'List constants', 'slug':'list', 'show_in_list':True},
-        'view':{'action':view_constants,'next':None, 'name':'View constants', 'slug':'view', 'show_in_list':True},
-        'upload':{'action':upload_constants,'next':None, 'name':'Upload constants', 'slug':'upload', 'show_in_list':True}
+        'list':{'action':list_constants,'next':None, 'name':'List constants', 'slug':'list', 'show_in_list':True, 'link':True},
+        'view':{'action':view_constants,'next':None, 'name':'View constants', 'slug':'view', 'show_in_list':True, 'link':True},
+        'upload':{'action':upload_constants,'next':None, 'name':'Upload constants', 'slug':'upload', 'show_in_list':True},
 }
 
 
 @constants_views.get('/')
 @check_user
 @requires_privilege('users')
-@templated('constants_index')
+@templated('constants/index')
 def constants_home_handler(userobj):
     return {'userobj': userobj, 'actions':[pipeline_actions[action] for action in pipeline_actions]}
 
 
 
-# Named bulk step handler
+@constants_views.get('/<string:route>/<string:slug>')
+@check_user
+@requires_privilege('users')
+@templated('pipeline_item_view')
+def pipeline_view_item_handler(userobj, route, slug):
+    data, success, errors = view_item(current_app.config['AWS_CONFIG'], slug)
+    return {
+        'item':data, 
+        'next':pipeline_actions[route]['next'], 
+        'action':pipeline_actions[route]['name'], 
+        'link':pipeline_actions[route]['link'], 
+        'success': success, 
+        'errors':errors, 
+        'action':route, 
+        'section':'constants',
+        'items':'constants'
+    }
+
+
+
+
 @constants_views.get('/<string:route>')
 @check_user
 @requires_privilege('users')
 @templated('pipeline_view')
 def pipeline_handler(userobj, route):
-    data, success, errors = pipeline_actions[route]['action'](aws_config=current_app.config['AWS_CONFIG'])
-    return {'data':data, 'next':pipeline_actions[route]['next'], 'success': success, 'errors':errors, 'userobj':userobj, 'action':route, 'section':'Constants', 'action':pipeline_actions[route]['name'], 'items':'constants'}
+    data, success, errors = pipeline_actions[route]['action'](current_app.config['AWS_CONFIG'])
+    return {
+        'data':data, 
+        'next':pipeline_actions[route]['next'], 
+        'action':pipeline_actions[route]['name'], 
+        'link':pipeline_actions[route]['link'], 
+        'success': success, 
+        'errors':errors, 
+        'action':route, 
+        'section':'constants',
+        'items':'constants' 
+    }
+
 
 

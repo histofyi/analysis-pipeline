@@ -2,17 +2,19 @@
 
 {% block main %}
 
+{% set section = 'constants' %}
+{% set nav = section %}
 
 <section class="vertical-spacing-top">
   <div class="grid-container">
     <div class="column-full-width">
       <div class="inner">
-        <h1 class="vertical-spacing-bottom">Constants</h1>
+        <h1 class="vertical-spacing-bottom">{{section|title}}</h1>
         <p>
         <ul>
             {% for action in actions %}
               {% if action.show_in_list %}
-                <li class="vertical-spacing-bottom-0-25"><a href="/pipeline/constants/{{action.slug}}">{{action.name}}</a></li>
+                <li class="vertical-spacing-bottom-0-25"><a href="/pipeline/{{section}}/{{action.slug}}">{{action.name}}</a></li>
               {% endif %}
             {% endfor %}
         </ul>

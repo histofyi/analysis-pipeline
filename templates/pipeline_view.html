@@ -1,6 +1,7 @@
 {% extends "base.html" %}
 
 {% set title = section + ' | ' + action %}
+{% set nav = section %}
 
 
 {% block style %}
@@ -37,7 +38,12 @@
         <ul>
             {% for item in data[items] %}
             {% if item is mapping %}
-              <li class="vertical-spacing-bottom">{{item.name}}
+              <li class="vertical-spacing-bottom">
+                {% if link %}
+                <a href="/pipeline/{{section|lower}}/view/{{item.slug}}">{{item.name}}</a>
+                {% else %}
+                {{item.name}}
+                {% endif %}
                 {% if item.status %}
                     | {{item.status}}
                 {% endif %}

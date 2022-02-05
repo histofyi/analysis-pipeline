@@ -47,11 +47,14 @@
                 {% if item.status %}
                     | {{item.status}}
                 {% endif %}
-                {% if item.data %}
+                {% if item.description %}
+                <p>{{item.description}}</p>
+                {% endif %}
+                {% if item.data and fullview %}
                 <br />
+                <p>
                 <textarea readonly>{{item.data|prettify_json}}</textarea>
-                {% else %}
-                  <div>{{item.description}}</div>
+                </p>
                 {% endif %}
               </li>
             {% else %}

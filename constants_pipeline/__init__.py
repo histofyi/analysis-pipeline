@@ -73,6 +73,10 @@ def pipeline_view_item_handler(userobj, route, slug):
 @templated('pipeline_view')
 def pipeline_handler(userobj, route):
     data, success, errors = pipeline_actions[route]['action'](current_app.config['AWS_CONFIG'])
+    if route == 'list':
+        fullview = False
+    else:
+        fullview = True
     return {
         'data':data, 
         'next':pipeline_actions[route]['next'], 
@@ -82,7 +86,8 @@ def pipeline_handler(userobj, route):
         'errors':errors, 
         'action':route, 
         'section':'constants',
-        'items':'constants' 
+        'items':'constants',
+        'fullview': fullview 
     }
 
 

@@ -1,4 +1,4 @@
-from typing import Dict
+from typing import Dict, List
 
 
 CONSTANTS_FILES = {
@@ -13,11 +13,29 @@ CONSTANTS_FILES = {
 }
 
 
-def constants_array(constants_dict=CONSTANTS_FILES):
-    return [CONSTANTS_FILES[constant] for constant in CONSTANTS_FILES]
+def constants_array(constants_dict: Dict=CONSTANTS_FILES) -> List:
+    """
+    Function to return an array of constants from the constants dictionary
+
+    Args:
+        constants_dict (dictionary) : used to override the constants dictionary declared in this file
+    Returns:
+        An array of metadata about the constants
+    """
+    if not constants_dict:
+        constants_dict = CONSTANTS_FILES
+    return [constants_dict[constant] for constant in constants_dict]
 
 
 def constants_details(slug:str) -> Dict:
+    """
+    Function to return the metadata on a specific constants file
+
+    Args:
+        slug (str) : the slug for a specific file
+    Returns:
+        A dictionary containing the metadata for the specific file
+    """
     for constants in constants_array():
         if constants['slug'] == slug:
             return constants    

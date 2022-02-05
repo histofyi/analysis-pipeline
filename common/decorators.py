@@ -8,13 +8,13 @@ from .templating import render
 import logging
 
 
-"""
-This function is used to retrieve the user cookie. #NOTE it does no checking of the privileges of that user
-
-Args:
-    none
-"""
 def check_user(f):
+    """
+    This decorator is used to retrieve the user cookie. #NOTE it does no checking of the privileges of that user
+
+    Args:
+        f the function to be decorated
+    """
     @wraps(f)
     def decorated(*args, **kwargs):
         userobj = get_user_from_cookie(request, current_app.config)
@@ -23,7 +23,13 @@ def check_user(f):
     return decorated
 
 
-def requires_privilege(privilege=None):
+def requires_privilege(privilege:str=None):
+    """
+    This decorator is used to determine if a user has specific privileges.
+
+    Args:
+        privilege (string) : the privilege group the user should be in e.g. admins
+    """
     def decorator(f):
         @wraps(f)
         def decorated(*args, **kwargs):
@@ -40,7 +46,13 @@ def requires_privilege(privilege=None):
     return decorator
 
 
-def templated(template=None):
+def templated(template:str):
+    """
+    This decorator is used perform html templating of views.
+
+    Args:
+        template (string) : the name of the template to be used
+    """
     def decorator(f):
         @wraps(f)
         def decorated_function(*args, **kwargs):

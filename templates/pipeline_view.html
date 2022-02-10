@@ -38,18 +38,21 @@
         <ul>
             {% for item in data[items] %}
             {% if item is mapping %}
-              <li class="vertical-spacing-bottom">
+              <li class="vertical-spacing-bottom"><strong>
                 {% if link %}
                 <a href="/pipeline/{{section|lower}}/view/{{item.slug}}">{{item.name}}</a>
                 {% else %}
                 {{item.name}}
-                {% endif %}
+                {% endif %}</strong>
                 {% if item.status %}
                     | {{item.status}}
                 {% endif %}
                 {% if item.description %}
                 <p>{{item.description}}</p>
                 {% endif %}
+                {% if item.unchanged %}No changes. {% endif%}
+                {% if item.formatted %}Valid JSON. {% endif%}
+                {% if item.uploaded %}Uploaded. {% endif%}
                 {% if item.data and fullview %}
                 <br />
                 <p>

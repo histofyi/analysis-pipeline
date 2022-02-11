@@ -49,7 +49,7 @@ def constants_home_handler(userobj):
 @constants_views.get('/<string:route>/<string:slug>')
 @check_user
 @requires_privilege('users')
-@templated('pipeline_item_view')
+@templated('constants/item')
 def pipeline_view_item_handler(userobj, route, slug):
     data, success, errors = view_item(current_app.config['AWS_CONFIG'], slug)
     return {
@@ -70,7 +70,7 @@ def pipeline_view_item_handler(userobj, route, slug):
 @constants_views.get('/<string:route>')
 @check_user
 @requires_privilege('users')
-@templated('pipeline_view')
+@templated('constants/multiple')
 def pipeline_handler(userobj, route):
     data, success, errors = pipeline_actions[route]['action'](current_app.config['AWS_CONFIG'])
     if route == 'list':

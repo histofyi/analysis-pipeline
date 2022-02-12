@@ -17,7 +17,7 @@ import logging
 import datetime
 
 
-#from structure_pipeline import structure_pipeline_views
+from structure_pipeline import structure_pipeline_views
 #from sequence_pipeline import sequence_pipeline_views
 from constants_pipeline import constants_views
 
@@ -50,7 +50,6 @@ def create_app():
     if environ.get('FLASK_ENV'):
         if environ.get('FLASK_ENV') == 'development' and app.config['LOCAL_S3']:
             app.config['USE_LOCAL_S3'] = True
-    app.config['AWS_CONFIG'] = providers.aws.get_aws_config(app)
 
 
     # configuration of the cache from config
@@ -66,7 +65,7 @@ def create_app():
     # TODO revise and refactor the Blueprints. Some of them should be in the frontend application
 
     app.register_blueprint(auth_handlers, url_prefix='/auth')
-    #app.register_blueprint(structure_pipeline_views, url_prefix='/pipeline/structures')
+    app.register_blueprint(structure_pipeline_views, url_prefix='/pipeline/structures')
     #app.register_blueprint(sequence_pipeline_views, url_prefix='/pipeline/sequences')
     app.register_blueprint(constants_views, url_prefix='/pipeline/constants')
 

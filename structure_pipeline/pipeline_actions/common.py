@@ -1,6 +1,5 @@
 from Bio.PDB import *
 from io import StringIO, TextIOWrapper
-import numpy as np
 
 
 from .s3 import s3Provider
@@ -8,21 +7,6 @@ from .s3 import s3Provider
 from .constants import HETATOMS, AMINOACIDS
 import logging
 
-
-
-def build_s3_block_key(pdb_code, facet, domain, privacy='public'):
-    s3_key = 'structures/{domain}/{privacy}/{pdb_code}/{facet}.json'.format(domain=domain, privacy=privacy, pdb_code=pdb_code, facet=facet)
-    return s3_key
-
-
-def build_s3_structure_key(pdb_code, structure_contents, privacy='public'):
-    s3_key = 'structures/files/{privacy}/{structure_contents}/{pdb_code}.pdb'.format(privacy=privacy,structure_contents=structure_contents,pdb_code=pdb_code)
-    return s3_key
-
-
-def build_s3_sequence_key(mhc_class, locus, privacy='public'):
-    s3_key = 'sequences/files/{privacy}/{mhc_class}/{locus}.json'.format(privacy=privacy,mhc_class=mhc_class,locus=locus)
-    return s3_key
 
 
 def pdb_loader(pdb_data):
@@ -92,6 +76,8 @@ def chunk_one_letter_sequence(self, sequence, residues_per_line):
 
 def slugify(string):
     return string.replace(' ','_').lower()
+
+
 
 def levenshtein_ratio_and_distance(s, t):
     """ levenshtein_ratio_and_distance:

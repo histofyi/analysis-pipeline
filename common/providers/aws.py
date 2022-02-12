@@ -1,30 +1,22 @@
 
 
-# TODO REMOVE
-
-def get_aws_config(app):
-    if app.config['USE_LOCAL_S3'] == True:
-        return {
-            'aws_access_key_id':app.config['LOCAL_ACCESS_KEY_ID'],
-            'aws_access_secret':app.config['LOCAL_ACCESS_SECRET'],
-            'aws_region':app.config['AWS_REGION'],
-            's3_url':app.config['LOCAL_S3_URL'],
-            'local':True,
-            's3_bucket':app.config['S3_BUCKET'] 
-        }
-    else:
-        return {
-            'aws_access_key_id':app.config['AWS_ACCESS_KEY_ID'],
-            'aws_access_secret':app.config['AWS_ACCESS_SECRET'],
-            'aws_region':app.config['AWS_REGION'],
-            'local':False,
-            's3_bucket':app.config['S3_BUCKET'] 
-    }
-    
-
-
-
 class awsKeyProvider():
 
     def constants_key(self, item, privacy='public', format='json'):
         return 'constants/{item}.{format}'.format(item=item, format=format)
+
+
+    def block_key(self, pdb_code, facet, domain, privacy='public'):
+        return 'structures/{domain}/{privacy}/{pdb_code}/{facet}.json'.format(domain=domain, privacy=privacy, pdb_code=pdb_code, facet=facet)
+
+
+    def structure_key(self, pdb_code, structure_contents, privacy='public'):
+        return 'structures/files/{privacy}/{structure_contents}/{pdb_code}.pdb'.format(privacy=privacy,structure_contents=structure_contents,pdb_code=pdb_code)
+
+
+    def sequence_key(self, mhc_class, locus, privacy='public'):
+        return 'sequences/files/{privacy}/{mhc_class}/{locus}.json'.format(privacy=privacy,mhc_class=mhc_class,locus=locus)
+
+
+
+

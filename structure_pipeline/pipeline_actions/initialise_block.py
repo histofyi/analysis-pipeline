@@ -1,4 +1,5 @@
-from .s3 import s3Provider
+from common.providers import s3Provider, awsKeyProvider
+
 from .common import build_s3_block_key
 
 def build_core(pdb_code):

@@ -1,9 +1,6 @@
-from .filesystem import filesystemProvider
-from .s3 import s3Provider
-
+from common.providers import filesystemProvider, s3Provider, awsKeyProvider
 
 from .constants import CONSTANTS_FILES
-from .common import build_s3_constants_key
 
 import json
 
@@ -24,7 +21,7 @@ def upload_constants(aws_config):
         constants[slug]['uploaded'] = False
         constants[slug]['formatted'] = False
         is_json = False
-        key = build_s3_constants_key(slug)
+        key = awsKeyProvider().constants_key(slug)
         localdata, success, errors = fs.get(slug)
         if success:
             s3data, success, errors = s3.get(key)

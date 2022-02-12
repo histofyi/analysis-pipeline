@@ -1,5 +1,7 @@
 
 
+# TODO REMOVE
+
 def get_aws_config(app):
     if app.config['USE_LOCAL_S3'] == True:
         return {
@@ -18,3 +20,11 @@ def get_aws_config(app):
             'local':False,
             's3_bucket':app.config['S3_BUCKET'] 
     }
+    
+
+
+
+class awsKeyProvider():
+
+    def constants_key(self, item, privacy='public', format='json'):
+        return 'constants/{item}.{format}'.format(item=item, format=format)

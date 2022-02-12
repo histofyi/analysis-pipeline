@@ -3,7 +3,7 @@ import logging
 
 class filesystemProvider():
 
-    basedir = '../../data'
+    basedir = 'constants/files'
 
     def __init__(self,basedir):
         if basedir is not None:

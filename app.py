@@ -1,4 +1,3 @@
-from common.providers.aws import get_aws_config
 from flask import Flask, request, redirect, make_response, Response, render_template, g
 from cache import cache
 from os import environ
@@ -91,6 +90,27 @@ def create_app():
             'scope': 'openid profile email',
         },
     )
+
+
+    if app.config['USE_LOCAL_S3'] == True:
+        app.config['AWS_CONFIG'] = {
+            'aws_access_key_id':app.config['LOCAL_ACCESS_KEY_ID'],
+            'aws_access_secret':app.config['LOCAL_ACCESS_SECRET'],
+            'aws_region':app.config['AWS_REGION'],
+            's3_url':app.config['LOCAL_S3_URL'],
+            'local':True,
+            's3_bucket':app.config['S3_BUCKET'] 
+        }
+    else:
+        app.config['AWS_CONFIG'] = {
+            'aws_access_key_id':app.config['AWS_ACCESS_KEY_ID'],
+            'aws_access_secret':app.config['AWS_ACCESS_SECRET'],
+            'aws_region':app.config['AWS_REGION'],
+            'local':False,
+            's3_bucket':app.config['S3_BUCKET'] 
+    }
+
+
     return app
 
 

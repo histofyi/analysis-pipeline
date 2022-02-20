@@ -1,6 +1,5 @@
 from common.providers import s3Provider, awsKeyProvider
 
-from .common import build_s3_block_key
 
 def build_core(pdb_code):
     return {
@@ -28,7 +27,7 @@ def build_core(pdb_code):
 
 def initialise(pdb_code, aws_config):
     s3 = s3Provider(aws_config)
-    key = build_s3_block_key(pdb_code, 'core', 'info')
+    key = awsKeyProvider.block_key(pdb_code, 'core', 'info')
     payload = build_core(pdb_code)
     s3.put(key, payload)
     return payload, True, None

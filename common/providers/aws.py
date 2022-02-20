@@ -18,5 +18,10 @@ class awsKeyProvider():
         return 'sequences/files/{privacy}/{mhc_class}/{locus}.json'.format(privacy=privacy,mhc_class=mhc_class,locus=locus)
 
 
+    def set_key(self, set_slug:str, set_type:str) -> str:
+        return f'sets/{set_type.lower()}/{set_slug.lower()}'
+
+
+
 
 

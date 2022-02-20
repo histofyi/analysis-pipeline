@@ -1,3 +1,4 @@
+from .test_block import test
 from .initialise_block import initialise
 #from .fetch_structure_block import get_pdb_structure
 #from .structure_info_block import parse_pdb_header

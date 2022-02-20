@@ -28,7 +28,7 @@
   <div class="grid-container">
     <div class="column-full-width">
       <div class="inner">
-        <h1 class="vertical-spacing-bottom">{{section|title}} | {{name}} | {{pdb_code}}</h1>
+        <h1 class="vertical-spacing-bottom">{{section|title}} | {{ mhc_class | deslugify }} | {{name}} action | {{pdb_code}}</h1>
         <p>{{item.description}}</p>
         <textarea readonly>{{data|prettify_json}}</textarea>
     </div>

@@ -5,6 +5,7 @@
 {% set nav = section %}
 
 
+
 {% block style %}
     <style>
         textarea
@@ -28,9 +29,23 @@
   <div class="grid-container">
     <div class="column-full-width">
       <div class="inner">
-        <h1 class="vertical-spacing-bottom">{{section|title}} | {{ mhc_class | deslugify }} | {{name}} action | {{pdb_code}}</h1>
-        <p>{{item.description}}</p>
-        <textarea readonly>{{data|prettify_json}}</textarea>
+        <h1 class="vertical-spacing-bottom">{{section|title}} | {{ mhc_class | deslugify }} | {{name}} action | {{pdb_code | upper}}</h1>
+        {% if data %}
+        {% if data is mapping %}
+            <textarea readonly>{{data|prettify_json}}</textarea>
+        {% else %}
+            <textarea readonly>{{data}}</textarea>
+        {% endif %}
+        {% if next %}
+            <p class="vertical-spacing-top"><strong>Next action</strong> : <a href="/pipeline/structures/{{mhc_class}}/{{next}}/{{pdb_code|lower}}">{{pipeline_actions[mhc_class][next]['name']}} {{pdb_code | upper}}</a></p>
+        {% endif %}
+        {% endif %}
+        {% if errors %}
+        <p>
+            {{errors}}
+        </p>
+        {% endif %}
+
     </div>
     </div>
   </div>

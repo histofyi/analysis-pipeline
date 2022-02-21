@@ -4,14 +4,12 @@ from typing import Dict
 from common.decorators import check_user, requires_privilege, templated
 from common.models import itemSet
 
-from .pipeline_actions import test, initialise, get_pdb_structure
+from .pipeline_actions import test, initialise, get_pdb_structure, parse_pdb_header
 #from .pipeline_actions import initialise, get_pdb_structure, parse_pdb_header, fetch_rcsb_info, alike_chains, match_chains
 #from .pipeline_actions import initialise, get_pdb_structure, parse_pdb_header, fetch_rcsb_info, alike_chains, match_chains
 #rom .pipeline_actions import initialise, get_pdb_structure, parse_pdb_header, fetch_rcsb_info, alike_chains, match_chains
 #from .pipeline_actions import initialise, get_pdb_structure, parse_pdb_header, fetch_rcsb_info, alike_chains, match_chains
 
-def parse_pdb_header(*args):
-    pass
 
 import logging
 import json
@@ -26,7 +24,7 @@ pipeline_actions = {
         'initialise':{'action':initialise, 'name':'Initialise', 'show_in_list':False, 'link':False, 'next':'fetch_structure'},
         'fetch_structure':{'action':get_pdb_structure, 'name':'Fetch structure', 'show_in_list':False, 'link':False, 'next':'parse_structure'},
         'parse_structure':{'action':parse_pdb_header, 'name': 'Parse structure', 'show_in_list':False, 'link':False, 'next':'fetch_information'},
-#        'fetch_information':{'action':fetch_rcsb_info,'next':'alike_chains'},
+        'fetch_information':{'action':None,'next':'alike_chains'},
 #        'alike_chains':{'action':alike_chains,'next':'match_chains'},
 #        'match_chains':{'action':match_chains,'next':'split_structure'}
         # TODO re-implement/refactor these actions

@@ -2,10 +2,22 @@ from Bio.PDB import *
 from io import StringIO, TextIOWrapper
 
 
-from .s3 import s3Provider
+from common.providers import s3Provider, awsKeyProvider
 
-from .constants import HETATOMS, AMINOACIDS
+import numpy as np
+
 import logging
+
+
+
+
+def fetch_constants(aws_config, slug):
+    key = awsKeyProvider().constants_key(slug)
+    data, success, errors = s3Provider(aws_config).get(key)
+    if success:
+        return data
+    else:
+        return None       
 
 
 
@@ -20,7 +32,7 @@ def pdb_loader(pdb_data):
 
 
 def update_block(pdb_code, facet, domain, update, aws_config, privacy='public'):
-    key = build_s3_block_key(pdb_code, facet, domain)
+    key = awsKeyProvider().block_key(pdb_code, facet, domain)
     s3 = s3Provider(aws_config)
     data, success, errors = s3.get(key)
     if success:
@@ -33,13 +45,13 @@ def update_block(pdb_code, facet, domain, update, aws_config, privacy='public'):
 
 
 def get_hetatoms():
-    return sorted(set(HETATOMS))
+    return sorted(set(fetch_constants('hetatoms')))
 
 
 def three_letter_to_one(residue):
     if residue.upper() not in get_hetatoms():
         try:
-            one_letter = AMINOACIDS["natural"]["translations"]["three_letter"][residue.lower()]
+            one_letter = fetch_constants('amino_acids')["natural"]["translations"]["three_letter"][residue.lower()]
         except:
             logging.warn('NEW HET ATOM ' + residue)
             one_letter = 'z'
@@ -51,7 +63,7 @@ def three_letter_to_one(residue):
 def one_letter_to_three(self, residue):
     if residue.upper() not in ['Z']:
         try:
-            three_letter = AMINOACIDS["natural"]["translations"]["one_letter"][residue.lower()]
+            three_letter = fetch_constants('amino_acids')["natural"]["translations"]["one_letter"][residue.lower()]
         except:
             logging.warn('UNNATURAL ' + residue)
             three_letter = 'ZZZ'

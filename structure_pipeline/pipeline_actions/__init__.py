@@ -1,6 +1,6 @@
 from .test_block import test
 from .initialise_block import initialise
-#from .fetch_structure_block import get_pdb_structure
+from .fetch_structure_block import get_pdb_structure
 #from .structure_info_block import parse_pdb_header
 #from .rcsb_info_block import fetch_rcsb_info
 #from .alike_chains_block import alike_chains

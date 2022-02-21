@@ -4,7 +4,7 @@ from typing import Dict
 from common.decorators import check_user, requires_privilege, templated
 from common.models import itemSet
 
-from .pipeline_actions import test, initialise, get_pdb_structure, parse_pdb_header, fetch_rcsb_info
+from .pipeline_actions import test, initialise, get_pdb_structure, parse_pdb_header, fetch_rcsb_info, alike_chains
 #from .pipeline_actions import initialise, get_pdb_structure, parse_pdb_header, fetch_rcsb_info, alike_chains, match_chains
 #from .pipeline_actions import initialise, get_pdb_structure, parse_pdb_header, fetch_rcsb_info, alike_chains, match_chains
 #rom .pipeline_actions import initialise, get_pdb_structure, parse_pdb_header, fetch_rcsb_info, alike_chains, match_chains
@@ -25,8 +25,8 @@ pipeline_actions = {
         'fetch_structure':{'action':get_pdb_structure, 'name':'Fetch structure', 'show_in_list':False, 'link':False, 'next':'parse_structure'},
         'parse_structure':{'action':parse_pdb_header, 'name': 'Parse structure', 'show_in_list':False, 'link':False, 'next':'fetch_information'},
         'fetch_information':{'action':fetch_rcsb_info, 'name': 'Fetch information', 'show_in_list':False, 'link':False, 'next':'alike_chains'},
-        'alike_chains':{'action':None,'next':'match_chains'},
-#        'match_chains':{'action':match_chains,'next':'split_structure'}
+        'alike_chains':{'action':alike_chains, 'name': 'Detect alike chains', 'show_in_list':False, 'link':False, 'next':'match_chains'},
+        'match_chains':{'action':None,'next':'split_structure'}
         # TODO re-implement/refactor these actions
 #        'split': {'action':split_structure, 'blocks':['split_info']}, # splits structure into single assemblies
 #        'align': {'action':align_structures, 'blocks':['align_info']}, # aligns structure against canonical one

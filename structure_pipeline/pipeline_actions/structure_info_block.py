@@ -23,7 +23,7 @@ def parse_pdb_header(pdb_code, aws_config, force=False):
             payload = structure.header
             s3.put(key, payload)
             update = {}
-            species_overrides = fetch_constants(aws_config, 'species_overrides')
+            species_overrides = fetch_constants('species_overrides')
             try:
                 if pdb_code in species_overrides:
                     update['organism_scientific'] = species_overrides[pdb_code]['organism_scientific']

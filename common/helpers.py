@@ -1,3 +1,5 @@
+from flask import current_app, g
+
 from Bio.PDB import *
 from io import StringIO, TextIOWrapper
 
@@ -11,13 +13,21 @@ import logging
 
 
 
-def fetch_constants(aws_config, slug):
-    key = awsKeyProvider().constants_key(slug)
-    data, success, errors = s3Provider(aws_config).get(key)
-    if success:
-        return data
+
+
+def fetch_constants(slug):
+    if not 'constants' in g:
+        g.constants = {}
+    if slug not in g.constants:
+        key = awsKeyProvider().constants_key(slug)
+        data, success, errors = s3Provider(current_app.config['AWS_CONFIG']).get(key)
+        if success:
+            g.constants[slug] = data
+            return data
+        else:
+            return None       
     else:
-        return None       
+        return g.constants[slug]
 
 
 
@@ -60,7 +70,7 @@ def three_letter_to_one(residue):
     return one_letter
 
 
-def one_letter_to_three(self, residue):
+def one_letter_to_three(residue):
     if residue.upper() not in ['Z']:
         try:
             three_letter = fetch_constants('amino_acids')["natural"]["translations"]["one_letter"][residue.lower()]

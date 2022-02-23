@@ -1,0 +1,11 @@
+<style>
+    .text-input {
+        width:300px
+    }
+</style>
+<form class="vertical-spacing-bottom-0-5" action="/pipeline/structures/redirect" method="POST">
+    <label for="set_slug">Set identifier</label>
+    <input type="text" name="set_slug" id="set_slug" placeholder="e.g. 'class_i_with_peptide'" class="text-input"/>
+    <input type="hidden" name="mhc_class" id="mhc_class"  value="class_i"/>
+    <input type="submit" value="Go" />
+</form>

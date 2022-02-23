@@ -1,7 +1,5 @@
-from functions import pdb
-from .s3 import s3Provider
-from .common import build_s3_block_key, update_block, slugify, build_s3_sequence_key, levenshtein_ratio_and_distance
-from .constants import SPECIES, LOCI
+from common.providers import s3Provider, awsKeyProvider
+from common.helpers import fetch_constants, update_block, slugify, levenshtein_ratio_and_distance
 
 import logging
 
@@ -139,30 +137,33 @@ def fuzzy_match(mhc_class, locus, sequence_to_match):
     return match, best_ratio
 
 
-def match_chains(pdb_code, aws_config):
+def match_chains(pdb_code, aws_config, force=False):
     step_errors = []
     s3 = s3Provider(aws_config)
     chains_to_match = {}
     best_match = None
     allele_match = None
     this_chain = None
-    key = build_s3_block_key(pdb_code, 'allele_match', 'info')
-    data, success, errors = s3.get(key)
+    match_key = awsKeyProvider().block_key(pdb_code, 'allele_match', 'info')
+    data, success, errors = s3.get(match_key)
     if success:
         allele_match = data
     else:
-        key = build_s3_block_key(pdb_code, 'core', 'info')
-        data, success, errors = s3.get(key)
+        core_key = awsKeyProvider().block_key(pdb_code, 'core', 'info')
+        data, success, errors = s3.get(core_key)
         organism = slugify(data['organism_scientific'])
-        if data['organism_scientific'] not in SPECIES:
+        species = fetch_constants('species')
+        logging.warn(organism)
+        scientific_names = [scientific for scientific in species]
+        logging.warn(scientific_names)
+        if organism not in scientific_names:
             step_errors.append('no_match_for:'+ organism)
             return None, False, step_errors
         else:
-            organism
             if organism in ['homo_sapiens','mus_musculus']:
                 mhc_class = None
-                key = build_s3_block_key(pdb_code, 'chains', 'info')
-                data, success, errors = s3.get(key)
+                chains_key = awsKeyProvider().block_key(pdb_code, 'chains', 'info')
+                data, success, errors = s3.get(chains_key)
                 if success:
                     for chain in data:
                         for this_mhc_class in ['class_i','class_ii']:
@@ -183,9 +184,9 @@ def match_chains(pdb_code, aws_config):
                             if this_chain['length'] < 200:
                                 break
                             else:
-                                for locus in LOCI[slugify(organism)][mhc_class][chain]:
-                                    key = build_s3_sequence_key(mhc_class, locus)
-                                    sequence_data, success, errors = s3.get(key)
+                                for locus in fetch_constants('loci')[slugify(organism)][mhc_class][chain]:
+                                    sequence_key = awsKeyProvider().sequence_key(mhc_class, locus)
+                                    sequence_data, success, errors = s3.get(sequence_key)
                                     loci[locus] = sequence_data
                                 for this_locus in loci:
                                     best_match = exact_match(mhc_class, loci[this_locus], this_chain)
@@ -229,8 +230,8 @@ def match_chains(pdb_code, aws_config):
         logging.warn(pdb_code)
         logging.warn(allele_match)
         logging.warn('-----')
-        key = build_s3_block_key(pdb_code, 'allele_match', 'info')
-        s3.put(key, allele_match)
+        match_key = awsKeyProvider().block_key(pdb_code, 'allele_match', 'info')
+        s3.put(match_key, allele_match)
         update = {}
         update['locus'] = allele_match['locus']
         update['allele'] = {'mhc_alpha':allele_match['allele']}

@@ -29,15 +29,19 @@
   <div class="grid-container">
     <div class="column-full-width">
       <div class="inner">
-        <h1 class="vertical-spacing-bottom">{{section|title}} | {{ mhc_class | deslugify }} | {{name}} action | {{pdb_code | upper}}</h1>
+        <h1 class="vertical-spacing-bottom">{{section|title}} | {{ mhc_class | deslugify }} | {{name}} | {{pdb_code | upper}}</h1>
         {% if data %}
         {% if data is mapping %}
             <textarea readonly>{{data|prettify_json}}</textarea>
         {% else %}
             <textarea readonly>{{data}}</textarea>
         {% endif %}
-        {% if next %}
-            <p class="vertical-spacing-top"><strong>Next action</strong> : <a href="/pipeline/structures/{{mhc_class}}/{{next}}/{{pdb_code|lower}}">{{pipeline_actions[mhc_class][next]['name']}} {{pdb_code | upper}}</a></p>
+        {% if next_action %}
+            <p class="vertical-spacing-top"><strong>Next action</strong> : <a href="/pipeline/structures/{{mhc_class}}/{{next_action.slug}}/{{pdb_code|lower}}">{{next_action['name']}} {{pdb_code | upper}}</a></p>
+        {% else %}
+            <p class="vertical-spacing-top">Pipeline complete.  <a href="/pipeline/structures/{{mhc_class}}/view/{{pdb_code|lower}}">View output?</a></p>
+            <h3>Run again on a different structure?</h3>
+            {% include "structures/single_structure_mode_form.html" %}
         {% endif %}
         {% endif %}
         {% if errors %}

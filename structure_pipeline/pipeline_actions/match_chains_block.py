@@ -137,6 +137,9 @@ def fuzzy_match(mhc_class, locus, sequence_to_match):
     return match, best_ratio
 
 
+classical = ['HLA-A', 'HLA-B', 'HLA-C']
+
+
 def match_chains(pdb_code, aws_config, force=False):
     step_errors = []
     s3 = s3Provider(aws_config)
@@ -233,6 +236,9 @@ def match_chains(pdb_code, aws_config, force=False):
         match_key = awsKeyProvider().block_key(pdb_code, 'allele_match', 'info')
         s3.put(match_key, allele_match)
         update = {}
+        if allele_match['locus'] in classical:
+            update['class'] = 'class_i'
+            update['classical'] = True
         update['locus'] = allele_match['locus']
         update['allele'] = {'mhc_alpha':allele_match['allele']}
         update['allele_group'] = {'mhc_alpha':allele_match['allele_group']}

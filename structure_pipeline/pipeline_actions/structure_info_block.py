@@ -1,6 +1,7 @@
 from common.providers import s3Provider, awsKeyProvider
 from common.helpers import pdb_loader, update_block, fetch_constants
 
+import logging
 
 def parse_pdb_header(pdb_code, aws_config, force=False):
     """
@@ -24,13 +25,32 @@ def parse_pdb_header(pdb_code, aws_config, force=False):
             s3.put(key, payload)
             update = {}
             species_overrides = fetch_constants('species_overrides')
+            update['resolution'] = payload['resolution']
+            update['release_date'] = payload['release_date']
+            update['deposition_date'] = payload['deposition_date']
+            update['chain_count'] = len(payload['compound'])
+            #update['complex_count'] = len(payload['compound'][1]['chain'])
+
+            complex_counts = []
+            for chain in payload['compound']:
+                if ',' in payload['compound'][chain]['chain']:
+                    chains = payload['compound'][chain]['chain'].split(',')
+                    payload['compound'][chain]['chain'] = [chain.lstrip() for chain in chains]
+                    complex_counts.append(len(chains))
+            
+            if len(set(complex_counts)) == 1:
+                update['complex_count'] = complex_counts[0]
+
+
             try:
                 if pdb_code in species_overrides:
+                    # TODO organism common
                     update['organism_scientific'] = species_overrides[pdb_code]['organism_scientific']
                 else:
+                    # TODO organism common
                     update['organism_scientific'] = payload['source']['1']['organism_scientific']
             except:
-                step_errors.append('unable_to_parse_organism_common')
+                step_errors.append('unable_to_parse_organism_scientific')
             try:
                 update['missing_residues'] = payload['missing_residues']
             except:

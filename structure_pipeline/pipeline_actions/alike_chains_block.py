@@ -57,7 +57,7 @@ def alike_chains(pdb_code, aws_config, force=False):
         for component in data['components']:
             this_component = data['components'][component]
             chainset[component] = {}
-            chainset[component]['chains'] = [item.strip() for item in this_component['chain'].split(',')]
+            chainset[component]['chains'] = this_component['chain']
             chainset[component]['molecule'] = this_component['molecule']
             chain_length = 0
             i = 0
@@ -74,6 +74,18 @@ def alike_chains(pdb_code, aws_config, force=False):
                 if 'unassigned_chain' not in step_errors:
                     step_errors.append('unassigned_chain')
             chainset[component]['length'] = chain_length
-    chains_key = awsKeyProvider().block_key(pdb_code, 'chains', 'info')
-    s3.put(chains_key, chainset)
+        
+        chains_key = awsKeyProvider().block_key(pdb_code, 'chains', 'info')
+        s3.put(chains_key, chainset)
+        peptide = None
+        for chain in chainset:
+            logging.warn(chain)
+            if chainset[chain]['best_match'] == 'peptide':
+                peptide = {
+                    'sequence':chainset[chain]['sequences'][0],
+                    'molecule':chainset[chain]['molecule']
+                }
+        update = {}
+        if peptide:
+            update['peptide'] = peptide['sequence']
     return chainset, True, step_errors

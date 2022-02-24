@@ -29,7 +29,7 @@ def view(pdb_code:str, aws_config: Dict, force: bool=False) -> Tuple[Dict, bool,
     for block in blocks:
         block_key = awsKeyProvider().block_key(pdb_code, block, 'info')
         if block == 'core':
-            output[block] = s3.get(block_key)
+            output[block] = s3.get(block_key)[0]
         else:
-            output['facets'][block] = s3.get(block_key)
+            output['facets'][block] = s3.get(block_key)[0]
     return output, True, None

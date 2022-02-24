@@ -6,7 +6,7 @@ from common.models import itemSet
 
 from common.forms import request_variables
 
-from .pipeline_actions import test, initialise, get_pdb_structure, parse_pdb_header, fetch_rcsb_info, alike_chains, match_chains
+from .pipeline_actions import test, view, initialise, get_pdb_structure, parse_pdb_header, fetch_rcsb_info, alike_chains, match_chains
 
 
 import logging
@@ -19,7 +19,7 @@ structure_pipeline_views = Blueprint('structure_pipeline_views', __name__)
 pipeline_actions = {
     'class_i': {
         'test':{'action':test, 'next':None, 'name':'Test', 'show_in_list':False, 'link':False},
-        'view':{'action':test, 'next':None, 'name':'View', 'show_in_list':False, 'link':False},
+        'view':{'action':view, 'next':None, 'name':'View', 'show_in_list':False, 'link':False},
         'initialise':{'action':initialise, 'name':'Initialise', 'show_in_list':False, 'link':False, 'next':'fetch_structure'},
         'fetch_structure':{'action':get_pdb_structure, 'name':'Fetch structure', 'show_in_list':False, 'link':False, 'next':'parse_structure'},
         'parse_structure':{'action':parse_pdb_header, 'name': 'Parse structure', 'show_in_list':False, 'link':False, 'next':'fetch_information'},

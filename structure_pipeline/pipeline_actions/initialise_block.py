@@ -23,7 +23,7 @@ def build_core(pdb_code: str) -> Dict:
         'locus':None,
         'allele':None,
         'peptide':None,
-        'peptide_name':None,
+        'peptide_info':{},
         'resolution':None,
         'deposition_date':None,
         'release_date':None,

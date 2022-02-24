@@ -79,7 +79,6 @@ def alike_chains(pdb_code, aws_config, force=False):
         s3.put(chains_key, chainset)
         peptide = None
         for chain in chainset:
-            logging.warn(chain)
             if chainset[chain]['best_match'] == 'peptide':
                 peptide = {
                     'sequence':chainset[chain]['sequences'][0],
@@ -88,4 +87,5 @@ def alike_chains(pdb_code, aws_config, force=False):
         update = {}
         if peptide:
             update['peptide'] = peptide['sequence']
+            data, success, errors = update_block(pdb_code, 'core', 'info', update, aws_config)
     return chainset, True, step_errors

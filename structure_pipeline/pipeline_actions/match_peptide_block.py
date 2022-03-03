@@ -1,7 +1,7 @@
 from typing import Dict, Tuple, List, Optional, Union
 
 from common.providers import s3Provider, awsKeyProvider, filesystemProvider
-from common.helpers import update_block
+from common.helpers import update_block, fetch_constants
 
 
 import csv
@@ -39,6 +39,9 @@ def match_peptide(pdb_code:str, aws_config: Dict, force: bool=False) -> Tuple[Di
 
     if 'peptide' in data:
         if data['peptide'] is not None:
+            # TODO exclude first row
+            # TODO include information on peptide if it has been modified
+            # TODO create named columns in the rows
             for row in result:
                 if data['peptide'].lower() == row[2].lower():
                     peptide_match = {
@@ -48,11 +51,19 @@ def match_peptide(pdb_code:str, aws_config: Dict, force: bool=False) -> Tuple[Di
                     }
                     peptide_matches.append(peptide_match)
     peptide_key = awsKeyProvider().block_key(pdb_code, 'peptide_matches', 'info')
+    update = {}
+    peptide_lengths = fetch_constants("peptide_lengths")
+    try:
+        peptide_length_name = [length for length in peptide_lengths if peptide_lengths[length]['length'] == len(data['peptide'])][0]
+    except:
+        peptide_length_name = None 
+        step_errors.append('no_matching_peptide_length_name') 
+    update['peptide_length'] = {
+        'value':len(data['peptide']),
+        'display': peptide_length_name
+    }
     if len(peptide_matches) == 1:
-        update = {}
         update['peptide_info'] = peptide_matches[0]
-
-        success = True  
         s3.put(peptide_key, peptide_matches)
         data, success, errors = update_block(pdb_code, 'core', 'info', update, aws_config)
     elif len(peptide_matches) > 1:
@@ -60,4 +71,5 @@ def match_peptide(pdb_code:str, aws_config: Dict, force: bool=False) -> Tuple[Di
         s3.put(peptide_key, peptide_matches)
     else:
         step_errors = ['no_peptide_matches']
+    # TODO add to speficic peptide sets
     return {'pdb_code':pdb_code, 'peptide_matches': peptide_matches}, success, step_errors

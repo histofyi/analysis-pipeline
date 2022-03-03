@@ -24,6 +24,10 @@ def build_core(pdb_code: str) -> Dict:
         'allele':None,
         'peptide':None,
         'peptide_info':{},
+        'peptide_length': None,
+        'peptide_extended': None,
+        'peptide_disordered': None,
+        'peptide_modified': None,
         'resolution':None,
         'deposition_date':None,
         'release_date':None,
@@ -33,7 +37,8 @@ def build_core(pdb_code: str) -> Dict:
         'chain_count':0,
         'title':None,
         'authors':[],
-        'publication':{}
+        'publication':{},
+        'manually_edited': {}
     }
 
 

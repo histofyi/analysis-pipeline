@@ -78,10 +78,10 @@ def structure_redirect_handler(userobj:Dict) -> Dict:
     mhc_class = variables['mhc_class']
     if 'pdb_code' in variables:
         pdb_code = variables['pdb_code']
-        url = f'/pipeline/structures/{mhc_class.lower()}/initialise/{pdb_code.lower()}'
+        url = f'/structures/{mhc_class.lower()}/initialise/{pdb_code.lower()}'
         return redirect(url)
     elif 'set_slug' in variables:
-        url = f'/pipeline/structures/{mhc_class.lower()}/initialise/set/{set_slug.lower()}'
+        url = f'/structures/{mhc_class.lower()}/initialise/set/{set_slug.lower()}'
         return redirect(url)
     else:
         return redirect('/pipeline/structures/')

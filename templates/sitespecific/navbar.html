@@ -6,7 +6,7 @@
 {% endif %}
 {% set navitems = ['sequences','structures', 'constants', 'sets', 'admin'] %}
 {% for navitem in navitems %}
-    <li><a {% if nav == navitem %}class="is-active"{% endif %} href="/pipeline/{{navitem}}/">{{navitem|title}}</a></li>
+    <li><a {% if nav == navitem %}class="is-active"{% endif %} href="/{{navitem}}/">{{navitem|title}}</a></li>
 {% endfor %}
 {% if userobj %}
     <li><a href="/auth/logout">Logout</a></li><li>|</li><li>{{userobj.given_name}}</li>

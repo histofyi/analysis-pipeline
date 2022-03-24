@@ -18,6 +18,7 @@ import datetime
 
 
 from structure_pipeline import structure_pipeline_views
+from set_pipeline import set_pipeline_views
 #from sequence_pipeline import sequence_pipeline_views
 from constants_pipeline import constants_views
 
@@ -65,12 +66,10 @@ def create_app():
     # TODO revise and refactor the Blueprints. Some of them should be in the frontend application
 
     app.register_blueprint(auth_handlers, url_prefix='/auth')
-    app.register_blueprint(structure_pipeline_views, url_prefix='/pipeline/structures')
-    #app.register_blueprint(sequence_pipeline_views, url_prefix='/pipeline/sequences')
-    app.register_blueprint(constants_views, url_prefix='/pipeline/constants')
-
-
-#    app.register_blueprint(set_views, url_prefix='/sets')
+    app.register_blueprint(structure_pipeline_views, url_prefix='/structures')
+    #app.register_blueprint(sequence_pipeline_views, url_prefix='/sequences')
+    app.register_blueprint(constants_views, url_prefix='/constants')
+    app.register_blueprint(set_pipeline_views, url_prefix='/sets')
 #    app.register_blueprint(structure_views, url_prefix='/structures')
 #    app.register_blueprint(allele_views, url_prefix='/alleles')
 #    app.register_blueprint(represention_views, url_prefix='/representations')

@@ -43,10 +43,10 @@
         </p>
         {% endif %}
         {% if next_action %}
-            <p class="vertical-spacing-top"><strong>Next action</strong> : <a href="/pipeline/structures/{{mhc_class}}/{{next_action.slug}}/{{pdb_code|lower}}">{{next_action['name']}} {{pdb_code | upper}}</a></p>
+            <p class="vertical-spacing-top"><strong>Next action</strong> : <a href="/structures/{{mhc_class}}/{{next_action.slug}}/{{pdb_code|lower}}">{{next_action['name']}} {{pdb_code | upper}}</a></p>
         {% else %}
             {% if name.lower() != 'view' %}
-            <p class="vertical-spacing-top">Pipeline complete.  <a href="/pipeline/structures/{{mhc_class}}/view/{{pdb_code|lower}}">View output?</a></p>
+            <p class="vertical-spacing-top">Pipeline complete.  <a href="/structures/{{mhc_class}}/view/{{pdb_code|lower}}">View output?</a></p>
             <h3>Run again on a different structure?</h3>
             {% else %}
             <h3 class="vertical-spacing-top">Run pipeline on a different structure?</h3>

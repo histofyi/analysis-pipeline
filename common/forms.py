@@ -38,3 +38,16 @@ def request_variables(form:Optional[Dict], params:List=None):
         if variables[param] == 'None':
             variables[param] = None
     return variables
+
+
+def validate_variables(variables, params):
+    validated = True
+    errors = []
+    for variable in variables:
+        if variable in params:
+            if variables[variable] is None:
+                validated = False
+                errors.append(variable)
+    return validated, errors
+
+

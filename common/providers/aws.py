@@ -74,7 +74,7 @@ class awsKeyProvider():
         Returns:
             str : the S3 key for the object
         """
-        return f'sets/{privacy.lower()}/{set_type.lower()}/{set_slug.lower()}'
+        return f'sets/{privacy.lower()}/{set_type.lower()}/{set_slug.lower()}.json'
 
 
 

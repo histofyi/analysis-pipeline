@@ -65,11 +65,11 @@ def match_peptide(pdb_code:str, aws_config: Dict, force: bool=False) -> Tuple[Di
     if len(peptide_matches) == 1:
         update['peptide_info'] = peptide_matches[0]
         s3.put(peptide_key, peptide_matches)
-        data, success, errors = update_block(pdb_code, 'core', 'info', update, aws_config)
     elif len(peptide_matches) > 1:
         step_errors = ['unambiguous_peptide_matches']
         s3.put(peptide_key, peptide_matches)
     else:
         step_errors = ['no_peptide_matches']
+    data, success, errors = update_block(pdb_code, 'core', 'info', update, aws_config)
     # TODO add to speficic peptide sets
     return {'pdb_code':pdb_code, 'peptide_matches': peptide_matches}, success, step_errors

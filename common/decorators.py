@@ -72,6 +72,11 @@ def templated(template:str):
             if '/' in template_name:
                 section = template_name.split('/')[0]
                 ctx['nav'] = section
-            return render(template_name, ctx)
+            if not 'redirect_to' in ctx:
+                if not 'code' in ctx:
+                    ctx['code'] = 200
+                return render(template_name, ctx)
+            else:
+                return redirect(ctx['redirect_to'], 302)
         return decorated_function
     return decorator

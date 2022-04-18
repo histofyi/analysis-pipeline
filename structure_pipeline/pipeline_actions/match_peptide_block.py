@@ -110,11 +110,15 @@ def api_match_peptide(pdb_code:str, aws_config: Dict, force: bool=False) -> Tupl
             query = f'https://query-api.iedb.org/epitope_search?limit=10&linear_sequence=eq.{peptide_sequence}&select=curated_source_antigens'
             results = httpProvider().get(query, 'json')
             for item in results:
-                peptide_match = {
-                        'organism':item['curated_source_antigens'][0]['source_organism_name'],
-                        'protein':item['curated_source_antigens'][0]['name']
-                }
-                possible_matches.append(peptide_match)
+                if item is not None:
+                    logging.warn(item)
+                    if 'curated_source_antigens' in item:
+                        if item['curated_source_antigens'] is not None:
+                            peptide_match = {
+                                'organism':item['curated_source_antigens'][0]['source_organism_name'],
+                                'protein':item['curated_source_antigens'][0]['name']
+                            }
+                            possible_matches.append(peptide_match)
             if len(possible_matches) > 0:
                 unique_matches = []
                 for match in peptide_matches:

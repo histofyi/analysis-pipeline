@@ -11,11 +11,12 @@ from common.functions import slugify
 import logging
 import json
 
+from .pipeline_actions import process_pdbefold
 
 set_pipeline_views = Blueprint('set_pipeline_views', __name__)
 
 
-contexts = ["complex_type", "similarity", "differences", "publication", "features", "species", "resolution", "locus", "allele", "allele_group","peptide_sequence", "peptide_length", "peptide_cluster", "peptide_features"]
+contexts = ["complex_type", "similarity", "differences", "publication", "features", "species", "resolution", "locus", "allele", "allele_group","peptide_sequence", "peptide_length", "peptide_cluster", "peptide_features", "search_query"]
 
 
 @set_pipeline_views.get('/')
@@ -244,3 +245,25 @@ def sets_alter_action_handler(userobj:Dict) -> Dict:
     success = False
     errors = []
     return {'userobj': userobj, 'variables':{}, 'errors':['blank_form']}
+
+
+
+@set_pipeline_views.get('/process/pdbefold/<string:mhc_class>')
+@check_user
+@requires_privilege('users')
+@templated('sets/process')
+def sets_process_handler(userobj:Dict, mhc_class:str) -> Dict:
+    """
+    This handler provides the homepage for the sets pipeline section
+
+    Args: 
+        userobj (Dict): a dictionary describing the currently logged in user with the correct privileges
+
+    Returns:
+        Dict: a dictionary containing the user object and a list of possible next actions
+
+    """
+    itemset = process_pdbefold(mhc_class)
+    return {'userobj': userobj, 'itemset': itemset}
+
+

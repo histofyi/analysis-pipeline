@@ -10,6 +10,18 @@ import logging
 fs = filesystemProvider('set_pipeline/files')
 
 def process_pdbefold(mhc_class:str) -> Dict:
+    """
+    This function takes a 'reslist.dat' file from the PDBeFold server of the EMBL-EBI (https://www.ebi.ac.uk/msd-srv/ssm/cgi-bin/ssmserver)
+    and turns it into a set of possible molecules to run through the pipeline.
+
+    The PDBeFold service matches a template structure to give a set of results which align structurally to it with homology.
+
+    Args:
+        mhc_class (str): the class of MHC molecule e.g. 'class_i'
+
+    Returns:
+        Dict : a set of items
+    """
     molecules = {'class_i':'1HHK','class_ii':'1DLH'}
     slug = f'{mhc_class}_pdbefold_query'
     title = f'{de_slugify(mhc_class)} PDBeFold Query'

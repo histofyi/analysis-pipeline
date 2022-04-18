@@ -254,13 +254,14 @@ def sets_alter_action_handler(userobj:Dict) -> Dict:
 @templated('sets/process')
 def sets_process_handler(userobj:Dict, mhc_class:str) -> Dict:
     """
-    This handler provides the homepage for the sets pipeline section
+    This handler returns an itemset of molecules found using the PDBeFold service
 
     Args: 
         userobj (Dict): a dictionary describing the currently logged in user with the correct privileges
+        mhc_clas (str): the class of MHC molecule being searched for
 
     Returns:
-        Dict: a dictionary containing the user object and a list of possible next actions
+        Dict: a dictionary containing the user object and a an itemset for that particular class of MHC molecules
 
     """
     itemset = process_pdbefold(mhc_class)

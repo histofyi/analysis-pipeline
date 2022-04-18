@@ -19,6 +19,8 @@ def de_slugify(slug):
 
 
 def timesince(start_time):
+    if isinstance(start_time, str):
+        start_time = datetime.fromisoformat(start_time)
     delta = datetime.now() - start_time
 
     # assumption: negative delta values originate from clock

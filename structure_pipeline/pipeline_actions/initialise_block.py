@@ -38,6 +38,8 @@ def build_core(pdb_code: str) -> Dict:
         'title':None,
         'authors':[],
         'publication':{},
+        'doi':None,
+        'open_access':False,
         'manually_edited': {}
     }
 

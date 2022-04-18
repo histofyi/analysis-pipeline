@@ -10,11 +10,11 @@ import logging
 fs = filesystemProvider('set_pipeline/files')
 
 def process_pdbefold(mhc_class:str) -> Dict:
-    molecules = {'class_i':'1HHK'}
+    molecules = {'class_i':'1HHK','class_ii':'1DLH'}
     slug = f'{mhc_class}_pdbefold_query'
     title = f'{de_slugify(mhc_class)} PDBeFold Query'
     description = f'PDBeFold Query for {de_slugify(mhc_class)}. Template molecule is {molecules[mhc_class]}'
-    data, success, errors = fs.get('class_i', format='txt')
+    data, success, errors = fs.get(mhc_class, format='txt')
 
     rows = [row.replace('PDB ','').split() for row in data.split('\n') if len(row) > 0]
 

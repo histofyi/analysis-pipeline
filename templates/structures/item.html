@@ -4,6 +4,7 @@
 {% set title = section + ' | ' + name %}
 {% set nav = section %}
 
+{% block title %} Pipeline | {{pdb_code | upper}} -  {{name}}{% endblock %}
 
 
 {% block style %}

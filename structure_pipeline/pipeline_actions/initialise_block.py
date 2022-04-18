@@ -33,8 +33,6 @@ def build_core(pdb_code: str) -> Dict:
         'release_date':None,
         'components':{},
         'missing_residues':[],
-        'complex_count':0,
-        'chain_count':0,
         'title':None,
         'authors':[],
         'publication':{},

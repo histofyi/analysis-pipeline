@@ -1,0 +1,19 @@
+<form action="/sets/create" method="POST">
+    <div>
+        <label for="title">Set title*</label><br />
+        <input type="text" name="title" id="title" class="wide_input" {% if variables.title %} value="{{variables.title}}"{% endif %} />
+    </div>
+    <label for="description">Set description*</label><br />
+    <textarea name="description" id="description" rows="10" width="100%">{% if variables.description %}{{variables.description}}{% endif %}</textarea>
+    <br />
+    <label for="description">Set context*</label><br />
+    <select name="context" id="context">
+        {% for context in contexts %}
+            <option value="{{context}}">{{context}}</option>
+        {% endfor %}
+    </select>
+    <br />
+    <label for="members">Set members (JSON array format e.g. ["1hla"])*</label><br />
+    <textarea name="members" id="members" rows="10" width="100%">{% if variables.members %}{{variables.members}}{% endif %}</textarea>
+    <div class="vertical-spacing-top-0-25"><input type="submit" value="submit" /></div>
+</form>

@@ -7,11 +7,10 @@
   <div class="grid-container">
     <div class="column-full-width">
       <div class="inner">
-        <h1 class="vertical-spacing-bottom-0-25">{{set.ui_text}}</h1>
-        <div>Last updated {{set.last_updated|timesince}} | {{set.length}} items</div>
+        <h1 class="vertical-spacing-bottom-0-25">{{itemset.metadata.title}}</h1>
+        <div>Last updated {{itemset.last_updated|timesince}} | {{itemset.members|length}} items</div>
         <div class="vertical-spacing-top vertical-spacing-bottom">
-          <div>{{set.set}}</div>
-          {% for structure in set.set %}
+          {% for structure in itemset.members %}
           <div class="vertical-spacing-top-0-25"><strong><a href="/structures/information/{{structure}}" target='_new'>{{structure}}</a></strong></div>
           <div class="vertical-spacing-bottom-0-5">
             <br />

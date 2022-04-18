@@ -6,11 +6,12 @@
         textarea
         {
             width:100%;
-            height:350px;
+            height:200px;
             background-color: #ffffff;
             color: #333;
             font-family:'Courier Prime','Courier New', Courier, monospace;
             font-size: 12pt;
+            margin-top:5px;
         }
 
         .wide_input {
@@ -18,6 +19,7 @@
             font-size: 12pt;
             padding: 5px;
         }
+
         
 
     </style>
@@ -26,31 +28,25 @@
 
 {% block main %}
 
-
 <section class="vertical-spacing-top">
   <div class="grid-container">
     <div class="column-full-width">
       <div class="inner">
         <h1 class="vertical-spacing-bottom">Create a set</h1>
-        {% if not errors %}
-        {{errors}}
-        {{structureset}}
-        {% else %}
-        {% if 'already_exists' in errors %}
-          {{structureset}}
-        {% endif %}
-        {{errors}}
-        <form action="/sets/create" method="POST">
-          <div>
-              <label for="set_ui_text">Set title (UI text)</label><br />
-              <input type="text" name="set_ui_text" id="set_ui_text" class="wide_input" {% if variables.set_ui_text %} value="{{variables.set_ui_text}}"{% endif %} />
-          </div>
-          <br />
-          <label for="set_members">Set members (JSON array format e.g. ["1hla"])</label><br />
-          <textarea name="set_members" id="set_members" rows="10" width="100%">{% if variables.set_members %}{{variables.set_members}}{% endif %}</textarea>
-          <div class="vertical-spacing-top-0-25"><input type="submit" value="submit" /></div>
-      </form>
-      {% endif %}
+        <ul>
+          {% for error in errors %}
+            {% if error == "set_already_exists" %}
+              <li>This set already exists. You can add members to it or create a new set with a different title</li>
+            {% endif %}
+            {% if error == "blank_form" %}
+              <li>All of the items marked with * are required</li>
+            {% endif %}
+            {% if error == "validation_errors" %}
+              <li>All of the items marked with * are required. Please check your input.</li>
+            {% endif %}
+          {% endfor %}
+        </ul>
+        {% include "sets/set_create_form.html"%}
       </div>
     </div>
   </div>

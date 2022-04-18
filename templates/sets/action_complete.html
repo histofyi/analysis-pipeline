@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+
+
+
+
+{% block main %}
+
+<section class="vertical-spacing-top">
+  <div class="grid-container">
+    <div class="column-full-width">
+      <div class="inner">
+        <h1 class="vertical-spacing-bottom">
+        {% if action == "add" %}
+          Items added to "{{itemset.metadata.title}}" successfully!
+        {% endif %}
+        {% if action == "remove" %}
+          Items removed from "{{itemset.metadata.title}}" successfully!
+        {% endif %}
+        {% if action == "create" %}
+          Set "{{itemset.metadata.title}}" created successfully!
+        {% endif %}
+        </h1>
+        <ul>
+          {% for member in itemset.members %}
+            <li>{{member}}</li>
+          {% endfor %}
+        </ul>
+        <p>
+          Next actions:
+          <ul>
+            <li><a href="/sets/create">Create another set</a></li>
+            <li><a href="/sets/add/{{itemset.metadata.slug}}">Add</a> or <a href="/sets/remove/{{itemset.metadata.slug}}">remove</a> members from this set</li>
+            <li><a href="/sets/alter/{{itemset.metadata.slug}}">Change the metadata</a> for this set</li>
+            <li><a href="/sets/view/{{itemset.metadata.slug}}">View this set</a> in full</li>
+          </ul>
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+{% endblock %}

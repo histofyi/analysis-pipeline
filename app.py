@@ -183,3 +183,8 @@ def structure_title(description):
     return title
 
 
+
+@app.template_filter()
+def length(list):
+    return len(list)
+

@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+
+
+{% block style %}
+    <style>
+        
+
+        .wide_input {
+            width:50%;
+            font-size: 12pt;
+            padding: 5px;
+        }
+
+        
+
+    </style>
+    {% endblock %}
+
+{% block main %}
+
+<section class="vertical-spacing-top">
+  <div class="grid-container">
+    <div class="column-full-width">
+      <div class="inner">
+        <h1 class="vertical-spacing-bottom">{{action|title}} members of set "{{itemset.metadata.title}}"</h1>
+        <h2>Current members</h2>
+        <div>{{itemset.members}}</div>
+        <hr />
+        <p>
+        {% include "sets/members_form.html"%}
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+{% endblock %}

@@ -1,0 +1,7 @@
+<form action="/sets/{{action}}/{{itemset.metadata.slug}}" method="POST">
+    <div>
+        <label for="members">Members to {{action}}. As a comma separated list *</label><br />
+        <input type="text" name="members" id="members" class="wide_input" value="{{variables.members}}"/>
+    </div>
+    <div class="vertical-spacing-top-0-25"><input type="submit" value="submit"/></div>
+</form>

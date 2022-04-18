@@ -19,7 +19,7 @@ def view(pdb_code:str, aws_config: Dict, force: bool=False) -> Tuple[Dict, bool,
         bool: A boolean of True or False (success)
         List: A list of error strings (errors)
     """
-    blocks = ['core', 'pdb', 'rcsb', 'chains', 'allele_match']
+    blocks = ['core', 'chains', 'allele_match']
     output = {
         'pdb_code':pdb_code,
         'core':None,

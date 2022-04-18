@@ -7,7 +7,7 @@ from common.models import itemSet
 from common.forms import request_variables
 from structure_pipeline.pipeline_actions.match_peptide_block import match_peptide
 
-from .pipeline_actions import test, view, initialise, get_pdb_structure, parse_pdb_header, fetch_rcsb_info, alike_chains, match_chains, match_peptide
+from .pipeline_actions import test, view, initialise, get_pdb_structure, parse_pdb_header, fetch_rcsb_info, alike_chains, match_chains, match_peptide, api_match_peptide
 
 
 import logging
@@ -27,7 +27,7 @@ pipeline_actions = {
         'fetch_information':{'action':fetch_rcsb_info, 'name': 'Fetch information', 'show_in_list':False, 'link':False, 'next':'alike_chains'},
         'alike_chains':{'action':alike_chains, 'name': 'Detect alike chains', 'show_in_list':False, 'link':False, 'next':'match_chains'},
         'match_chains':{'action':match_chains, 'name': 'Match to MHC sequences', 'show_in_list':False, 'link':False, 'next':'match_peptide'},
-        'match_peptide':{'action':match_peptide, 'name': 'Match peptide', 'link':False, 'next':None},
+        'match_peptide':{'action':api_match_peptide, 'name': 'Match peptide', 'link':False, 'next':None},
         # TODO re-implement/refactor these actions
 #        'split': {'action':split_structure}, # splits structure into single assemblies
 #        'align': {'action':align_structures, 'blocks':['align_info']}, # aligns structure against canonical one

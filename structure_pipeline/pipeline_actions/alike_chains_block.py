@@ -52,7 +52,7 @@ def alike_chains(pdb_code, aws_config, force=False):
                     chain_lengths[chain.id.lower()] = len(chain_sequence)
                     chain_sequences[chain.id.lower()] = ''.join(chain_sequence)
     if len(data['components']) == 0:
-        step_errors.append['missing_components_dictionary']
+        step_errors.append('missing_components_dictionary')
     else:
         for component in data['components']:
             this_component = data['components'][component]

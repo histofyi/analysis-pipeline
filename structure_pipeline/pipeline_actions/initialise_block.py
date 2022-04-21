@@ -16,29 +16,44 @@ def build_core(pdb_code: str) -> Dict:
     """
     return {
         'pdb_code':pdb_code,
-        'organism_common':None,
-        'organism_scientific':None,
+        'assemblies':{'files':{}},
+        'organism':{},
         'class':None,
         'classical': None,
+        'complex':{'assemblies':{}},
         'locus':None,
         'allele':None,
-        'peptide':None,
-        'peptide_info':{},
-        'peptide_length': None,
-        'peptide_extended': None,
-        'peptide_disordered': None,
-        'peptide_modified': None,
+        'peptide':{
+            'sequence':None,
+            'info':{},
+            'length':{
+                'numeric':None,
+                'text':None
+            },
+            'extended':{
+                'c_terminal':False,
+                'n_terminal':False
+            },
+            'disordered':False,
+            'modified':None
+        },
         'resolution':None,
-        'deposition_date':None,
-        'release_date':None,
-        'components':{},
+        'assembly_count':None,
+        'chain_count':None,
+        'unique_chain_count': None,
+        'assembly_count':None,
+        'structure':{
+            'deposition_date':None,
+            'release_date':None
+        },
         'missing_residues':[],
-        'title':None,
+        'pdb_title':None,
         'authors':[],
         'publication':{},
         'doi':None,
         'open_access':False,
-        'manually_edited': {}
+        'manually_edited': {},
+        'facets':[]
     }
 
 
@@ -56,14 +71,19 @@ def initialise(pdb_code: str, aws_config: Dict, force:bool=False) -> Tuple[Dict,
         force (bool): determines whether the metadata on a particular structure should be reset
 
     Returns:
-        Dict: A dictionary of generated data (data)
+        Dict: A dictionary of generated data (output)
         bool: A boolean of True or False (success)
         List: A list of error strings (errors)
     """
+    
     s3 = s3Provider(aws_config)
     key = awsKeyProvider().block_key(pdb_code, 'core', 'info')
     data, success, errors = s3.get(key)
     if not data or force is True:
         data, success, errors = s3.put(key, build_core(pdb_code))
         data = json.loads(data)
-    return data, success, errors
+    output = {
+        'action':data,
+        'core':data
+    }
+    return output, success, errors

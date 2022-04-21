@@ -7,8 +7,14 @@ from common.models import itemSet
 from common.forms import request_variables
 from structure_pipeline.pipeline_actions.match_peptide_block import match_peptide
 
-from .pipeline_actions import test, view, initialise, get_pdb_structure, parse_pdb_header, fetch_rcsb_info, alike_chains, match_chains, match_peptide, api_match_peptide, fetch_summary_info, fetch_publication_info
+from .pipeline_actions import parse_pdb_header, fetch_rcsb_info, alike_chains, match_chains, api_match_peptide
 
+# initial methods
+from .pipeline_actions import test, view, initialise, get_pdb_structure
+# PDBe REST API methods
+from .pipeline_actions import fetch_summary_info, fetch_publication_info, fetch_experiment_info, get_pdbe_structures
+
+# structure based methods
 
 import logging
 import json
@@ -21,10 +27,11 @@ pipeline_actions = {
     'class_i': {
         'test':{'action':test, 'next':None, 'name':'Test', 'show_in_list':False, 'link':False},
         'view':{'action':view, 'next':None, 'name':'View', 'show_in_list':False, 'link':False},
-        'initialise':{'action':initialise, 'name':'Initialise', 'show_in_list':False, 'link':False, 'next':'fetch_structure'},
-        'fetch_structure':{'action':get_pdb_structure, 'name':'Fetch structure', 'show_in_list':False, 'link':False, 'next':'fetch_summary'},
-        'fetch_summary':{'action':fetch_summary_info, 'name': 'Fetch summary', 'show_in_list':False, 'link':False, 'next':'fetch_publications'},
-        'fetch_publications':{'action':fetch_publication_info, 'name': 'Fetch publications', 'show_in_list':False, 'link':False, 'next':'alike_chains'},
+        'initialise':{'action':initialise, 'name':'Initialise', 'show_in_list':False, 'link':False, 'next':'fetch_summary'},
+        'fetch_summary':{'action':fetch_summary_info, 'name': 'Fetch summary', 'show_in_list':False, 'link':False, 'next':'fetch_structure'},
+        'fetch_structure':{'action':get_pdbe_structures, 'name':'Fetch structure', 'show_in_list':False, 'link':False, 'next':'fetch_publications'},
+        'fetch_publications':{'action':fetch_publication_info, 'name': 'Fetch publications', 'show_in_list':False, 'link':False, 'next':'fetch_experiment'},
+        'fetch_experiment':{'action':fetch_experiment_info, 'name': 'Fetch experiment information', 'show_in_list':False, 'link':False, 'next':'alike_chains'},
         'alike_chains':{'action':alike_chains, 'name': 'Detect alike chains', 'show_in_list':False, 'link':False, 'next':'match_chains'},
         'match_chains':{'action':match_chains, 'name': 'Match to MHC sequences', 'show_in_list':False, 'link':False, 'next':'match_peptide'},
         'match_peptide':{'action':api_match_peptide, 'name': 'Match peptide', 'link':False, 'next':None},
@@ -149,6 +156,7 @@ def pipeline_item_handler(userobj, mhc_class, route, pdb_code):
         if request.args.get('force') == 'True':
             force = True
     data, success, errors = pipeline_actions[mhc_class][route]['action'](pdb_code.lower(), current_app.config['AWS_CONFIG'], force)
+
     if pipeline_actions[mhc_class][route]['next']:
         next = pipeline_actions[mhc_class][route]['next']
         next_action = {
@@ -158,7 +166,8 @@ def pipeline_item_handler(userobj, mhc_class, route, pdb_code):
     else:
         next_action = None
     return {
-            'data':data, 
+            'data':data['action'],
+            'core':data['core'], 
             'name':pipeline_actions[mhc_class][route]['name'], 
             'next':pipeline_actions[mhc_class][route]['next'], 
             'mhc_class':mhc_class, 

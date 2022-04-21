@@ -32,6 +32,7 @@
       <div class="inner">
         <h1 class="vertical-spacing-bottom">{{section|title}} | {{ mhc_class | deslugify }} | {{name}} | {{pdb_code | upper}}</h1>
         {% if data %}
+        <h3>Action data</h3>
         {% if data is mapping %}
             <textarea readonly>{{data|prettify_json}}</textarea>
         {% else %}
@@ -54,6 +55,8 @@
             {% endif %}
             {% include "structures/single_structure_mode_form.html" %}
         {% endif %}
+        <h3>Core record</h3>
+        <textarea readonly>{{core|prettify_json}}</textarea>
         {% endif %}
 
     </div>

@@ -17,11 +17,15 @@ class PDBeProvider():
         self.pdb_code = pdb_code
         self.url_stem = 'https://www.ebi.ac.uk/pdbe/api/pdb/entry/'
 
-    def fetch(self, route):
+    def fetch(self, route, first_only=True):
         url = f'{self.url_stem}/{route}/{self.pdb_code}'
-        results = httpProvider().get(url, format='json')[self.pdb_code][0]
+        results = httpProvider().get(url, format='json')[self.pdb_code]
         if results:
-            return results, True, []
+            trimmed_results = results
+            if isinstance(results, list):
+                if first_only:
+                    trimmed_results = results[0]
+            return trimmed_results, True, []
         else:
             return {}, False, ['unable_to_fetch']
 
@@ -52,6 +56,9 @@ class PDBeProvider():
     def fetch_observed_residues_ratio(self):
         return self.fetch('observed_residues_ratio')
 
+
+    def fetch_file_list(self):
+        return self.fetch('files')
 
 
 

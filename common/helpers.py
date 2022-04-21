@@ -1,12 +1,11 @@
 from flask import current_app, g
 
-from Bio.PDB import *
+from Bio.PDB import PDBParser
+from Bio.PDB.MMCIFParser import MMCIFParser
 from io import StringIO, TextIOWrapper
 
 
 from common.providers import s3Provider, awsKeyProvider
-
-import numpy as np
 
 import logging
 
@@ -39,6 +38,23 @@ def pdb_loader(pdb_data):
         return structure
     except:
         return None
+
+
+def cif_loader(cif_data, assembly_name):
+    cif_file = StringIO(cif_data)
+    parser = MMCIFParser(QUIET=True)
+    try:
+        structure = parser.get_structure(assembly_name, cif_file)
+    except:
+        structure = None
+    return structure
+
+
+def fetch_core(pdb_code, aws_config):
+    key = awsKeyProvider().block_key(pdb_code, 'core', 'info')
+    s3 = s3Provider(aws_config)
+    data, success, errors = s3.get(key)
+    return data, success, errors
 
 
 def update_block(pdb_code, facet, domain, update, aws_config, privacy='public'):

@@ -55,8 +55,10 @@
             {% endif %}
             {% include "structures/single_structure_mode_form.html" %}
         {% endif %}
-        <h3>Core record</h3>
-        <textarea readonly>{{core|prettify_json}}</textarea>
+        {% if core %}
+            <h3>Core record</h3>
+            <textarea readonly>{{core|prettify_json}}</textarea>
+        {% endif %}
         {% endif %}
 
     </div>

@@ -2,6 +2,7 @@ from re import A
 from typing import Dict, Tuple, List, Optional, Union
 
 from common.providers import s3Provider, awsKeyProvider
+from common.helpers import fetch_core
 
 import logging
 
@@ -19,17 +20,17 @@ def view(pdb_code:str, aws_config: Dict, force: bool=False) -> Tuple[Dict, bool,
         bool: A boolean of True or False (success)
         List: A list of error strings (errors)
     """
-    blocks = ['core', 'chains', 'allele_match']
-    output = {
-        'pdb_code':pdb_code,
-        'core':None,
-        'facets':{}
-    }
+    blocks = ['chains', 'allele_match', 'peptide_matches']
+    core, success, errors = fetch_core(pdb_code, aws_config)
+    core['pdb_code'] = pdb_code
+    core['facets'] = {}
     s3 = s3Provider(aws_config)
     for block in blocks:
         block_key = awsKeyProvider().block_key(pdb_code, block, 'info')
-        if block == 'core':
-            output[block] = s3.get(block_key)[0]
-        else:
-            output['facets'][block] = s3.get(block_key)[0]
+        block_data, success, errors = s3.get(block_key)
+        core['facets'][block] = block_data
+    output = {
+        'action': core,
+        'core': None
+    } 
     return output, True, None

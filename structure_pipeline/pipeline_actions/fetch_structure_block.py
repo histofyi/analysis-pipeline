@@ -22,7 +22,8 @@ def get_pdbe_structures(pdb_code:str, aws_config: Dict, force:bool=False):
     if core['assembly_count'] is not None:
         assembly_id = 1
         while assembly_id <= core['assembly_count']:
-            key = awsKeyProvider().cif_assembly_key(pdb_code, assembly_id, 'split')
+            assembly_identifier = f'{pdb_code}_{assembly_id}'
+            key = awsKeyProvider().cif_file_key(pdb_code, assembly_identifier, 'split')
             cif_data, success, errors = s3.get(key, data_format='cif')
             if not success:
                 has_updates = True

@@ -12,7 +12,7 @@ from .pipeline_actions import parse_pdb_header, fetch_rcsb_info, alike_chains, m
 # initial methods
 from .pipeline_actions import test, view, initialise, get_pdb_structure
 # PDBe REST API methods
-from .pipeline_actions import fetch_summary_info, fetch_publication_info, fetch_experiment_info, get_pdbe_structures
+from .pipeline_actions import fetch_summary_info, fetch_publication_info, fetch_experiment_info, get_pdbe_structures, assign_chains, align_structures
 
 # structure based methods
 
@@ -31,13 +31,12 @@ pipeline_actions = {
         'fetch_summary':{'action':fetch_summary_info, 'name': 'Fetch summary', 'show_in_list':False, 'link':False, 'next':'fetch_structure'},
         'fetch_structure':{'action':get_pdbe_structures, 'name':'Fetch structure', 'show_in_list':False, 'link':False, 'next':'fetch_publications'},
         'fetch_publications':{'action':fetch_publication_info, 'name': 'Fetch publications', 'show_in_list':False, 'link':False, 'next':'fetch_experiment'},
-        'fetch_experiment':{'action':fetch_experiment_info, 'name': 'Fetch experiment information', 'show_in_list':False, 'link':False, 'next':'alike_chains'},
-        'alike_chains':{'action':alike_chains, 'name': 'Detect alike chains', 'show_in_list':False, 'link':False, 'next':'match_chains'},
+        'fetch_experiment':{'action':fetch_experiment_info, 'name': 'Fetch experiment information', 'show_in_list':False, 'link':False, 'next':'assign_chains'},
+        'assign_chains':{'action':assign_chains, 'name': 'Assign chains', 'show_in_list':False, 'link':False, 'next':'match_chains'},
         'match_chains':{'action':match_chains, 'name': 'Match to MHC sequences', 'show_in_list':False, 'link':False, 'next':'match_peptide'},
-        'match_peptide':{'action':api_match_peptide, 'name': 'Match peptide', 'link':False, 'next':None},
+        'match_peptide':{'action':api_match_peptide, 'name': 'Match peptide', 'link':False, 'next':'align'},
+        'align': {'action':align_structures, 'name': 'Align structures', 'link':False, 'next':'view'},
         # TODO re-implement/refactor these actions
-#        'split': {'action':split_structure}, # splits structure into single assemblies
-#        'align': {'action':align_structures, 'blocks':['align_info']}, # aligns structure against canonical one
 #        'peptide_neighbours': {'action':peptide_neighbours, 'blocks':['neighbour_info']},
 #        'peptide_positions': {'action':peptide_positions, 'blocks':['peptide_positions']},
 #        'peptide_angles': {'action':measure_peptide_angles, 'blocks':['peptide_angle_info']},
@@ -81,13 +80,13 @@ def structure_redirect_handler(userobj:Dict) -> Dict:
 
     """
     variables = request_variables(None, params=['pdb_code','set_slug','mhc_class'])
-    logging.warn(variables)
     mhc_class = variables['mhc_class']
     if 'pdb_code' in variables:
         pdb_code = variables['pdb_code']
         url = f'/structures/{mhc_class.lower()}/initialise/{pdb_code.lower()}'
         return redirect(url)
     elif 'set_slug' in variables:
+        set_slug = variables['set_slug']
         url = f'/structures/{mhc_class.lower()}/initialise/set/{set_slug.lower()}'
         return redirect(url)
     else:

@@ -1,12 +1,16 @@
-from common.providers import s3Provider, awsKeyProvider
+from common.providers import s3Provider, awsKeyProvider, PDBeProvider
 from common.helpers import pdb_loader, update_block, three_letter_to_one, fetch_constants
+
+from common.helpers import fetch_constants, fetch_core, update_block
 
 import logging
 
 
 
-def assign_chains(chain_length, molecule):
-    molecule = molecule.replace('-',' ').split(' ')
+def assign_chain(chain_length, molecule, molecule_search_terms=None):
+    if not molecule_search_terms:
+        molecule_search_terms = molecule.replace('-',' ').split(' ')
+    
     max_match_count = 0
     best_match = 'unmatched'
     chains = fetch_constants('chains')
@@ -14,7 +18,7 @@ def assign_chains(chain_length, molecule):
         if chain_length < 20:
             best_match = 'peptide'
         else:
-            matches = [item for item in molecule if item in chains[chain]['features']]
+            matches = [item for item in molecule_search_terms if item in chains[chain]['features']]
             if chain_length > chains[chain]['length'] + chains[chain]['range'][0] and chain_length < chains[chain]['length'] + chains[chain]['range'][1]:
                 in_range = True
             else:
@@ -26,6 +30,53 @@ def assign_chains(chain_length, molecule):
                 max_match_count = match_count
                 best_match = chains[chain]['label']
     return best_match
+
+
+
+
+def assign_chains(pdb_code, aws_config, force=False):
+    set_errors = []
+    core, success, errors = fetch_core(pdb_code, aws_config)
+    action = {}
+    update = {'peptide':core['peptide']}
+    molecules_info, success, errors = PDBeProvider(pdb_code).fetch_molecules()
+    for chain in molecules_info:
+        if 'molecule' not in chain:
+            if 'length' in chain:
+                chain_id = chain['entity_id']
+                action[chain_id] = {
+                    'molecule':chain['molecule_name'][0].lower(),
+                    'chains':chain['in_chains'],
+                    'length':chain['length'],
+                    'gene_name':chain['gene_name'],
+                    'start':[source['mappings'][0]['start']['residue_number'] for source in chain['source']],
+                    'end':[source['mappings'][0]['end']['residue_number'] for source in chain['source']]
+                }
+
+                chain_length = chain['length']
+                molecule_search_terms = chain['molecule_name'][0].lower().split(' ')
+                if 'gene_name' in chain:
+                    for item in chain['gene_name']:
+                        molecule_search_terms.append(item)
+                best_match = assign_chain(chain_length, None, molecule_search_terms=molecule_search_terms)
+                action[chain_id]['best_match'] = best_match
+                action[chain_id]['sequences'] = [chain['sequence']]
+                if best_match in ['class_i_alpha', 'class_ii_alpha']:
+                    update['organism'] = {
+                        'scientific_name': chain['source'][0]['organism_scientific_name']
+                    }
+                if best_match == 'peptide':
+                    update['peptide']['sequence'] = chain['sequence']
+    s3 = s3Provider(aws_config)
+    chains_key = awsKeyProvider().block_key(pdb_code, 'chains', 'info')
+    s3.put(chains_key, action)
+    data, success, errors = update_block(pdb_code, 'core', 'info', update, aws_config)
+    output = {
+        'action':action,
+        'core':data
+    }
+    return output, True, set_errors
+
 
 
 
@@ -69,7 +120,7 @@ def alike_chains(pdb_code, aws_config, force=False):
                 chainset[component]['start'].append(chain_starts[chain_id])
                 i += 1
             chain_length = round(chain_length/i)
-            chainset[component]['best_match'] = assign_chains(chain_length,this_component['molecule'])
+            chainset[component]['best_match'] = assign_chain(chain_length,this_component['molecule'])
             if chainset[component]['best_match'] == 'unmatched':
                 if 'unassigned_chain' not in step_errors:
                     step_errors.append('unassigned_chain')

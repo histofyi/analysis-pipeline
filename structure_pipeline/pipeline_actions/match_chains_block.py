@@ -154,7 +154,7 @@ def match_chains(pdb_code, aws_config, force=False):
     else:
         core_key = awsKeyProvider().block_key(pdb_code, 'core', 'info')
         data, success, errors = s3.get(core_key)
-        organism = slugify(data['organism_scientific'])
+        organism = slugify(data['organism']['scientific_name'])
         species = fetch_constants('species')
         logging.warn(organism)
         scientific_names = [scientific for scientific in species]
@@ -187,7 +187,7 @@ def match_chains(pdb_code, aws_config, force=False):
                             if this_chain['length'] < 200:
                                 break
                             else:
-                                for locus in fetch_constants('loci')[slugify(organism)][mhc_class][chain]:
+                                for locus in fetch_constants('loci')[organism][mhc_class][chain]:
                                     sequence_key = awsKeyProvider().sequence_key(mhc_class, locus)
                                     sequence_data, success, errors = s3.get(sequence_key)
                                     loci[locus] = sequence_data
@@ -243,4 +243,8 @@ def match_chains(pdb_code, aws_config, force=False):
         update['allele'] = {'mhc_alpha':allele_match['allele']}
         update['allele_group'] = {'mhc_alpha':allele_match['allele_group']}
         data, success, errors = update_block(pdb_code, 'core', 'info', update, aws_config)
-    return allele_match, True, step_errors
+    output = {
+        'action':allele_match,
+        'core':data
+    }
+    return output, True, step_errors

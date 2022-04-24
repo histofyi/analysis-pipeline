@@ -30,7 +30,13 @@ def fetch_publication_info(pdb_code:str, aws_config:Dict, force:bool=False) -> D
         update['publication']['citation']['issue'] = publication_info['journal_info']['issue']
         update['publication']['citation']['pages'] = publication_info['journal_info']['pages']
         update['publication']['citation']['year'] = publication_info['journal_info']['year']
-        update['associated_structures'] = [member.strip() for member in publication_info['associated_entries'].split(',')]
+        if 'abstract' in publication_info:
+            if publication_info['abstract']['unassigned'] is not None:
+                update['publication']['abstract'] = publication_info['abstract']['unassigned']
+        if publication_info['associated_entries']:
+            update['associated_structures'] = [member.strip() for member in publication_info['associated_entries'].split(',')]
+        else:
+            update['associated_structures'] = []
         if update['doi'] is not None:
             if update['associated_structures'] is not None:
                 members = update['associated_structures']

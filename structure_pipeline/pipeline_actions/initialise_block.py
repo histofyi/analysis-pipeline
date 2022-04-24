@@ -53,7 +53,7 @@ def build_core(pdb_code: str) -> Dict:
         'doi':None,
         'open_access':False,
         'manually_edited': {},
-        'facets':[]
+        'facets':{}
     }
 
 

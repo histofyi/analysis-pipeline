@@ -42,11 +42,11 @@ class PDBeProvider():
 
 
     def fetch_molecules(self):
-        return self.fetch('molecules')
+        return self.fetch('molecules', first_only=False)
 
 
     def fetch_assembly(self):
-        return self.fetch('assembly')
+        return self.fetch('assembly', first_only=False)
 
 
     def fetch_files(self):

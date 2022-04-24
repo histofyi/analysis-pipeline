@@ -9,7 +9,7 @@
     <li><a {% if nav == navitem %}class="is-active"{% endif %} href="/{{navitem}}/">{{navitem|title}}</a></li>
 {% endfor %}
 {% if userobj %}
-    <li><a href="/auth/logout">Logout</a></li><li>|</li><li>{{userobj.given_name}}</li>
+    {% if not userobj.default_user %}<li><a href="/auth/logout">Logout</a></li>{% endif %}<li>|</li><li>{{userobj.given_name}}</li>
 {% else %}
     <li><a href="/auth/login">Login</a></li>
 {% endif %}

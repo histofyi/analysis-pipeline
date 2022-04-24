@@ -33,15 +33,19 @@ def requires_privilege(privilege:str=None):
     def decorator(f):
         @wraps(f)
         def decorated(*args, **kwargs):
-            userobj = get_user_from_cookie(request, current_app.config, privilege=privilege)
-            kwargs['userobj'] = userobj
-            if userobj:
-                if privilege in userobj['privileges']:
-                    return f(*args, **kwargs)
-                else:
-                    return redirect('/auth/not-allowed/'+ privilege)
-            else: 
-                return redirect('/auth/login')
+            if not current_app.config['NO_AUTH']:
+                userobj = get_user_from_cookie(request, current_app.config, privilege=privilege)
+                kwargs['userobj'] = userobj
+                if userobj:
+                    if privilege in userobj['privileges']:
+                        return f(*args, **kwargs)
+                    else:
+                        return redirect('/auth/not-allowed/'+ privilege)
+                else: 
+                    return redirect('/auth/login')
+            else:
+                kwargs['userobj'] = {'given_name':'localuser','default_user':True}
+                return f(*args, **kwargs)
         return decorated
     return decorator
 

@@ -48,6 +48,16 @@ def load_pdb(key, identifier, aws_config):
         return None
 
 
+def process_step_errors(step_errors):
+    if len(step_errors) > 0:
+        cleaned_step_errors = []
+        for error in step_errors:
+            if not error in cleaned_step_errors:
+                cleaned_step_errors.append(error)
+        return cleaned_step_errors
+    else:
+        return step_errors
+
 
 def fetch_constants(slug):
     if not 'constants' in g:

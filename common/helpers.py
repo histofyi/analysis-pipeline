@@ -11,6 +11,41 @@ import logging
 
 
 
+def load_cif(key, identifier, aws_config):
+    s3 = s3Provider(aws_config)
+    cif_data, success, errors = s3.get(key, 'cif')
+    if success:
+        try:
+            structure = cif_loader(cif_data.decode('utf-8'), identifier)
+        except:
+            structure = None
+        return structure
+    else:
+        return None
+
+
+def save_cif(key, cif_file_handle, aws_config):
+    s3 = s3Provider(aws_config)
+    cif_data, success, errors = s3.put(key, cif_file_handle.getvalue(), 'cif')
+    if success:
+        return cif_file_handle.getvalue()
+    else:
+        return None
+
+
+
+
+def load_pdb(key, identifier, aws_config):
+    s3 = s3Provider(aws_config)
+    pdb_data, success, errors = s3.get(key, 'pdb')
+    if success:
+        try:
+            structure = pdb_loader(pdb_data.decode('utf-8'), identifier)
+        except:
+            structure = None
+        return structure
+    else:
+        return None
 
 
 
@@ -30,11 +65,11 @@ def fetch_constants(slug):
 
 
 
-def pdb_loader(pdb_data):
-    pdb_file = StringIO(pdb_data.decode('utf-8'))
+def pdb_loader(pdb_data, identifier):
+    pdb_file = StringIO(pdb_data)
     parser = PDBParser(PERMISSIVE=1)
     try:
-        structure = parser.get_structure('mhc', pdb_file)
+        structure = parser.get_structure(identifier, pdb_file)
         return structure
     except:
         return None
@@ -48,6 +83,8 @@ def cif_loader(cif_data, assembly_name):
     except:
         structure = None
     return structure
+
+
 
 
 def fetch_core(pdb_code, aws_config):

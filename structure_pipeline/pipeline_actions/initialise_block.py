@@ -75,15 +75,19 @@ def initialise(pdb_code: str, aws_config: Dict, force:bool=False) -> Tuple[Dict,
         bool: A boolean of True or False (success)
         List: A list of error strings (errors)
     """
-    
+    step_errors = []
     s3 = s3Provider(aws_config)
     key = awsKeyProvider().block_key(pdb_code, 'core', 'info')
     data, success, errors = s3.get(key)
+    if errors:
+        step_errors.append(errors)
     if not data or force is True:
         data, success, errors = s3.put(key, build_core(pdb_code))
         data = json.loads(data)
+    if errors:
+        step_errors.append(errors)
     output = {
         'action':data,
         'core':data
     }
-    return output, success, errors
+    return output, success, list(set(step_errors))

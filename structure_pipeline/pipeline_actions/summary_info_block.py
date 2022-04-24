@@ -1,7 +1,7 @@
 from typing import Dict, List, Tuple
 
-from common.providers import s3Provider, awsKeyProvider, PDBeProvider
-from common.helpers import update_block, fetch_constants, fetch_core
+from common.providers import PDBeProvider
+from common.helpers import update_block, fetch_core, process_step_errors
 
 import datetime
 
@@ -29,6 +29,7 @@ def fetch_summary_info(pdb_code:str, aws_config, force=False):
     Returns:
         Dict: a dictionary of the summary information from the PDBe and an attribution
     """
+    step_errors = []
     summary_info, success, errors = PDBeProvider(pdb_code).fetch_summary()
     if summary_info:
         update = {'complex':{},'structure':{}}
@@ -42,10 +43,14 @@ def fetch_summary_info(pdb_code:str, aws_config, force=False):
         update['chain_count'] =  update['assembly_count'] * update['unique_chain_count']
         update['authors'] = summary_info['entry_authors']
         data, success, errors = update_block(pdb_code, 'core', 'info', update, aws_config)
+        if errors:
+            step_errors.append(errors)
     if not data:
         data, success, errors = fetch_core(pdb_code, aws_config)
+        if errors:
+            step_errors.append(errors)
     output = {
         'action':{'summary':summary_info, 'source':'PDBe REST API summary method'},
         'core': data
     }
-    return output, True, []
+    return output, success, process_step_errors(step_errors)

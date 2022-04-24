@@ -4,14 +4,15 @@ from common.helpers import fetch_constants, update_block, slugify, levenshtein_r
 import logging
 
 
-def build_match_block(allele, locus, match_type, confidence):
+def build_match_block(allele, locus, match_type, confidence, mhc_class):
     match_info = {
         'allele': allele['allele'],
         'allele_group':allele['allele_group'],
         'locus':locus.upper(),
         'id':allele['id'],
         'match_type':match_type,
-        'confidence': confidence
+        'confidence': confidence,
+        'class': mhc_class
     }
     return match_info
 
@@ -147,18 +148,25 @@ def match_chains(pdb_code, aws_config, force=False):
     best_match = None
     allele_match = None
     this_chain = None
+    core_key = awsKeyProvider().block_key(pdb_code, 'core', 'info')
+    core, success, errors = s3.get(core_key)
+    organism = slugify(core['organism']['scientific_name'])
+
+    species = fetch_constants('species')
+
     match_key = awsKeyProvider().block_key(pdb_code, 'allele_match', 'info')
-    data, success, errors = s3.get(match_key)
-    if success:
-        allele_match = data
+    if force:
+        match_data = None
+    else:
+        match_data, success, errors = s3.get(match_key)
+    if match_data:
+        allele_match = match_data
     else:
         core_key = awsKeyProvider().block_key(pdb_code, 'core', 'info')
         data, success, errors = s3.get(core_key)
         organism = slugify(data['organism']['scientific_name'])
         species = fetch_constants('species')
-        logging.warn(organism)
         scientific_names = [scientific for scientific in species]
-        logging.warn(scientific_names)
         if organism not in scientific_names:
             step_errors.append('no_match_for:'+ organism)
             return None, False, step_errors
@@ -197,7 +205,7 @@ def match_chains(pdb_code, aws_config, force=False):
                                         best_ratio = 1
                                         match_type = 'exact'
                                         step_errors = []
-                                        allele_match = build_match_block(best_match, this_locus, match_type, best_ratio)
+                                        allele_match = build_match_block(best_match, this_locus, match_type, best_ratio, mhc_class)
                                         break
                                     else:
                                         best_match = exact_match(mhc_class, loci[this_locus], this_chain, first_allele_only=False)
@@ -205,14 +213,14 @@ def match_chains(pdb_code, aws_config, force=False):
                                             best_ratio = 1
                                             match_type = 'exact'
                                             step_errors = []
-                                            allele_match = build_match_block(best_match, this_locus, match_type, best_ratio)
+                                            allele_match = build_match_block(best_match, this_locus, match_type, best_ratio, mhc_class)
                                             break
                                         else:
                                             best_match, best_ratio = fuzzy_match(mhc_class, loci[this_locus], this_chain)
                                             if best_match:
                                                 match_type = 'fuzzy'
                                                 step_errors = []
-                                                allele_match = build_match_block(best_match, this_locus, match_type, best_ratio)
+                                                allele_match = build_match_block(best_match, this_locus, match_type, best_ratio, mhc_class)
                                                 break
                     else:
                         step_errors.append('no_chain_info')
@@ -242,6 +250,8 @@ def match_chains(pdb_code, aws_config, force=False):
         update['locus'] = allele_match['locus']
         update['allele'] = {'mhc_alpha':allele_match['allele']}
         update['allele_group'] = {'mhc_alpha':allele_match['allele_group']}
+
+        # Add to species class set
         data, success, errors = update_block(pdb_code, 'core', 'info', update, aws_config)
     output = {
         'action':allele_match,

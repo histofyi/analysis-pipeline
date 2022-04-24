@@ -1,7 +1,7 @@
 from typing import Dict, List, Tuple
 
 from common.providers import s3Provider, awsKeyProvider, PDBeProvider
-from common.helpers import update_block, fetch_core
+from common.helpers import process_step_errors, update_block, fetch_core
 from common.functions import slugify
 
 from common.models import itemSet
@@ -18,6 +18,7 @@ def fetch_publication_info(pdb_code:str, aws_config:Dict, force:bool=False) -> D
         aws_config (Dict): the AWS configuration for the environment
         force (bool): not currently used, may be implemented to force a re-download in the case of a revised structure
     """
+    step_errors = []
     publication_info, success, errors = PDBeProvider(pdb_code).fetch_publications()
     if publication_info:
         update = {'publication':{'citation':{}}}
@@ -45,9 +46,13 @@ def fetch_publication_info(pdb_code:str, aws_config:Dict, force:bool=False) -> D
             else:
                 members = [pdb_code]
             itemset, success, errors = itemSet(slugify(update['doi'])).create_or_update('doi:'+ update['doi'], 'Structures in '+ update['publication']['citation']['title'], members, 'publication')
+            if errors:
+                step_errors.append(errors)
         data, success, errors = update_block(pdb_code, 'core', 'info', update, aws_config)
+        if errors:
+            step_errors.append(errors)
     output = {
         'action': {'publication':publication_info, 'source':'PDBe REST API publication method'} ,
         'core': data
     }
-    return output, True, []
+    return output, True, process_step_errors(step_errors)

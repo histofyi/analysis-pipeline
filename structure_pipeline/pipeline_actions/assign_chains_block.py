@@ -1,7 +1,7 @@
 from common.providers import s3Provider, awsKeyProvider, PDBeProvider
 from common.helpers import pdb_loader, update_block, three_letter_to_one, fetch_constants
 
-from common.helpers import fetch_constants, fetch_core, update_block
+from common.helpers import fetch_constants, fetch_core, update_block, slugify
 
 import logging
 
@@ -32,6 +32,17 @@ def assign_chain(chain_length, molecule, molecule_search_terms=None):
     return best_match
 
 
+def organism_update(organism_scientific):
+    species = fetch_constants('species')
+    organism_slug = slugify(organism_scientific)
+    if organism_slug in species:
+        organism_update = {
+            'scientific_name':species[organism_slug]['scientific_name'],
+            'common_name':species[organism_slug]['common_name']
+        }
+    else:
+        organism_update = {'scientific_name':organism_scientific}
+    return organism_update
 
 
 def assign_chains(pdb_code, aws_config, force=False):
@@ -62,9 +73,8 @@ def assign_chains(pdb_code, aws_config, force=False):
                 action[chain_id]['best_match'] = best_match
                 action[chain_id]['sequences'] = [chain['sequence']]
                 if best_match in ['class_i_alpha', 'class_ii_alpha']:
-                    update['organism'] = {
-                        'scientific_name': chain['source'][0]['organism_scientific_name']
-                    }
+                    organism_update(chain['source'][0]['organism_scientific_name'])
+                    update['organism'] = organism_update(chain['source'][0]['organism_scientific_name'])
                 if best_match == 'peptide':
                     update['peptide']['sequence'] = chain['sequence']
     s3 = s3Provider(aws_config)

@@ -12,13 +12,3 @@ from .match_chains_block import match_chains # computed from IPD data using Leve
 from .match_peptide_block import api_match_peptide # computed from IEDB REST API
 
 from .align_structures_block import align_structures # computed using BioPython
-
-
-
-
-
-# OLD
-
-from .structure_info_block import parse_pdb_header
-from .rcsb_info_block import fetch_rcsb_info
-

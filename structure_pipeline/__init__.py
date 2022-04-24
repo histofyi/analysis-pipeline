@@ -5,12 +5,11 @@ from common.decorators import check_user, requires_privilege, templated
 from common.models import itemSet
 
 from common.forms import request_variables
-from structure_pipeline.pipeline_actions.match_peptide_block import match_peptide
 
-from .pipeline_actions import parse_pdb_header, fetch_rcsb_info, alike_chains, match_chains, api_match_peptide
+from .pipeline_actions import match_chains, api_match_peptide
 
 # initial methods
-from .pipeline_actions import test, view, initialise, get_pdb_structure
+from .pipeline_actions import test, view, initialise
 # PDBe REST API methods
 from .pipeline_actions import fetch_summary_info, fetch_publication_info, fetch_experiment_info, get_pdbe_structures, assign_chains, align_structures
 

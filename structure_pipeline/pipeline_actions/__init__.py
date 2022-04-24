@@ -9,7 +9,7 @@ from .experiment_info_block import fetch_experiment_info
 from .fetch_structure_block import get_pdbe_structures
 from .assign_chains_block import alike_chains, assign_chains
 from .match_chains_block import match_chains
-from .match_peptide_block import match_peptide, api_match_peptide
+from .match_peptide_block import api_match_peptide
 
 from .align_structures_block import align_structures
 

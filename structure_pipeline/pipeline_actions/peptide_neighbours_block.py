@@ -19,7 +19,7 @@ def peptide_neighbours(pdb_code:str, aws_config:Dict, force:bool=False) -> Tuple
     contacts = {}
     peptide_chains = []
     mhc_chains = []
-    sorted_peptide = {}
+    sorted_peptides = {}
     if mhc_class == 'class_i':
         for chain in chains:
             if chains[chain]['best_match'] == 'peptide':
@@ -76,11 +76,12 @@ def peptide_neighbours(pdb_code:str, aws_config:Dict, force:bool=False) -> Tuple
                         contacts[class_i_peptide][peptide_residue_id]['neighbours'].append(class_i_details)
 
                 sorted_peptide = dict(sorted(contacts[class_i_peptide].items()))
-                peptide_key = awsKeyProvider().block_key(pdb_code, 'peptide_neighbours', 'info')
-                s3.put(peptide_key, sorted_peptide)
+            sorted_peptides[assembly_id] = sorted_peptide
+        peptide_key = awsKeyProvider().block_key(pdb_code, 'peptide_neighbours', 'info')
+        s3.put(peptide_key, sorted_peptides)
     # TODO Class II 
     #elif mhc_class == 'class_ii':
-    action = {'peptide_neighbours':sorted_peptide}
+    action = {'peptide_neighbours':sorted_peptides}
     output = {
         'action':action,
         'core':core

@@ -20,7 +20,7 @@ def view(pdb_code:str, aws_config: Dict, force: bool=False) -> Tuple[Dict, bool,
         bool: A boolean of True or False (success)
         List: A list of error strings (errors)
     """
-    blocks = ['chains', 'allele_match', 'peptide_matches']
+    blocks = ['chains', 'allele_match', 'peptide_matches', 'peptide_neighbours']
     core, success, errors = fetch_core(pdb_code, aws_config)
     core['pdb_code'] = pdb_code
     core['facets'] = {}

@@ -11,7 +11,7 @@ from .pipeline_actions import match_chains, api_match_peptide
 # initial methods
 from .pipeline_actions import test, view, initialise
 # PDBe REST API methods
-from .pipeline_actions import fetch_summary_info, fetch_publication_info, fetch_experiment_info, get_pdbe_structures, assign_chains, align_structures
+from .pipeline_actions import fetch_summary_info, fetch_publication_info, fetch_experiment_info, get_pdbe_structures, assign_chains, align_structures, peptide_neighbours
 
 # structure based methods
 
@@ -34,9 +34,10 @@ pipeline_actions = {
         'assign_chains':{'action':assign_chains, 'name': 'Assign chains', 'show_in_list':False, 'link':False, 'next':'match_chains'},
         'match_chains':{'action':match_chains, 'name': 'Match to MHC sequences', 'show_in_list':False, 'link':False, 'next':'match_peptide'},
         'match_peptide':{'action':api_match_peptide, 'name': 'Match peptide', 'link':False, 'next':'align'},
-        'align': {'action':align_structures, 'name': 'Align structures', 'link':False, 'next':'view'},
+        'align': {'action':align_structures, 'name': 'Align structures', 'link':False, 'next':'peptide_neighbours'},
+        'peptide_neighbours': {'action':peptide_neighbours, 'name': 'Find peptide neighbours', 'link':False, 'next':'view'},
+        
         # TODO re-implement/refactor these actions
-#        'peptide_neighbours': {'action':peptide_neighbours, 'blocks':['neighbour_info']},
 #        'peptide_positions': {'action':peptide_positions, 'blocks':['peptide_positions']},
 #        'peptide_angles': {'action':measure_peptide_angles, 'blocks':['peptide_angle_info']},
 #        'extract_peptides': {'action':extract_peptides, 'blocks':[]},

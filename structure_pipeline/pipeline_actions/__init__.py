@@ -12,3 +12,4 @@ from .match_chains_block import match_chains # computed from IPD data using Leve
 from .match_peptide_block import api_match_peptide # computed from IEDB REST API
 
 from .align_structures_block import align_structures # computed using BioPython
+from .peptide_neighbours_block import peptide_neighbours  # computed using BioPython

@@ -25,7 +25,7 @@ def get_pdbe_structures(pdb_code:str, aws_config: Dict, force:bool=False):
         assembly_id = 1
         while assembly_id <= core['assembly_count']:
             assembly_identifier = f'{pdb_code}_{assembly_id}'
-            key = awsKeyProvider().cif_file_key(assembly_id, 'split')
+            key = awsKeyProvider().cif_file_key(assembly_identifier, 'split')
             cif_data, success, errors = s3.get(key, data_format='cif')
             if errors:
                 step_errors.append(errors)

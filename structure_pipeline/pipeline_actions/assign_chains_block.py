@@ -67,8 +67,9 @@ def assign_chains(pdb_code, aws_config, force=False):
                 chain_length = chain['length']
                 molecule_search_terms = chain['molecule_name'][0].lower().split(' ')
                 if 'gene_name' in chain:
-                    for item in chain['gene_name']:
-                        molecule_search_terms.append(item)
+                    if chain['gene_name'] is not None:
+                        for item in chain['gene_name']:
+                            molecule_search_terms.append(item)
                 best_match = assign_chain(chain_length, None, molecule_search_terms=molecule_search_terms)
                 action[chain_id]['best_match'] = best_match
                 action[chain_id]['sequences'] = [chain['sequence']]

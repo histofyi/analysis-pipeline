@@ -118,29 +118,31 @@ def align_structures(pdb_code:str, aws_config:Dict, force:bool=False) -> Dict:
     chains_key = awsKeyProvider().block_key(pdb_code, 'chains', 'info')
     chains, success, errors = s3.get(chains_key)
     mhc_class = core['class']
+    chain_ids = None
     if mhc_class in ['class_i','class_ii']:
         for chain in chains:
             if mhc_class in chains[chain]['best_match']:
                 chain_ids = chains[chain]['chains']
     action = {'aligned':{'files':{}}}
     update = {}
-    for assembly_id in core['assemblies']['files']:
-        canonical_key = 'structures/canonical/class_i.cif'
-        cif_key = core['assemblies']['files'][assembly_id]['files']['file_key']
-        assembly_identifier = f'{pdb_code}_{assembly_id}'
-        structure = load_cif(cif_key, assembly_identifier, aws_config)
-        canonical = load_cif(canonical_key, 'class_i', aws_config)
-        if structure and canonical:
-            chain_id = chain_ids[int(assembly_id) - 1]
-            alignment, errors = align_structure(structure, canonical, chain_id, assembly_identifier, mhc_class, aws_config)
-            if not errors:
-                action['aligned']['files'][assembly_id] = alignment
-            else:
-                step_errors.append(errors)
-    if len(step_errors) == 0:
-        update['aligned'] = action['aligned']
-        data, success, errors = update_block(pdb_code, 'core', 'info', update, aws_config)
-        core = data
+    if chain_ids:
+        for assembly_id in core['assemblies']['files']:
+            canonical_key = 'structures/canonical/class_i.cif'
+            cif_key = core['assemblies']['files'][assembly_id]['files']['file_key']
+            assembly_identifier = f'{pdb_code}_{assembly_id}'
+            structure = load_cif(cif_key, assembly_identifier, aws_config)
+            canonical = load_cif(canonical_key, 'class_i', aws_config)
+            if structure and canonical:
+                chain_id = chain_ids[int(assembly_id) - 1]
+                alignment, errors = align_structure(structure, canonical, chain_id, assembly_identifier, mhc_class, aws_config)
+                if not errors:
+                    action['aligned']['files'][assembly_id] = alignment
+                else:
+                    step_errors.append(errors)
+        if len(step_errors) == 0:
+            update['aligned'] = action['aligned']
+            data, success, errors = update_block(pdb_code, 'core', 'info', update, aws_config)
+            core = data
     output = {
         'action':action,
         'core':core

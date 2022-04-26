@@ -14,18 +14,15 @@ def peptide_features(pdb_code:str, aws_config:Dict, force:bool=False) -> Tuple[D
     
     extended_peptide = False
     exposed_bulge = False
-    extension_positions = []
-    extension_length = 0
     peptide_features = {}
-
+    extensions = None
 
     for assembly_id in sorted_peptide:
         peptide_features[assembly_id] = {
-            'P1':None,
+            'PN':None,
             'PC':None,
             'exposed':[],
             'buried':[]
-
         }
         for position in sorted_peptide[assembly_id]:
             abd_contacts = [neighbour['position'] for neighbour in sorted_peptide[assembly_id][position]['neighbours']]
@@ -34,13 +31,21 @@ def peptide_features(pdb_code:str, aws_config:Dict, force:bool=False) -> Tuple[D
             else:
                 peptide_features[assembly_id]['buried'].append(position)
             if 7 in abd_contacts and 171 in abd_contacts:
-                peptide_features[assembly_id]['P1'] = position
+                peptide_features[assembly_id]['PN'] = position
+                
             if 116 in abd_contacts and 143 in abd_contacts:
                 peptide_features[assembly_id]['PC'] = position
-        logging.warn(peptide_features[assembly_id])
 
+        if int(peptide_features[assembly_id]['PN']) > 1:
+            extended_peptide = True 
+            extensions = {'n-terminal':{'positions':[]}}
 
+        if int(peptide_features[assembly_id]['PC']) < len(sorted_peptide[assembly_id]): 
+            extended_peptide = True
+            extensions = {'c-terminal':{'positions':[]}}
 
+    peptide_features['extended_peptide'] = extended_peptide
+    peptide_features['extensions'] = extensions
     step_errors = []
     action = {
         'peptide_features':peptide_features

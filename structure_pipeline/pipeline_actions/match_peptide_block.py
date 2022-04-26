@@ -71,7 +71,7 @@ def api_match_peptide(pdb_code:str, aws_config: Dict, force: bool=False) -> Tupl
                 peptide_length_name = None 
                 step_errors.append('no_matching_peptide_length_name') 
             update['peptide']['length'] = {
-                'numeric':len(core['peptide']),
+                'numeric':len(core['peptide']['sequence']),
                 'text': peptide_length_name
             }
             if exact_match:

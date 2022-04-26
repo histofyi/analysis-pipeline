@@ -3,7 +3,7 @@ from flask import current_app, g
 from Bio.PDB import PDBParser
 from Bio.PDB.MMCIFParser import MMCIFParser
 from io import StringIO, TextIOWrapper
-
+import numpy as np
 
 from common.providers import s3Provider, awsKeyProvider
 

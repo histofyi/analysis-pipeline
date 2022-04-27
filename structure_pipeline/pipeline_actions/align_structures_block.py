@@ -10,8 +10,8 @@ from common.providers import s3Provider, awsKeyProvider, PDBeProvider
 from common.helpers import update_block, fetch_core, load_cif, save_cif
 import logging
 
-
-start_id = 1
+# Don't start at 1 as many structures start at 2 or 3 due to disorder of the first few residues
+start_id = 3
 end_id   = 180
 
 def align_structure(target, canonical, target_chain_id, assembly_identifier, mhc_class, aws_config):
@@ -98,6 +98,7 @@ def align_structure(target, canonical, target_chain_id, assembly_identifier, mhc
         errors = None
     else:
         aligned = None
+    
     if rmsd:
         logging.warn(f'RMSD is {rmsd}')
     else:
@@ -143,6 +144,8 @@ def align_structures(pdb_code:str, aws_config:Dict, force:bool=False) -> Dict:
             update['aligned'] = action['aligned']
             data, success, errors = update_block(pdb_code, 'core', 'info', update, aws_config)
             core = data
+            aligned_key = awsKeyProvider().block_key(pdb_code, 'aligned', 'info')
+            data, success, errors = s3.put(aligned_key, action, data_format='json')
     output = {
         'action':action,
         'core':core

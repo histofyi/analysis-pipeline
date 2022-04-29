@@ -1,12 +1,11 @@
 from typing import Dict, Tuple, List, Optional, Union
 
-from common.providers import s3Provider, awsKeyProvider, filesystemProvider, httpProvider
+from common.providers import s3Provider, awsKeyProvider, httpProvider
 from common.helpers import update_block, fetch_constants, slugify
 from common.models import itemSet
 
 import csv
 
-fs = filesystemProvider('structure_pipeline/files')
 
 import logging
 

@@ -81,7 +81,7 @@ def sets_create_action_handler(userobj:Dict) -> Dict:
     variables = request_variables(None, params=params)
     validated, errors = validate_variables(variables, params)
     if validated:
-        set = itemSet(None, variables['title'])
+        set = itemSet(None, variables['context'], title=variables['title'])
         if set.exists():
             errors = ['set_already_exists']
             return {'userobj': userobj, 'variables':variables, 'validated': validated, 'errors':errors, 'success':success, 'itemset':itemset, 'contexts':contexts}
@@ -90,18 +90,19 @@ def sets_create_action_handler(userobj:Dict) -> Dict:
                 variables['members'] = set.clean_members(variables['members'])
             itemset, success, errors = set.create(variables['title'], variables['description'], variables['members'], variables['context'])
             set_slug = itemset['metadata']['slug']
-            redirect_to = f'/sets/create/complete/{set_slug}'
+            set_context = itemset['context']
+            redirect_to = f'/sets/create/complete/{set_context}/{set_slug}'
             return {'redirect_to': redirect_to}
     else:
         errors = ['validation_errors']
         return {'userobj': userobj, 'variables':variables, 'validated': validated, 'errors':errors, 'success':success, 'itemset':itemset, 'contexts':contexts}
 
 
-@set_pipeline_views.get('/view/<string:set_slug>')
+@set_pipeline_views.get('/view/<string:set_context>/<string:set_slug>')
 @check_user
 @requires_privilege('users')
 @templated('sets/view')
-def set_view(userobj:Dict, set_slug:str) -> Dict:
+def set_view(userobj:Dict, set_context:str, set_slug:str) -> Dict:
     """
     This handler provides the form for changing the members of a set, adding or removing
 
@@ -112,15 +113,15 @@ def set_view(userobj:Dict, set_slug:str) -> Dict:
         Dict: a dictionary containing the user object, an empty variables dictionary and an errors array containing the indication that it's an empty form
 
     """
-    itemset, success, errors = itemSet(set_slug).get()    
+    itemset, success, errors = itemSet(set_slug, set_context).get()    
     return {'userobj': userobj, 'itemset':itemset}
 
 
-@set_pipeline_views.get('/<string:action>/complete/<string:set_slug>')
+@set_pipeline_views.get('/<string:action>/complete/<string:set_context>/<string:set_slug>')
 @check_user
 @requires_privilege('users')
 @templated('sets/action_complete')
-def sets_create_complete_handler(userobj:Dict, action:str, set_slug:str) -> Dict:
+def sets_create_complete_handler(userobj:Dict, action:str, set_context:str, set_slug:str) -> Dict:
     """
     This handler provides the confirmation page for editorial set curation
 
@@ -135,11 +136,11 @@ def sets_create_complete_handler(userobj:Dict, action:str, set_slug:str) -> Dict
         Dict: a dictionary containing the user object and a list of possible next actions
 
     """
-    itemset, success, errors = itemSet(set_slug).get()
+    itemset, success, errors = itemSet(set_slug, set_context).get()
     return {'userobj': userobj, 'itemset':itemset, 'action':action}
 
 
-@set_pipeline_views.get('/<string:action>/<string:set_slug>')
+@set_pipeline_views.get('/<string:action>/<string:set_context>/<string:set_slug>')
 @check_user
 @requires_privilege('users')
 @templated('sets/add_remove_members')
@@ -160,11 +161,11 @@ def sets_add_remove_form_handler(userobj:Dict, action:str, set_slug:str) -> Dict
 
 
 
-@set_pipeline_views.post('/<string:action>/<string:set_slug>')
+@set_pipeline_views.post('/<string:action>/<string:set_context>/<string:set_slug>')
 @check_user
 @requires_privilege('users')
 @templated('sets/add_remove_members')
-def sets_add_remove_action_handler(userobj:Dict, action:str, set_slug:str) -> Dict:
+def sets_add_remove_action_handler(userobj:Dict, action:str, set_context:str, set_slug:str) -> Dict:
     """
     This handler provides the action for changing the members of a set, adding or removing
 
@@ -177,7 +178,7 @@ def sets_add_remove_action_handler(userobj:Dict, action:str, set_slug:str) -> Di
         Dict: a dictionary containing the user object, an empty variables dictionary and an errors array containing the indication that it's an empty form
 
     """
-    itemset, success, errors = itemSet(set_slug).get()
+    itemset, success, errors = itemSet(set_slug, set_context).get()
     success = True    
     variables = request_variables(None, params=['members'])
     if ',' in variables['members']:
@@ -201,11 +202,11 @@ def sets_add_remove_action_handler(userobj:Dict, action:str, set_slug:str) -> Di
 
 
 
-@set_pipeline_views.get('/alter/<string:set_slug>')
+@set_pipeline_views.get('/alter/<string:set_context>/<string:set_slug>')
 @check_user
 @requires_privilege('users')
 @templated('sets/alter')
-def sets_alter_form_handler(userobj:Dict) -> Dict:
+def sets_alter_form_handler(userobj:Dict, set_context:str, set_slug:str) -> Dict:
     """
     This handler provides the form for changing the metadata of a set
 
@@ -223,7 +224,7 @@ def sets_alter_form_handler(userobj:Dict) -> Dict:
     return {'userobj': userobj, 'variables':{}, 'errors':['blank_form']}
 
 
-@set_pipeline_views.get('/alter/<string:set_slug>')
+@set_pipeline_views.get('/alter/<string:set_context>/<string:set_slug>')
 @check_user
 @requires_privilege('users')
 @templated('sets/alter')

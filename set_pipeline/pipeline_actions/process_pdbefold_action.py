@@ -44,5 +44,5 @@ def process_pdbefold(mhc_class:str) -> Dict:
         i += 1
     complexes = list(set(complexes))
     complexes = sorted(complexes)
-    itemset, success, errors = itemSet(slug).create_or_update(title, description, complexes, 'search_query')
+    itemset, success, errors = itemSet(slug, 'search_query').create_or_update(title, description, complexes, 'search_query')
     return itemset

@@ -45,7 +45,7 @@ def fetch_publication_info(pdb_code:str, aws_config:Dict, force:bool=False) -> D
                 members = sorted(members)
             else:
                 members = [pdb_code]
-            itemset, success, errors = itemSet(slugify(update['doi'])).create_or_update('doi:'+ update['doi'], 'Structures in '+ update['publication']['citation']['title'], members, 'publication')
+            itemset, success, errors = itemSet(slugify(update['doi']), 'publication').create_or_update('doi:'+ update['doi'], 'Structures in '+ update['publication']['citation']['title'], members, 'publication')
             if errors:
                 step_errors.append(errors)
         data, success, errors = update_block(pdb_code, 'core', 'info', update, aws_config)

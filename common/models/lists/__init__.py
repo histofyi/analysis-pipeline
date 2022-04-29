@@ -35,7 +35,7 @@ class itemSet():
     }
 
 
-    def __init__(self, set_slug, title=None, set_type='structures'):
+    def __init__(self, set_slug, context, title=None, set_type='structures'):
         """
         This method initialises the itemSet class
 
@@ -50,7 +50,7 @@ class itemSet():
             self.set_slug = set_slug
         else:
             self.set_slug = slugify(title)
-        self.set_key = awsKeyProvider().set_key(self.set_slug, set_type)
+        self.set_key = awsKeyProvider().set_key(self.set_slug, set_type, context)
         self.aws_config = current_app.config['AWS_CONFIG']
 
 
@@ -75,7 +75,7 @@ class itemSet():
     def put(self, itemset):
         itemset['last_updated'] = datetime.datetime.now().isoformat()
         itemset['members'] = [member.strip() for member in itemset['members']]
-        itemset, success, errors = s3Provider(self.aws_config).put(self.set_key,itemset)
+        itemset, success, errors = s3Provider(self.aws_config).put(self.set_key, itemset)
         return json.loads(itemset), success, errors
 
 

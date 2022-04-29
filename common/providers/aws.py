@@ -29,7 +29,7 @@ class awsKeyProvider():
         Returns:
             str : the S3 key for the object
         """
-        return f'structures/{domain.lower()}/{privacy.lower()}/{pdb_code.lower()}/{facet.lower()}.json'
+        return f'structures/{domain.lower()}/{privacy.lower()}/{facet.lower()}/{pdb_code.lower()}.json'
 
 
     def structure_key(self, pdb_code:str, structure_contents:str, privacy:str='public') -> str:
@@ -77,7 +77,7 @@ class awsKeyProvider():
         return f'sequences/files/{privacy.lower()}/{mhc_class.lower()}/{locus.lower()}.json'
 
 
-    def set_key(self, set_slug:str, set_type:str, privacy:str='public') -> str:
+    def set_key(self, set_slug:str, set_type:str, context:str, privacy:str='public') -> str:
         """
         Function to return the S3 key for a specific itemset file
 
@@ -89,7 +89,7 @@ class awsKeyProvider():
         Returns:
             str : the S3 key for the object
         """
-        return f'sets/{privacy.lower()}/{set_type.lower()}/{set_slug.lower()}.json'
+        return f'sets/{privacy.lower()}/{set_type.lower()}/{context.lower()}/{set_slug.lower()}.json'
 
 
 

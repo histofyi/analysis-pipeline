@@ -28,7 +28,7 @@ def fetch_experiment_info(pdb_code:str, aws_config:Dict, force:bool=False) -> Di
         set_slug = slugify(set_title.replace('&#8491;', 'A'))
         set_description = f'Structures at {set_title}'
         members = [pdb_code]
-        itemset, success, errors = itemSet(set_slug).create_or_update(set_title, set_description, members, 'resolution')
+        itemset, success, errors = itemSet(set_slug, 'resolution').create_or_update(set_title, set_description, members, 'resolution')
     data, success, errors = update_block(pdb_code, 'core', 'info', update, aws_config)
     output = {
         'action':{'experiment':experiment_info, 'source':'PDBe REST API experiment method'},

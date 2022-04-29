@@ -120,10 +120,6 @@ def assign_chains(pdb_code, aws_config, force=False):
         set_description = f'{set_title} structures'
         members = [pdb_code]
         itemset, success, errors = itemSet(set_slug, 'complex_type').create_or_update(set_title, set_description, members, 'complex_type')
-        logging.warn('HIT')
-        logging.warn(complex_type['slug'])
-        logging.warn(complex_type['label'])
-
     s3 = s3Provider(aws_config)
     chains_key = awsKeyProvider().block_key(pdb_code, 'chains', 'info')
     s3.put(chains_key, action)

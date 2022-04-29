@@ -2,7 +2,7 @@ from typing import Dict, Tuple, List, Optional, Union
 
 from common.providers import s3Provider, awsKeyProvider, filesystemProvider, httpProvider
 from common.helpers import update_block, fetch_constants, slugify
-
+from common.models import itemSet
 
 import csv
 
@@ -45,7 +45,6 @@ def api_match_peptide(pdb_code:str, aws_config: Dict, force: bool=False) -> Tupl
             results = httpProvider().get(query, 'json')
             for item in results:
                 if item is not None:
-                    logging.warn(item)
                     if 'curated_source_antigens' in item:
                         if item['curated_source_antigens'] is not None:
                             peptide_match = {
@@ -77,11 +76,30 @@ def api_match_peptide(pdb_code:str, aws_config: Dict, force: bool=False) -> Tupl
             if exact_match:
                 update['peptide']['info'] = peptide_matches
                 s3.put(peptide_key, peptide_matches)
+                #TODO peptide organism set creation when we have a clean set of organism names
             elif len(peptide_matches) > 1:
                 step_errors = ['unambiguous_peptide_matches']
                 s3.put(peptide_key, peptide_matches)
             else:
                 step_errors = ['no_peptide_matches']
+            
+            members = [pdb_code]
+            set_title = f'Structures including {peptide_sequence}'
+            set_slug = slugify(peptide_sequence)
+            set_description = f'{peptide_sequence} containing structures'
+            context = 'peptide_sequence'
+            itemset, success, errors = itemSet(set_slug, context).create_or_update(set_title, set_description, members, context)
+
+
+            if peptide_length_name:
+                members = [pdb_code]
+                set_title = f'{peptide_length_name.capitalize()} structures'
+                set_slug = slugify(peptide_length_name)
+                set_description = f'{peptide_length_name} containing structures'
+                context = 'peptide_length'
+                itemset, success, errors = itemSet(set_slug, context).create_or_update(set_title, set_description, members, context)
+
+
             data, success, errors = update_block(pdb_code, 'core', 'info', update, aws_config)
             core = data   
     output = {

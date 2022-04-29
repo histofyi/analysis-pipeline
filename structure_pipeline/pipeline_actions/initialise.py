@@ -85,6 +85,8 @@ def initialise(pdb_code: str, aws_config: Dict, force:bool=False) -> Tuple[Dict,
     if not data or force is True:
         data, success, errors = s3.put(key, build_core(pdb_code))
         data = json.loads(data)
+        if data:
+            step_errors = []
     if errors:
         step_errors.append(errors)
     output = {

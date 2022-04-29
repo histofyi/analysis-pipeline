@@ -11,7 +11,9 @@ from .pipeline_actions import match_chains, api_match_peptide
 # initial methods
 from .pipeline_actions import test, view, initialise
 # PDBe REST API methods
-from .pipeline_actions import fetch_summary_info, fetch_publication_info, fetch_experiment_info, get_pdbe_structures, assign_chains, align_structures, peptide_neighbours, peptide_features
+from .pipeline_actions import fetch_summary_info, fetch_publication_info, fetch_experiment_info, get_pdbe_structures, assign_chains
+
+from .pipeline_actions import align_structures, peptide_neighbours, peptide_features, extract_peptides, measure_peptide_angles, measure_cleft_angles, measure_distances
 
 # structure based methods
 
@@ -36,13 +38,14 @@ pipeline_actions = {
         'match_peptide':{'action':api_match_peptide, 'name': 'Match peptide', 'link':False, 'next':'align'},
         'align': {'action':align_structures, 'name': 'Align structures', 'link':False, 'next':'peptide_neighbours'},
         'peptide_neighbours': {'action':peptide_neighbours, 'name': 'Find peptide neighbours', 'link':False, 'next':'peptide_features'},
-        'peptide_features': {'action':peptide_features, 'name': 'Define peptide features', 'link':False, 'next':'view'},
+        'peptide_features': {'action':peptide_features, 'name': 'Define peptide features', 'link':False, 'next':'extract_peptides'},
+        'extract_peptides': {'action':extract_peptides, 'name': 'Extract peptides', 'link':False, 'next':'measure_peptide_angles'},
+        'measure_peptide_angles': {'action':measure_peptide_angles, 'name': 'Measure peptide angles', 'link':False, 'next':'measure_cleft_angles'},
+        'measure_cleft_angles': {'action':measure_cleft_angles, 'name': 'Measure cleft angles', 'link':False, 'next':'measure_distances'},
+        'measure_distances': {'action':measure_distances, 'name': 'Measure C alpha distances', 'link':False, 'next':'view'}
 
         # TODO re-implement/refactor these actions
 #        'peptide_positions': {'action':peptide_positions, 'blocks':['peptide_positions']},
-#        'peptide_angles': {'action':measure_peptide_angles, 'blocks':['peptide_angle_info']},
-#        'extract_peptides': {'action':extract_peptides, 'blocks':[]},
-#        'cleft_angles': {'action': measure_neighbour_angles, 'blocks':['cleft_angle_info']}           
     },
     'class_ii': {}
 }

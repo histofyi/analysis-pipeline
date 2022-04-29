@@ -1,6 +1,6 @@
 from flask import current_app, g
 
-from Bio.PDB import PDBParser
+from Bio.PDB import PDBParser, Select
 from Bio.PDB.MMCIFParser import MMCIFParser
 from io import StringIO, TextIOWrapper
 import numpy as np
@@ -8,6 +8,26 @@ import numpy as np
 from common.providers import s3Provider, awsKeyProvider
 
 import logging
+
+
+
+class SelectChains(Select):
+    """ Only accept the specified chains when saving. """
+    def __init__(self, chain):
+        self.chain = chain
+
+    def accept_chain(self, chain):
+        if chain.get_id() == self.chain:
+            return 1
+        else:          
+            return 0
+
+
+class NonHetSelect(Select):
+    def accept_residue(self, residue):
+        return 1 if residue.id[0] == " " else 0
+
+
 
 
 

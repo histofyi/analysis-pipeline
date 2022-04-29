@@ -245,7 +245,7 @@ def match_chains(pdb_code, aws_config, force=False):
         #"locus", "allele", "allele_group, match_type, no_match"
         members = [pdb_code]
 
-        if 'HLA-' in allele_match['locus']:
+        if 'HLA-' in allele_match['locus'] and 'HLA-' not in allele_match['allele']:
             allele_match['allele'] = 'HLA-' + allele_match['allele']
             allele_match['allele_group'] = 'HLA-' + allele_match['allele_group']
 

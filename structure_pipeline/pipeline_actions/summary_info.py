@@ -61,7 +61,7 @@ def fetch_summary_info(pdb_code:str, aws_config, force=False):
         itemset = create_or_update_year_set(pdb_code, 'deposited', parse_date_to_year(summary_info['release_date']))
         if 'revision_date' in summary_info:
             update['structure']['revision_date'] =  parse_date_to_isoformat(summary_info['revision_date'])
-            itemset = create_or_update_year_set(pdb_code, 'revised', parse_date_to_year(summary_info['release_date']))
+            itemset = create_or_update_year_set(pdb_code, 'revised', parse_date_to_year(summary_info['revision_date']))
         update['pdb_title'] = summary_info['title'].title()
         assembly_count = len(summary_info['assemblies'])
         update['assembly_count'] = assembly_count

@@ -30,7 +30,7 @@ def fetch_experiment_info(pdb_code:str, aws_config:Dict, force:bool=False) -> Di
     itemset, success, errors = itemSet(set_slug, 'crystallographic').create_or_update(set_title, set_description, members, 'crystallographic')
     if update['resolution'] is not None:
         string_resolution = str(update['resolution'])
-        set_title = f'{string_resolution}&#8491; resolution '
+        set_title = f'{string_resolution}&#8491; resolution'
         set_slug = slugify(set_title.replace('&#8491;', 'A'))
         set_description = f'Structures at {set_title}'
         members = [pdb_code]

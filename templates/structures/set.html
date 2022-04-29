@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+
+{% set section = 'structures' %}
+{% set title = section + ' | ' + name %}
+{% set nav = section %}
+
+{% block title %} Pipeline | {{set_name}} -  {{name}}{% endblock %}
+
+
+{% block style %}
+    <style>
+        textarea
+        {
+            width:100%;
+            height:350px;
+            background-color: #fcfcfc;
+            color: #333;
+            font-family:'Courier Prime','Courier New', Courier, monospace;
+            font-size: 12pt;
+        }
+    </style>
+{% endblock %}
+
+{% block main %}
+
+
+
+<section class="phases vertical-spacing-top">
+    <div class="grid-container">
+        <div class="column-full-width">
+            <div class="inner">
+                <h1 class="vertical-spacing-bottom">{{section|title}} | {{ mhc_class | deslugify }} | {{name}} | {{set_name}}</h1>
+            </div>
+        </div>
+    </div>
+    <div class="grid-container">
+        <div class="grid-column proto-pipeline-phase">
+            <div class="inner">
+                <span class="phase-title is-idea">Items</span>
+                <span class="heading-extra-large phase-count"><a href="#">{{item_count}}</a></span>
+                <p>
+                    {% for pdb_code in items %}
+                    {{pdb_code}}<br />
+                    {% endfor %}
+                </p>    
+            </div>
+        </div>
+
+        <div class="grid-column proto-pipeline-phase">
+            <div class="inner">
+                <span class="phase-title is-alpha">Errors</span>
+                <span class="heading-extra-large phase-count"><a href="#">{{error_count}}</a></span>
+                <p>
+                    {% for pdb_code in errors %}
+                    {{pdb_code}}<br />
+                    {% endfor %}
+                </p>    
+            </div>
+        </div>
+
+        <div class="grid-column proto-pipeline-phase">
+            <div class="inner">
+                <span class="phase-title is-beta">Minor errors</span>
+                <span class="heading-extra-large phase-count"><a href="#">{{minor_error_count}}</a></span>
+                <p>
+                    {% for pdb_code in minor_errors %}
+                    {{pdb_code}}<br />
+                    {% endfor %}
+                </p>    
+            </div>
+        </div>
+
+        <div class="grid-column proto-pipeline-phase">
+            <div class="inner">
+                <span class="phase-title is-live">Success</span>
+                <span class="heading-extra-large phase-count"><a href="#">{{success_count}}</a></span>
+                <p>
+                    {% for pdb_code in success %}
+                    {{pdb_code}}<br />
+                {% endfor %}
+                </p>    
+            </div>
+        </div>
+    </div>
+
+    <div class="grid-container">
+        <div class="column-full-width">
+            <div class="inner">
+            {% if next_action %}
+                <p class="vertical-spacing-top"><strong>Next action</strong> : <a href="/structures/{{mhc_class}}/{{next_action.slug}}/set/{{set_context}}/{{set_slug}}">{{next_action['name']}} for {{set_name}}</a></p>
+            {% endif %}
+            </div>
+        </div>
+    </div>
+</section>
+
+
+{% endblock %}

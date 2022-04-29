@@ -28,6 +28,14 @@ class NonHetSelect(Select):
         return 1 if residue.id[0] == " " else 0
 
 
+def slugify(string):
+    slug_char = '_'
+    to_replace = [' ','-','.',',','[',']','{','}','(',')','/','\\','|','*']
+    for replace_me in to_replace:
+        if replace_me in string:
+            string = string.replace(replace_me, slug_char)
+    return string.lower()
+    
 
 
 
@@ -177,11 +185,6 @@ def chunk_one_letter_sequence(self, sequence, residues_per_line):
         length = len(sequence)
     chunked_sequence.append(sequence)
     return chunked_sequence
-
-
-def slugify(string):
-    return string.replace(' ','_').lower()
-
 
 
 def levenshtein_ratio_and_distance(s, t):

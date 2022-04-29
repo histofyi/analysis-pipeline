@@ -4,7 +4,7 @@ from typing import List, Dict, Tuple
 
 from common.providers import s3Provider, awsKeyProvider
 
-from common.functions import slugify
+from common.helpers import slugify
 
 
 import json

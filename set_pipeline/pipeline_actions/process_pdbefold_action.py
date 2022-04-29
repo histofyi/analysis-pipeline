@@ -2,7 +2,8 @@ from typing import Dict, Tuple, List, Optional, Union
 
 from common.providers import filesystemProvider
 from common.models import itemSet
-from common.functions import de_slugify, slugify
+from common.functions import de_slugify
+from common.helpers import slugify
 
 import logging
 

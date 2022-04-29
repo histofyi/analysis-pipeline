@@ -1,8 +1,7 @@
 from typing import Dict, List, Tuple
 
 from common.providers import s3Provider, awsKeyProvider, PDBeProvider
-from common.helpers import process_step_errors, update_block, fetch_core
-from common.functions import slugify
+from common.helpers import process_step_errors, update_block, fetch_core, slugify
 
 from common.models import itemSet
 

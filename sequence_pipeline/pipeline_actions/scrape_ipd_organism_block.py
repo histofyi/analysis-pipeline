@@ -1,5 +1,5 @@
-from .http import httpProvider
-from .common import slugify
+from common.providers import httpProvider
+from common.helpers import slugify
 from bs4 import BeautifulSoup
 
 import logging

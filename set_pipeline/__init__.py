@@ -5,7 +5,7 @@ from common.decorators import check_user, requires_privilege, templated
 from common.models import itemSet
 
 from common.forms import request_variables, validate_variables
-from common.functions import slugify
+from common.helpers import slugify
 
 
 import logging
@@ -16,7 +16,7 @@ from .pipeline_actions import process_pdbefold
 set_pipeline_views = Blueprint('set_pipeline_views', __name__)
 
 
-contexts = ["complex_type", "similarity", "differences", "publication", "features", "chronology", "crystallography", "species", "resolution", "locus", "allele", "allele_group", "peptide_sequence", "peptide_length", "peptide_cluster", "peptide_features", "search_query", "testing"]
+contexts = ["complex_type", "similarity", "differences", "publication", "features", "chronology", "crystallography", "species", "resolution", "locus", "allele", "allele_group", "peptide_sequence", "peptide_length", "peptide_cluster", "peptide_features", "search_query", "testing", "matching"]
 
 
 @set_pipeline_views.get('/')

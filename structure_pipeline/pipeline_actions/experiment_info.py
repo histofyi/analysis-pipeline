@@ -2,8 +2,7 @@ from typing import Dict, List, Tuple
 
 
 from common.providers import s3Provider, awsKeyProvider, PDBeProvider
-from common.helpers import update_block
-from common.functions import slugify
+from common.helpers import update_block, slugify
 
 from common.models import itemSet
 

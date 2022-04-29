@@ -21,7 +21,13 @@ def fetch_experiment_info(pdb_code:str, aws_config:Dict, force:bool=False) -> Di
     update = {'crystallography':{}}
     update['resolution'] = experiment_info['resolution']
     update['crystallography']['cell'] = experiment_info['cell']
-    update['crystallography']['spacegroup'] = experiment_info['spacegroup']
+    spacegroup = experiment_info['spacegroup']
+    update['crystallography']['spacegroup'] = spacegroup
+    set_title = f'{spacegroup} spacegroup'
+    set_slug = slugify(set_title)
+    set_description = f'Structures in {spacegroup} spacegroup'
+    members = [pdb_code]
+    itemset, success, errors = itemSet(set_slug, 'crystallographic').create_or_update(set_title, set_description, members, 'crystallographic')
     if update['resolution'] is not None:
         string_resolution = str(update['resolution'])
         set_title = f'{string_resolution}&#8491; resolution '

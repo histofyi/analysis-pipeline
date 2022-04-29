@@ -83,7 +83,7 @@ def structure_redirect_handler(userobj:Dict) -> Dict:
         A redirect to the relevant starting point
 
     """
-    variables = request_variables(None, params=['pdb_code','set_slug','mhc_class'])
+    variables = request_variables(None, params=['pdb_code','set_slug','set_context','mhc_class'])
     mhc_class = variables['mhc_class']
     if 'pdb_code' in variables:
         pdb_code = variables['pdb_code']
@@ -91,14 +91,23 @@ def structure_redirect_handler(userobj:Dict) -> Dict:
         return redirect(url)
     elif 'set_slug' in variables:
         set_slug = variables['set_slug']
-        url = f'/structures/{mhc_class.lower()}/initialise/set/{set_slug.lower()}'
+        set_context = variables['set_context']
+        url = f'/structures/{mhc_class.lower()}/initialise/set/{set_context.lower()}/{set_slug.lower()}'
         return redirect(url)
     else:
         return redirect('/pipeline/structures/')
 
 
-@structure_pipeline_views.get('/<string:mhc_class>/<string:route>/set/<path:slug>')
-def pipeline_set_handler(userobj, mhc_class, route, slug):
+
+def roll_up_errors(errors):
+    pass
+
+
+
+@structure_pipeline_views.get('/<string:mhc_class>/<string:route>/set/<path:set_context>/<path:set_slug>')
+@requires_privilege('users')
+@templated('structures/set')
+def pipeline_set_handler(userobj, mhc_class, route, set_context, set_slug):
     """
     This handler is used to perform structure pipeline actions on a set of structures en masse
 
@@ -112,29 +121,53 @@ def pipeline_set_handler(userobj, mhc_class, route, slug):
         Dict: a dictionary containing the user object, data aboutt the action performed and the next action in the pipeline
 
     """
-    itemset, success, errors = itemSet(slug).get()
+    itemset, success, errors = itemSet(set_slug, set_context).get()
     success_array = []
-    errors_array = []
+    errors_dict = {}
+    minor_errors_dict = {}
     error_count = 0
+    minor_error_count = 0
     for pdb_code in itemset['members']:
+        pdb_code = pdb_code.lower()
         data, success, errors = pipeline_actions[mhc_class][route]['action'](pdb_code, current_app.config['AWS_CONFIG'])
         if data:
-            success_array.append(pdb_code)
+            logging.warn(errors)
+            success_array.append(pdb_code.upper())
             if errors:
-                errors_array.append({'pdb_code':pdb_code,'errors':errors})
-                error_count += 1
+                if not pdb_code in minor_errors_dict:
+                    minor_errors_dict[pdb_code] = {'errors':[]}
+                minor_errors_dict[pdb_code]['errors'].append(errors)
+                minor_error_count += 1
         else:
-            errors_array.append({'pdb_code':pdb_code,'errors':errors})
+            if not pdb_code in errors_dict:
+                errors_dict[pdb_code] = {'errors':[]}
+            errors_dict[pdb_code]['errors'].append(errors)
             error_count += 1
+    if pipeline_actions[mhc_class][route]['next']:
+        next = pipeline_actions[mhc_class][route]['next']
+        next_action = {
+            'name': pipeline_actions[mhc_class][next]['name'],
+            'slug': next
+        }
+    else:
+        next_action = None
+
     return {
         'success':success_array,
         'success_count': len(success_array),
         'item_count': len(itemset['members']),
+        'items':itemset['members'],
+        'minor_error_count': minor_error_count,
+        'minor_errors':minor_errors_dict,
         'error_count': error_count,
-        'errors':errors_array,
-        'next':pipeline_actions[mhc_class][route]['next'], 
+        'errors':errors_dict,
+        'name':pipeline_actions[mhc_class][route]['name'], 
+        'next_action':next_action, 
         'mhc_class':mhc_class, 
-        'userobj': userobj
+        'userobj': userobj,
+        'set_name': itemset['metadata']['title'],
+        'set_context': set_context,
+        'set_slug': set_slug
     }
 
 

@@ -1,7 +1,9 @@
 from typing import Dict, List, Tuple
 
 from common.providers import s3Provider, awsKeyProvider
-from common.helpers import fetch_core
+from common.helpers import fetch_core, slugify
+
+from common.models import itemSet
 
 import logging
 
@@ -24,6 +26,7 @@ def peptide_features(pdb_code:str, aws_config:Dict, force:bool=False) -> Tuple[D
             'exposed':[],
             'buried':[]
         }
+        members = [pdb_code]
         for position in sorted_peptide[assembly_id]:
             abd_contacts = [neighbour['position'] for neighbour in sorted_peptide[assembly_id][position]['neighbours']]
             if len(abd_contacts) <=3:
@@ -39,10 +42,27 @@ def peptide_features(pdb_code:str, aws_config:Dict, force:bool=False) -> Tuple[D
         if int(peptide_features[assembly_id]['PN']) > 1:
             extended_peptide = True 
             extensions = {'n-terminal':{'positions':[]}}
+            set_title = f'N-terminally extended structures'
+            set_slug = slugify('c terminally extended')
+            set_description = f'Structures containing a N-terminal extension'
+            context = 'features'
+            itemset, success, errors = itemSet(set_slug, context).create_or_update(set_title, set_description, members, context)
 
         if int(peptide_features[assembly_id]['PC']) < len(sorted_peptide[assembly_id]): 
             extended_peptide = True
             extensions = {'c-terminal':{'positions':[]}}
+            set_title = f'C-terminally extended structures'
+            set_slug = slugify('c terminally extended')
+            set_description = f'Structures containing a C-terminal extension'
+            context = 'features'
+            itemset, success, errors = itemSet(set_slug, context).create_or_update(set_title, set_description, members, context)
+
+        if extended_peptide:
+            set_title = f'Extended peptide structures'
+            set_slug = slugify('extended')
+            set_description = f'Structures containing an extension at either end of the cleft'
+            context = 'features'
+            itemset, success, errors = itemSet(set_slug, context).create_or_update(set_title, set_description, members, context)
 
     peptide_features['extended_peptide'] = extended_peptide
     peptide_features['extensions'] = extensions

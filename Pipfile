@@ -20,6 +20,7 @@ Flask = "*"
 Flask-Caching = "*"
 Authlib = "*"
 pyjwt = "*"
+rich = "*"
 
 [dev-packages]
 

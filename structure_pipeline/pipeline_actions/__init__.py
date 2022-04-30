@@ -8,6 +8,7 @@ from .experiment_info import fetch_experiment_info # fetch from PDBe REST API
 
 from .fetch_structure import get_pdbe_structures # fetch from PDBe Coordinate Server
 from .assign_chains import assign_chains # computed
+from .assign_complex_type import assign_complex_type # computed
 from .match_chains import match_chains # computed from IPD data using Levenshtein distance where needed
 from .match_peptide import api_match_peptide # computed from IEDB REST API
 

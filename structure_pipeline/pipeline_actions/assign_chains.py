@@ -1,4 +1,4 @@
-from pprint import pprint
+from typing import List, Dict, Tuple, Union
 from common.providers import s3Provider, awsKeyProvider, PDBeProvider
 from common.models import itemSet
 
@@ -15,11 +15,15 @@ import logging
 from structure_pipeline.pipeline_actions.match_chains import match_chains
 
 
+
+def process_molecule_search_terms(molecule:str) -> List:
+    return [term.lower() for term in molecule.replace('-',' ').split(' ')]
+
+
 def assign_chain(chain_length, molecule, molecule_search_terms=None):
+    logging.warn(molecule_search_terms)
     if not molecule_search_terms:
-        molecule_search_terms = [term.lower() for term in molecule.replace('-',' ').split(' ')]
-    else:
-        molecule_search_terms = [term.lower() for term in molecule_search_terms]
+        molecule_search_terms = process_molecule_search_terms(molecule)
     max_match_count = 0
     best_match = 'unmatched'
     possible_matches = []
@@ -47,6 +51,9 @@ def assign_chain(chain_length, molecule, molecule_search_terms=None):
             else:
                 if matches and match_count > 1:
                     possible_matches.append({'match_count':match_count, 'in_range':in_range, 'matches':matches ,'chain_type': chains[chain]['label'], 'search_terms':molecule_search_terms, 'chain_length':chain_length, 'lower':lower, 'upper':upper })
+    if best_match == 'unmatched':
+        logging.warn(molecule_search_terms)
+        logging.warn(possible_matches)
     if best_match == 'unmatched' and len(possible_matches) > 1:
         logging.warn(possible_matches)
     else:
@@ -110,11 +117,11 @@ def assign_chains(pdb_code, aws_config, force=False):
                     'end':[source['mappings'][0]['end']['residue_number'] for source in chain['source']]
                 }
                 chain_length = chain['length']
-                molecule_search_terms = chain['molecule_name'][0].lower().split(' ')
+                molecule_search_terms = process_molecule_search_terms(chain['molecule_name'][0])
                 if 'gene_name' in chain:
                     if chain['gene_name'] is not None:
                         for item in chain['gene_name']:
-                            molecule_search_terms.append(item)
+                            molecule_search_terms.append(item.lower())
                 best_match = assign_chain(chain_length, None, molecule_search_terms=molecule_search_terms)
                 action[chain_id]['best_match'] = best_match
                 action[chain_id]['sequences'] = [chain['sequence']]
@@ -131,6 +138,7 @@ def assign_chains(pdb_code, aws_config, force=False):
                     
                 if best_match == 'peptide':
                     update['peptide']['sequence'] = chain['sequence']
+    logging.warn(found_chains)
     s3 = s3Provider(aws_config)
     chains_key = awsKeyProvider().block_key(pdb_code, 'chains', 'info')
     s3.put(chains_key, action)

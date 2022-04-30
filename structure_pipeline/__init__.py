@@ -9,8 +9,10 @@ from common.forms import request_variables
 # initial methods
 from .pipeline_actions import test, view, initialise
 
+from .pipeline_actions import assign_chains, assign_complex_type
+
 # EMBL PDBe REST API methods
-from .pipeline_actions import fetch_summary_info, fetch_publication_info, fetch_experiment_info, get_pdbe_structures, assign_chains
+from .pipeline_actions import fetch_summary_info, fetch_publication_info, fetch_experiment_info, get_pdbe_structures
 
 # EMBL-IPD data based methods
 from .pipeline_actions import match_chains
@@ -38,7 +40,8 @@ pipeline_actions = {
         'fetch_structure':{'action':get_pdbe_structures, 'name':'Fetch structure', 'show_in_list':False, 'link':False, 'next':'fetch_publications'},
         'fetch_publications':{'action':fetch_publication_info, 'name': 'Fetch publications', 'show_in_list':False, 'link':False, 'next':'fetch_experiment'},
         'fetch_experiment':{'action':fetch_experiment_info, 'name': 'Fetch experiment information', 'show_in_list':False, 'link':False, 'next':'assign_chains'},
-        'assign_chains':{'action':assign_chains, 'name': 'Assign chains', 'show_in_list':False, 'link':False, 'next':'match_chains'},
+        'assign_chains':{'action':assign_chains, 'name': 'Assign chains', 'show_in_list':False, 'link':False, 'next':'assign_complex_type'},
+        'assign_complex_type':{'action':assign_complex_type, 'name': 'Assign complex type', 'show_in_list':False, 'link':False, 'next':'match_chains'},
         'match_chains':{'action':match_chains, 'name': 'Match to MHC sequences', 'show_in_list':False, 'link':False, 'next':'match_peptide'},
         'match_peptide':{'action':api_match_peptide, 'name': 'Match peptide', 'link':False, 'next':'align'},
         'align': {'action':align_structures, 'name': 'Align structures', 'link':False, 'next':'peptide_neighbours'},

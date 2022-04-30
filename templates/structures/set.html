@@ -40,7 +40,7 @@
                 <span class="heading-extra-large phase-count"><a href="#">{{item_count}}</a></span>
                 <p>
                     {% for pdb_code in items %}
-                    {{pdb_code}}<br />
+                    {{pdb_code|upper}}<br />
                     {% endfor %}
                 </p>    
             </div>
@@ -52,7 +52,7 @@
                 <span class="heading-extra-large phase-count"><a href="#">{{error_count}}</a></span>
                 <p>
                     {% for pdb_code in errors %}
-                    {{pdb_code}}<br />
+                    {{pdb_code|upper}}<br />
                     {% endfor %}
                 </p>    
             </div>
@@ -64,7 +64,7 @@
                 <span class="heading-extra-large phase-count"><a href="#">{{minor_error_count}}</a></span>
                 <p>
                     {% for pdb_code in minor_errors %}
-                    {{pdb_code}}<br />
+                    {{pdb_code|upper}}<br />
                     {% endfor %}
                 </p>    
             </div>
@@ -76,7 +76,7 @@
                 <span class="heading-extra-large phase-count"><a href="#">{{success_count}}</a></span>
                 <p>
                     {% for pdb_code in success %}
-                    {{pdb_code}}<br />
+                    {{pdb_code|upper}}<br />
                 {% endfor %}
                 </p>    
             </div>
@@ -87,7 +87,11 @@
         <div class="column-full-width">
             <div class="inner">
             {% if next_action %}
+                {% if next_action.slug == 'view' %}
+                Run pipeline on another set
+                {% else %}
                 <p class="vertical-spacing-top"><strong>Next action</strong> : <a href="/structures/{{mhc_class}}/{{next_action.slug}}/set/{{set_context}}/{{set_slug}}">{{next_action['name']}} for {{set_name}}</a></p>
+                {% endif %}
             {% endif %}
             </div>
         </div>

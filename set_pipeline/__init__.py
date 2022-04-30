@@ -16,7 +16,7 @@ from .pipeline_actions import process_pdbefold
 set_pipeline_views = Blueprint('set_pipeline_views', __name__)
 
 
-contexts = ["complex_type", "similarity", "differences", "publication", "features", "chronology", "crystallography", "species", "resolution", "locus", "allele", "allele_group", "peptide_sequence", "peptide_length", "peptide_cluster", "peptide_features", "search_query", "testing", "matching"]
+contexts = ["complex_type", "similarity", "differences", "publication", "features", "chronology", "crystallography", "species", "resolution", "locus", "allele", "allele_group", "peptide_sequence", "peptide_length", "peptide_cluster", "peptide_features", "search_query", "matching", "testing","errors"]
 
 
 @set_pipeline_views.get('/')

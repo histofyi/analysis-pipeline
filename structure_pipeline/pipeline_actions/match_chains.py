@@ -146,62 +146,58 @@ def match_chains(pdb_code, aws_config, force=False):
     step_errors = []
     s3 = s3Provider(aws_config)
     chains_to_match = {}
+    members = [pdb_code]
     best_match = None
     allele_match = None
     this_chain = None
     core_key = awsKeyProvider().block_key(pdb_code, 'core', 'info')
     core, success, errors = s3.get(core_key)
-    organism = slugify(core['organism']['scientific_name'])
+    try:
+        organism = slugify(core['organism']['scientific_name'])
+    except:
+        organism = None
 
     species = fetch_constants('species')
     allele_match = None
     core_key = awsKeyProvider().block_key(pdb_code, 'core', 'info')
     data, success, errors = s3.get(core_key)
-    organism = slugify(data['organism']['scientific_name'])
     species = fetch_constants('species')
     scientific_names = [scientific for scientific in species]
-    if organism not in scientific_names:
-        step_errors.append('no_match_for:'+ organism)
-        return None, False, step_errors
-    else:
-        if organism in ['homo_sapiens','mus_musculus']:
-            mhc_class = None
-            chains_key = awsKeyProvider().block_key(pdb_code, 'chains', 'info')
-            data, success, errors = s3.get(chains_key)
-            if success:
-                for chain in data:
-                    for this_mhc_class in ['class_i','class_ii']:
-                        if this_mhc_class in data[chain]['best_match']:
-                            mhc_class = this_mhc_class
-                            this_chain = data[chain]['best_match'].replace(mhc_class + '_','')
-                            if this_chain in ['alpha','beta']:
-                                chains_to_match[this_chain] = {
-                                    'label':this_chain,
-                                    'sequence':data[chain]['sequences'][0],
-                                    'length':data[chain]['length'],
-                                    'start':data[chain]['start'][0]
-                                }
-                if mhc_class and len(chains_to_match) > 0:
-                    loci = {}
-                    for chain in chains_to_match:
-                        this_chain = chains_to_match[chain]
-                        if this_chain['length'] < 200:
-                            break
-                        else:
-                            for locus in fetch_constants('loci')[organism][mhc_class][chain]:
-                                sequence_key = awsKeyProvider().sequence_key(mhc_class, locus)
-                                sequence_data, success, errors = s3.get(sequence_key)
-                                loci[locus] = sequence_data
-                            for this_locus in loci:
-                                best_match = exact_match(mhc_class, loci[this_locus], this_chain)
-                                if best_match:
-                                    best_ratio = 1
-                                    match_type = 'exact'
-                                    step_errors = []
-                                    allele_match = build_match_block(best_match, this_locus, match_type, best_ratio, mhc_class)
-                                    break
-                                else:
-                                    best_match = exact_match(mhc_class, loci[this_locus], this_chain, first_allele_only=False)
+    if organism:
+        if organism not in scientific_names:
+            step_errors.append('no_match_for:'+ organism)
+            return None, False, step_errors
+        else:
+            if organism in ['homo_sapiens','mus_musculus']:
+                mhc_class = None
+                chains_key = awsKeyProvider().block_key(pdb_code, 'chains', 'info')
+                data, success, errors = s3.get(chains_key)
+                if success:
+                    for chain in data:
+                        for this_mhc_class in ['class_i','class_ii']:
+                            if this_mhc_class in data[chain]['best_match']:
+                                mhc_class = this_mhc_class
+                                this_chain = data[chain]['best_match'].replace(mhc_class + '_','')
+                                if this_chain in ['alpha','beta']:
+                                    chains_to_match[this_chain] = {
+                                        'label':this_chain,
+                                        'sequence':data[chain]['sequences'][0],
+                                        'length':data[chain]['length'],
+                                        'start':data[chain]['start'][0]
+                                    }
+                    if mhc_class and len(chains_to_match) > 0:
+                        loci = {}
+                        for chain in chains_to_match:
+                            this_chain = chains_to_match[chain]
+                            if this_chain['length'] < 200:
+                                break
+                            else:
+                                for locus in fetch_constants('loci')[organism][mhc_class][chain]:
+                                    sequence_key = awsKeyProvider().sequence_key(mhc_class, locus)
+                                    sequence_data, success, errors = s3.get(sequence_key)
+                                    loci[locus] = sequence_data
+                                for this_locus in loci:
+                                    best_match = exact_match(mhc_class, loci[this_locus], this_chain)
                                     if best_match:
                                         best_ratio = 1
                                         match_type = 'exact'
@@ -209,86 +205,94 @@ def match_chains(pdb_code, aws_config, force=False):
                                         allele_match = build_match_block(best_match, this_locus, match_type, best_ratio, mhc_class)
                                         break
                                     else:
-                                        best_match, best_ratio = fuzzy_match(mhc_class, loci[this_locus], this_chain)
+                                        best_match = exact_match(mhc_class, loci[this_locus], this_chain, first_allele_only=False)
                                         if best_match:
-                                            match_type = 'fuzzy'
+                                            best_ratio = 1
+                                            match_type = 'exact'
                                             step_errors = []
                                             allele_match = build_match_block(best_match, this_locus, match_type, best_ratio, mhc_class)
                                             break
-                else:
-                    step_errors.append('no_chain_info')
-            if not best_match:
-                if 'no_match' not in step_errors:
-                    step_errors.append('no_match')
-        else:
-            step_errors.append('no_loci_yet')
-            step_errors.append(organism)
-    if step_errors:
-        logging.warn('-----')
-        logging.warn(pdb_code)
-        logging.warn(step_errors)
-        logging.warn(this_chain)
-        logging.warn('-----')
+                                        else:
+                                            best_match, best_ratio = fuzzy_match(mhc_class, loci[this_locus], this_chain)
+                                            if best_match:
+                                                match_type = 'fuzzy'
+                                                step_errors = []
+                                                allele_match = build_match_block(best_match, this_locus, match_type, best_ratio, mhc_class)
+                                                break
+                    else:
+                        step_errors.append('no_chain_info')
+                if not best_match:
+                    if 'no_match' not in step_errors:
+                        step_errors.append('no_match')
+            else:
+                step_errors.append('no_loci_yet')
+                step_errors.append(organism)
+        if step_errors:
+            logging.warn('-----')
+            logging.warn(pdb_code)
+            logging.warn(step_errors)
+            logging.warn(this_chain)
+            logging.warn('-----')
 
-        set_title = 'Sequence unmatched structures'
-        set_slug = slugify(set_title)
-        set_description = f'Unmatched structures (sequence matching)'
-        context = 'matching'
-        itemset, success, errors = itemSet(set_slug, context).create_or_update(set_title, set_description, members, context)
-
-
-    else:   
-        logging.warn('-----')
-        logging.warn(pdb_code)
-        logging.warn(allele_match)
-        
-        #"locus", "allele", "allele_group, match_type, no_match"
-        members = [pdb_code]
-
-        if 'HLA-' in allele_match['locus'] and 'HLA-' not in allele_match['allele']:
-            allele_match['allele'] = 'HLA-' + allele_match['allele']
-            allele_match['allele_group'] = 'HLA-' + allele_match['allele_group']
-
-        set_title = allele_match['locus']
-        set_slug = slugify(allele_match['locus'])
-        set_description = f'{set_title} structures'
-        context = 'locus'
-        itemset, success, errors = itemSet(set_slug, context).create_or_update(set_title, set_description, members, context)
-
-        set_title = allele_match['allele']
-        set_slug = slugify(allele_match['allele'])
-        set_description = f'{set_title} structures'
-        context = 'allele'
-        itemset, success, errors = itemSet(set_slug, context).create_or_update(set_title, set_description, members, context)
-        
-        set_title = allele_match['allele_group']
-        set_slug = slugify(allele_match['allele_group'])
-        set_description = f'{set_title} structures'
-        context = 'allele_group'
-        itemset, success, errors = itemSet(set_slug, context).create_or_update(set_title, set_description, members, context)
-
-        set_title = allele_match['match_type'] + ' sequence matched structures'
-        set_slug = slugify(set_title)
-        set_description = f'{set_title} matched structures (sequence matching)'
-        context = 'matching'
-        itemset, success, errors = itemSet(set_slug, context).create_or_update(set_title, set_description, members, context)
+            set_title = 'Sequence unmatched structures'
+            set_slug = slugify(set_title)
+            set_description = f'Unmatched structures (sequence matching)'
+            context = 'matching'
+            itemset, success, errors = itemSet(set_slug, context).create_or_update(set_title, set_description, members, context)
 
 
-        logging.warn('-----')
+        else:   
+            logging.warn('-----')
+            logging.warn(pdb_code)
+            logging.warn(allele_match)
+            
 
-        match_key = awsKeyProvider().block_key(pdb_code, 'allele_match', 'info')
-        s3.put(match_key, allele_match)
-        update = {}
-        logging.warn(allele_match['locus'])
-        if allele_match['locus'] in classical:
-            update['class'] = 'class_i'
-            update['classical'] = True
-        update['locus'] = allele_match['locus']
-        update['allele'] = {'mhc_alpha':allele_match['allele']}
-        update['allele_group'] = {'mhc_alpha':allele_match['allele_group']}
+            if 'HLA-' in allele_match['locus'] and 'HLA-' not in allele_match['allele']:
+                allele_match['allele'] = 'HLA-' + allele_match['allele']
+                allele_match['allele_group'] = 'HLA-' + allele_match['allele_group']
 
-        # Add to species class set
-        data, success, errors = update_block(pdb_code, 'core', 'info', update, aws_config)
+            set_title = allele_match['locus']
+            set_slug = slugify(allele_match['locus'])
+            set_description = f'{set_title} structures'
+            context = 'locus'
+            itemset, success, errors = itemSet(set_slug, context).create_or_update(set_title, set_description, members, context)
+
+            set_title = allele_match['allele']
+            set_slug = slugify(allele_match['allele'])
+            set_description = f'{set_title} structures'
+            context = 'allele'
+            itemset, success, errors = itemSet(set_slug, context).create_or_update(set_title, set_description, members, context)
+            
+            set_title = allele_match['allele_group']
+            set_slug = slugify(allele_match['allele_group'])
+            set_description = f'{set_title} structures'
+            context = 'allele_group'
+            itemset, success, errors = itemSet(set_slug, context).create_or_update(set_title, set_description, members, context)
+
+            set_title = allele_match['match_type'] + ' sequence matched structures'
+            set_slug = slugify(set_title)
+            set_description = f'{set_title} matched structures (sequence matching)'
+            context = 'matching'
+            itemset, success, errors = itemSet(set_slug, context).create_or_update(set_title, set_description, members, context)
+
+
+            logging.warn('-----')
+
+            match_key = awsKeyProvider().block_key(pdb_code, 'allele_match', 'info')
+            s3.put(match_key, allele_match)
+            update = {}
+            logging.warn(allele_match['locus'])
+            if allele_match['locus'] in classical:
+                update['class'] = 'class_i'
+                update['classical'] = True
+            update['locus'] = allele_match['locus']
+            update['allele'] = {'mhc_alpha':allele_match['allele']}
+            update['allele_group'] = {'mhc_alpha':allele_match['allele_group']}
+
+            # Add to species class set
+            data, success, errors = update_block(pdb_code, 'core', 'info', update, aws_config)
+    else:
+        step_errors.append(['no_organism'])
     output = {
         'action':allele_match,
         'core':data

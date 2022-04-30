@@ -115,7 +115,7 @@
     "cd8":{
         "length":120,
         "range":[-10,10],
-        "features":["cd8", "cd8a", "cd8b", "lyt2"],
+        "features":["t","cell","cd8", "cd8a", "cd8b", "lyt2"],
         "label":"cd8",
         "ui_text":"CD8",
         "webglcolor":"0x77DDBB"
@@ -166,6 +166,16 @@
         "non-classical":true,
         "homologue":"class_i_alpha",
         "ui_text":"Transferrin Receptor",
+        "webglcolor":"0x77DDBB"
+    },
+    "h2-t22":{
+        "length":260,
+        "range":[-25,10],
+        "features":["h2", "t22", "h2-t22", "ig"],
+        "label":"h2-t22",
+        "non-classical":true,
+        "homologue":"class_i_alpha",
+        "ui_text":"H2-T22",
         "webglcolor":"0x77DDBB"
     }
 

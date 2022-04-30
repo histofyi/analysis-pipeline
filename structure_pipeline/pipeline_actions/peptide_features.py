@@ -15,8 +15,6 @@ def peptide_features(pdb_code:str, aws_config:Dict, force:bool=False) -> Tuple[D
     peptide_key = awsKeyProvider().block_key(pdb_code, 'peptide_neighbours', 'info')
     sorted_peptide, success, errors = s3.get(peptide_key)
     
-    logging.warn(sorted_peptide)
-    
     extended_peptide = False
     exposed_bulge = False
     peptide_features = {}
@@ -52,6 +50,8 @@ def peptide_features(pdb_code:str, aws_config:Dict, force:bool=False) -> Tuple[D
                     context = 'features'
                     itemset, success, errors = itemSet(set_slug, context).create_or_update(set_title, set_description, members, context)
             else:
+                logging.warn(pdb_code)
+                logging.warn('NO PN IN PEPTIDE')
                 step_errors.append('no_pn_in_peptide')
 
             if peptide_features[assembly_id]['PC'] is not None:
@@ -64,6 +64,8 @@ def peptide_features(pdb_code:str, aws_config:Dict, force:bool=False) -> Tuple[D
                     context = 'features'
                     itemset, success, errors = itemSet(set_slug, context).create_or_update(set_title, set_description, members, context)
             else:
+                logging.warn(pdb_code)
+                logging.warn('NO PC IN PEPTIDE')
                 step_errors.append('no_pc_in_peptide')
 
             if extended_peptide:
@@ -76,7 +78,9 @@ def peptide_features(pdb_code:str, aws_config:Dict, force:bool=False) -> Tuple[D
         peptide_features['extended_peptide'] = extended_peptide
         peptide_features['extensions'] = extensions
     else:
+        logging.warn(pdb_code)
         step_errors.append('no_sorted_peptide')
+        logging.warn('NO SORTED PEPTIDE')
     action = {
         'peptide_features':peptide_features
     }

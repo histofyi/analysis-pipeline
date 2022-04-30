@@ -1,51 +1,54 @@
+from pprint import pprint
 from common.providers import s3Provider, awsKeyProvider, PDBeProvider
 from common.models import itemSet
 
 from common.helpers import fetch_constants, fetch_core, update_block, slugify
 
+from common.models import itemSet
+
+
+from rich import print
+from rich.panel import Panel
+
 import logging
-
-
-complexes = {
-    'chain_counts':{
-        '3':[{
-                'components':['class_i_alpha','beta2m', 'peptide'],
-                'unique_chains':3,
-                'label': 'MHC Class I with peptide',
-                'slug':'class_i_with_peptide'
-
-        }],
-        '5':[{
-               'components':['class_i_alpha','beta2m', 'peptide','tcr_alpha','tcr_beta'],
-                'unique_chains':5,
-                'label': 'MHC Class I with peptide and Alpha/Beta T cell receptor',
-                'slug':'class_i_with_peptide_and_tcr'                
-            }]
-    }
-}
 
 
 def assign_chain(chain_length, molecule, molecule_search_terms=None):
     if not molecule_search_terms:
-        molecule_search_terms = molecule.replace('-',' ').split(' ')
+        molecule_search_terms = [term.lower() for term in molecule.replace('-',' ').split(' ')]
+    else:
+        molecule_search_terms = [term.lower() for term in molecule_search_terms]
     max_match_count = 0
     best_match = 'unmatched'
+    possible_matches = []
     chains = fetch_constants('chains')
     for chain in chains:
         if chain_length < 20:
             best_match = 'peptide'
         else:
             matches = [item for item in molecule_search_terms if item in chains[chain]['features']]
-            if chain_length > chains[chain]['length'] + chains[chain]['range'][0] and chain_length < chains[chain]['length'] + chains[chain]['range'][1]:
+            lower = chains[chain]['length'] + chains[chain]['range'][0]
+            upper = chains[chain]['length'] + chains[chain]['range'][1]
+            if chain_length > lower and chain_length < upper:
                 in_range = True
             else:
                 in_range = False
             match_count = len(matches)
             if in_range:
                 match_count += 1
-            if match_count > max_match_count and in_range:
+            #TODO test why in_range was required, function works better without it on test set
+            #if match_count > max_match_count and in_range:
+            #TODO remove comment if not needed
+            if match_count > max_match_count:
                 max_match_count = match_count
                 best_match = chains[chain]['label']
+            else:
+                if matches and match_count > 1:
+                    possible_matches.append({'match_count':match_count, 'in_range':in_range, 'matches':matches ,'chain_type': chains[chain]['label'], 'search_terms':molecule_search_terms, 'chain_length':chain_length, 'lower':lower, 'upper':upper })
+    if best_match == 'unmatched' and len(possible_matches) > 1:
+        logging.warn(possible_matches)
+    else:
+        logging.warn(best_match)
     return best_match
 
 
@@ -57,30 +60,17 @@ def organism_update(organism_scientific):
             'scientific_name':species[organism_slug]['scientific_name'],
             'common_name':species[organism_slug]['common_name']
         }
+
     else:
-        organism_update = {'scientific_name':organism_scientific}
+        organism_update = None
     return organism_update
 
 
-def assign_complex_type(found_chains, unique_chain_count):
-    possible_complex_types = []
-    for item in complexes['chain_counts'][str(unique_chain_count)]:
-        matches = [chain for chain in found_chains if chain in item['components']]
-        if len(matches) == unique_chain_count:
-            possible_complex_types.append(item)
-    
-    if len(possible_complex_types) == 1:
-        return possible_complex_types[0]
-    else:
-        logging.warn(found_chains)
-        logging.warn(unique_chain_count)
-        logging.warn(possible_complex_types)
-        return False
-
-
 def assign_chains(pdb_code, aws_config, force=False):
+    print('--------------------')
+    print(' ')
+    logging.warn(pdb_code)
     set_errors = []
-    this_complexes = complexes
     core, success, errors = fetch_core(pdb_code, aws_config)
     action = {}
     update = {'peptide':core['peptide']}
@@ -109,21 +99,21 @@ def assign_chains(pdb_code, aws_config, force=False):
                 action[chain_id]['sequences'] = [chain['sequence']]
                 found_chains.append(best_match)
                 if best_match in ['class_i_alpha', 'class_ii_alpha']:
-                    organism_update(chain['source'][0]['organism_scientific_name'])
-                    update['organism'] = organism_update(chain['source'][0]['organism_scientific_name'])
+                    organism = organism_update(chain['source'][0]['organism_scientific_name'])
+                    if organism:
+                        update['organism'] = organism
+                        print(organism)
+                    else:
+                        missing_organism = chain['source'][0]['organism_scientific_name']
+                        print(Panel(f'Unable to match organism : {missing_organism}', style="red"))
+                    
                 if best_match == 'peptide':
                     update['peptide']['sequence'] = chain['sequence']
-    complex_type = assign_complex_type(found_chains, core['unique_chain_count'])
-    if complex_type:
-        set_title = complex_type['label']
-        set_slug = complex_type['slug']
-        set_description = f'{set_title} structures'
-        members = [pdb_code]
-        itemset, success, errors = itemSet(set_slug, 'complex_type').create_or_update(set_title, set_description, members, 'complex_type')
     s3 = s3Provider(aws_config)
     chains_key = awsKeyProvider().block_key(pdb_code, 'chains', 'info')
     s3.put(chains_key, action)
     data, success, errors = update_block(pdb_code, 'core', 'info', update, aws_config)
+    print(' ')
     output = {
         'action':action,
         'core':data

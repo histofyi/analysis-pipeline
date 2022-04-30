@@ -6,6 +6,8 @@ from common.providers import s3Provider, awsKeyProvider
 
 from common.helpers import slugify
 
+from .data import DataClass
+
 
 import json
 import datetime
@@ -14,7 +16,7 @@ import logging
 
 
 
-class itemSet():
+class itemSet(DataClass):
 
     set_slug = None
     set_key = None
@@ -52,9 +54,10 @@ class itemSet():
             self.set_slug = slugify(title)
         self.set_key = awsKeyProvider().set_key(self.set_slug, set_type, context)
         self.aws_config = current_app.config['AWS_CONFIG']
+        super().__init__()
 
 
-    def get(self, new_slug=False) -> Tuple[Dict, bool, List]:
+    def get(self, new_slug=False, all=False, page_number=None, page_size=None) -> Tuple[Dict, bool, List]:
         """
         This method returns the itemSet whose slug is provided to the constructor
 
@@ -69,6 +72,11 @@ class itemSet():
         if new_slug:
             self.set_key = new_slug
         itemset, success, errors = s3Provider(self.aws_config).get(self.set_key)
+        if not all:
+            paginated, pagination = self.paginate(itemset['members'], page_number=page_number, page_size=page_size)
+            itemset['pagination'] = pagination
+            if len(paginated) > 0:
+                itemset['members'] = paginated
         return itemset, success, errors
 
 
@@ -225,5 +233,9 @@ class itemSet():
 
 
     def hydrate(self):
+        pass
+
+
+    def intersection(self):
         pass
 

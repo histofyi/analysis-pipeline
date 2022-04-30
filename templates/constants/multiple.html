@@ -40,7 +40,7 @@
             {% if item is mapping %}
               <li class="vertical-spacing-bottom"><strong>
                 {% if link %}
-                <a href="/pipeline/{{section|lower}}/view/{{item.slug}}">{{item.name}}</a>
+                <a href="/{{section|lower}}/view/{{item.slug}}">{{item.name}}</a>
                 {% else %}
                 {{item.name}}
                 {% endif %}</strong>

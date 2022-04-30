@@ -3,19 +3,24 @@ from typing import Dict
 
 from common.decorators import check_user, requires_privilege, templated
 from common.models import itemSet
-
 from common.forms import request_variables
 
-from .pipeline_actions import match_chains, api_match_peptide
 
 # initial methods
 from .pipeline_actions import test, view, initialise
-# PDBe REST API methods
+
+# EMBL PDBe REST API methods
 from .pipeline_actions import fetch_summary_info, fetch_publication_info, fetch_experiment_info, get_pdbe_structures, assign_chains
 
+# EMBL-IPD data based methods
+from .pipeline_actions import match_chains
+
+# IEDB.org API based methods
+from .pipeline_actions import api_match_peptide
+
+# structure based methods (BioPython etc)
 from .pipeline_actions import align_structures, peptide_neighbours, peptide_features, extract_peptides, measure_peptide_angles, measure_cleft_angles, measure_distances
 
-# structure based methods
 
 import logging
 import json
@@ -131,7 +136,6 @@ def pipeline_set_handler(userobj, mhc_class, route, set_context, set_slug):
         pdb_code = pdb_code.lower()
         data, success, errors = pipeline_actions[mhc_class][route]['action'](pdb_code, current_app.config['AWS_CONFIG'])
         if data:
-            logging.warn(errors)
             success_array.append(pdb_code.upper())
             if errors:
                 if not pdb_code in minor_errors_dict:

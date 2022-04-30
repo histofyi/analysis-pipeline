@@ -98,7 +98,7 @@ def assign_chains(pdb_code, aws_config, force=False):
     print('--------------------')
     print(' ')
     logging.warn(pdb_code)
-    set_errors = []
+    step_errors = []
     core, success, errors = fetch_core(pdb_code, aws_config)
     action = {}
     update = {'peptide':core['peptide']}
@@ -139,6 +139,8 @@ def assign_chains(pdb_code, aws_config, force=False):
                 if best_match == 'peptide':
                     update['peptide']['sequence'] = chain['sequence']
     logging.warn(found_chains)
+    if 'unmatched' in found_chains:
+        step_errors.append(['unmatched_chain'])
     s3 = s3Provider(aws_config)
     chains_key = awsKeyProvider().block_key(pdb_code, 'chains', 'info')
     s3.put(chains_key, action)
@@ -148,4 +150,4 @@ def assign_chains(pdb_code, aws_config, force=False):
         'action':action,
         'core':data
     }
-    return output, True, set_errors
+    return output, True, step_errors

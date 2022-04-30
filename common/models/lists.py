@@ -72,11 +72,12 @@ class itemSet(DataClass):
         if new_slug:
             self.set_key = new_slug
         itemset, success, errors = s3Provider(self.aws_config).get(self.set_key)
-        if not all:
-            paginated, pagination = self.paginate(itemset['members'], page_number=page_number, page_size=page_size)
-            itemset['pagination'] = pagination
-            if len(paginated) > 0:
-                itemset['members'] = paginated
+        if itemset is not None:
+            if not all:
+                paginated, pagination = self.paginate(itemset['members'], page_number=page_number, page_size=page_size)
+                itemset['pagination'] = pagination
+                if len(paginated) > 0:
+                    itemset['members'] = paginated
         return itemset, success, errors
 
 

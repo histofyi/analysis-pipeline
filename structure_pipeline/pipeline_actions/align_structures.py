@@ -70,6 +70,9 @@ def align_structure(target, canonical, target_chain_id, assembly_identifier, mhc
             rmsd = super_imposer.rms
             errors = None
         except Bio.PDB.PDBExceptions.PDBException as e:
+            logging.warn('UNABLE TO ALIGN')
+            logging.warn(len(canonical_atoms))
+            logging.warn(len(target_atoms))
             rmsd = False
             errors = str(e).replace(' ','_').lower()
     else:
@@ -113,6 +116,8 @@ def align_structure(target, canonical, target_chain_id, assembly_identifier, mhc
 
 
 def align_structures(pdb_code:str, aws_config:Dict, force:bool=False) -> Dict:
+    logging.warn('-----')
+    logging.warn(pdb_code)
     step_errors = []
     core, success, errors = fetch_core(pdb_code, aws_config)
     s3 = s3Provider(aws_config)
@@ -127,6 +132,7 @@ def align_structures(pdb_code:str, aws_config:Dict, force:bool=False) -> Dict:
     action = {'aligned':{'files':{}}}
     update = {}
     if chain_ids:
+        i = 0
         for assembly_id in core['assemblies']['files']:
             canonical_key = 'structures/canonical/class_i.cif'
             cif_key = core['assemblies']['files'][assembly_id]['files']['file_key']
@@ -134,12 +140,23 @@ def align_structures(pdb_code:str, aws_config:Dict, force:bool=False) -> Dict:
             structure = load_cif(cif_key, assembly_identifier, aws_config)
             canonical = load_cif(canonical_key, 'class_i', aws_config)
             if structure and canonical:
-                chain_id = chain_ids[int(assembly_id) - 1]
-                alignment, errors = align_structure(structure, canonical, chain_id, assembly_identifier, mhc_class, aws_config)
-                if not errors:
-                    action['aligned']['files'][assembly_id] = alignment
+                if len(chain_ids) > 0:
+                    try:
+                        chain_id = chain_ids[i]
+                        alignment, errors = align_structure(structure, canonical, chain_id, assembly_identifier, mhc_class, aws_config)
+                        if not errors:
+                            action['aligned']['files'][assembly_id] = alignment
+                        else:
+                            step_errors.append(errors)
+                    except:
+                       step_errors.append('missing_chain_id') 
+                       logging.warn('MISSING CHAIN ID')
+                       logging.warn(i)
+                       logging.warn(chain_ids)
+                       logging.warn(assembly_id)
                 else:
-                    step_errors.append(errors)
+                    logging.warn("ZERO LENGTH CHAIN_IDS")
+            i += 1
         if len(step_errors) == 0:
             update['aligned'] = action['aligned']
             data, success, errors = update_block(pdb_code, 'core', 'info', update, aws_config)

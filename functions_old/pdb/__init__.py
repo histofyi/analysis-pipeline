@@ -1,3 +1,0 @@
-from .rcsb import RCSB
-
-

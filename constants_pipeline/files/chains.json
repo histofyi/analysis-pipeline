@@ -43,7 +43,7 @@
     "tcr_alpha":{
         "length":200,
         "range":[-10,10],
-        "features":[],
+        "features":["t", "cell", "receptor", "alpha", "tcra"],
         "label":"tcr_alpha",
         "ui_text":"T cell receptor alpha",
         "webglcolor":"0xFF44BB"
@@ -51,7 +51,7 @@
     "tcr_beta":{
         "length":240,
         "range":[-10,10],
-        "features":[],
+        "features":["t", "cell", "receptor", "beta", "tcrb"],
         "label":"tcr_beta",
         "ui_text":"T cell receptor beta",
         "webglcolor":"0x99DD55"

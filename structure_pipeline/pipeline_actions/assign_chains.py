@@ -12,6 +12,8 @@ from rich.panel import Panel
 
 import logging
 
+from structure_pipeline.pipeline_actions.match_chains import match_chains
+
 
 def assign_chain(chain_length, molecule, molecule_search_terms=None):
     if not molecule_search_terms:
@@ -66,6 +68,25 @@ def organism_update(organism_scientific):
     return organism_update
 
 
+def create_or_update_organism_set(organism, mhc_alpha_chain, pdb_code):
+    species = organism['common_name']
+    class_name = None
+    #TODO these sorts of labels should be centrally done somehow
+    if mhc_alpha_chain == 'class_i_alpha':
+        class_name = 'Class I'
+    else:
+        class_name = 'Class II'
+    set_title = f'{species.capitalize()} {class_name}'
+    set_slug = slugify(set_title)
+    set_description = f'{set_title} structures. Automatically assigned'
+    context = 'species'
+    logging.warn(pdb_code)
+    itemset, success, errors = itemSet(set_slug, context).create_or_update(set_title, set_description, [pdb_code], context)
+    return itemset, success, errors
+
+
+
+
 def assign_chains(pdb_code, aws_config, force=False):
     print('--------------------')
     print(' ')
@@ -103,6 +124,7 @@ def assign_chains(pdb_code, aws_config, force=False):
                     if organism:
                         update['organism'] = organism
                         print(organism)
+                        itemset, success, errors = create_or_update_organism_set(organism, best_match, pdb_code)
                     else:
                         missing_organism = chain['source'][0]['organism_scientific_name']
                         print(Panel(f'Unable to match organism : {missing_organism}', style="red"))

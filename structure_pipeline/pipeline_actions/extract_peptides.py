@@ -25,7 +25,9 @@ def extract_peptides(pdb_code:str, aws_config:Dict, force:bool=False) -> Dict:
             chain_ids = chains[chain]['chains']
     action = {'peptide_structures':{'files':{}}}
     i = 0
-    if aligned is not None:
+    if chain_ids is None:
+        step_errors.append("no_chain_ids")
+    if aligned is not None and chain_ids is not None:
         for assembly_id in aligned['aligned']['files']:
             assembly_identifier = f'{pdb_code}_{assembly_id}'
             action['peptide_structures']['files'][assembly_id] = {}

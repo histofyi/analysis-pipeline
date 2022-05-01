@@ -14,14 +14,17 @@ peptide_contact_positions = [5,7,9,24,25,33,34,45,59,62,63,64,65,66,67,68,69,70,
 
 
 def build_residue_dictionary(residue):
-    coords = [str(coord) for coord in residue["CA"].get_coord()]
-    return {
-        'residue_id':residue.get_id()[1],
-        'chain': residue.parent.get_id(),
-        'residue_name':residue.resname,
-        'coords': coords,
-        'typed_coords':residue["CA"].get_coord()
-    }
+    try:
+        coords = [str(coord) for coord in residue["CA"].get_coord()]
+        return {
+            'residue_id':residue.get_id()[1],
+            'chain': residue.parent.get_id(),
+            'residue_name':residue.resname,
+            'coords': coords,
+            'typed_coords':residue["CA"].get_coord()
+        }
+    except:
+        return None
 
 
 
@@ -46,26 +49,29 @@ def build_c_alpha_set(structure, class_i_alpha_chain, peptide_chain):
             pair = {}
             pair['from'] = build_residue_dictionary(each[0])
             pair['to'] = build_residue_dictionary(each[1])
-            pair['distance'] = float(np.linalg.norm(pair['from']['typed_coords'] - pair['to']['typed_coords']))
+            if pair['from'] is not None and pair['to'] is not None:
+                pair['distance'] = float(np.linalg.norm(pair['from']['typed_coords'] - pair['to']['typed_coords']))
         
-            del pair['from']['typed_coords']
-            del pair['to']['typed_coords']
+                del pair['from']['typed_coords']
+                del pair['to']['typed_coords']
 
-            res_id = pair['from']['residue_id']
-            if pair['from']['chain'] == peptide_chain:
-                if res_id not in c_alpha_set['peptide']:
-                    c_alpha_set['peptide'][res_id] = {
-                        'best_pair':{},
-                        'best_distance':0,
-                    'pairs':[]
-                }
-            c_alpha_set['peptide'][res_id]['pairs'].append(pair)
-            if c_alpha_set['peptide'][res_id]['best_distance'] == 0:
-                c_alpha_set['peptide'][res_id]['best_pair'] = pair
-                c_alpha_set['peptide'][res_id]['best_distance'] = pair['distance']
-            elif pair['distance'] < c_alpha_set['peptide'][res_id]['best_distance']:
-                c_alpha_set['peptide'][res_id]['best_pair'] = pair
-                c_alpha_set['peptide'][res_id]['best_distance'] = pair['distance']
+                res_id = pair['from']['residue_id']
+                if pair['from']['chain'] == peptide_chain:
+                    if res_id not in c_alpha_set['peptide']:
+                        c_alpha_set['peptide'][res_id] = {
+                            'best_pair':{},
+                            'best_distance':0,
+                        'pairs':[]
+                    }
+                c_alpha_set['peptide'][res_id]['pairs'].append(pair)
+                if c_alpha_set['peptide'][res_id]['best_distance'] == 0:
+                    c_alpha_set['peptide'][res_id]['best_pair'] = pair
+                    c_alpha_set['peptide'][res_id]['best_distance'] = pair['distance']
+                elif pair['distance'] < c_alpha_set['peptide'][res_id]['best_distance']:
+                    c_alpha_set['peptide'][res_id]['best_pair'] = pair
+                    c_alpha_set['peptide'][res_id]['best_distance'] = pair['distance']
+            else:
+                c_alpha_set = None
     return c_alpha_set
 
 
@@ -90,8 +96,16 @@ def measure_distances(pdb_code:str, aws_config:Dict, force:bool=False) -> Dict:
             if aligned['aligned']['files'][assembly_id] is not None:
                 cif_key = aligned['aligned']['files'][assembly_id]['files']['file_key']
                 structure = load_cif(cif_key, assembly_identifier, aws_config)
-                c_alpha_set = build_c_alpha_set(structure, chain_ids['class_i_alpha'][i], chain_ids['peptide'][i])
-                action['c_alpha_distances'][assembly_id] = c_alpha_set
+                try:
+                    c_alpha_set = build_c_alpha_set(structure, chain_ids['class_i_alpha'][i], chain_ids['peptide'][i])
+                except:
+                    c_alpha_set = None
+                    step_errors.append('unable_to_build_calpha_set')
+                if c_alpha_set is not None:
+                    action['c_alpha_distances'][assembly_id] = c_alpha_set
+                else:
+                    action['c_alpha_distances'][assembly_id] = None
+                    step_errors.append('unable_to_build_calpha_set')
             else:
                 step_errors.append('missing_aligned_structure')
             i += 1

@@ -223,7 +223,7 @@ def match_chains(pdb_code, aws_config, force=False):
                         step_errors.append('no_chain_info')
                 if not best_match:
                     if 'no_match' not in step_errors:
-                        step_errors.append('no_match')
+                        step_errors.append('no_sequence_match')
             else:
                 step_errors.append('no_loci_yet')
                 step_errors.append(organism)
@@ -292,7 +292,7 @@ def match_chains(pdb_code, aws_config, force=False):
             # Add to species class set
             data, success, errors = update_block(pdb_code, 'core', 'info', update, aws_config)
     else:
-        step_errors.append(['no_organism'])
+        step_errors.append('no_organism_in_structure_data')
     output = {
         'action':allele_match,
         'core':data

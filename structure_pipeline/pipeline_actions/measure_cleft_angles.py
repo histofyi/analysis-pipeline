@@ -51,22 +51,26 @@ def measure_cleft_angles(pdb_code:str, aws_config:Dict, force:bool=False) -> Dic
         if chains[chain]['best_match'] == 'class_i_alpha':
             chain_ids = chains[chain]['chains']
     i = 0
-    for assembly_id in aligned['aligned']['files']:
-        action['peptide_contact_position_angles'][assembly_id] = {}
-        action['cleft_torsion_angles'][assembly_id] = {}
-        assembly_identifier = f'{pdb_code}_{assembly_id}'
-        cif_key = aligned['aligned']['files'][assembly_id]['files']['file_key']
-        structure = load_cif(cif_key, assembly_identifier, aws_config)
-        peptide_contact_angles, all_cleft_angles = cleft_torsion_angles(structure, chain_ids[i])
-        action['peptide_contact_position_angles'][assembly_id] = peptide_contact_angles
-        action['cleft_torsion_angles'][assembly_id] = all_cleft_angles
-        i += 1
-    
-    peptide_contact_position_angles_key = awsKeyProvider().block_key(pdb_code, 'peptide_contact_position_angles', 'info')
-    data, success, errors = s3.put(peptide_contact_position_angles_key, {'peptide_contact_position_angles': action['peptide_contact_position_angles']}, data_format='json')
-    cleft_torsion_angles_key = awsKeyProvider().block_key(pdb_code, 'cleft_torsion_angles', 'info')
-    data, success, errors = s3.put(cleft_torsion_angles_key, {'cleft_torsion_angles': action['cleft_torsion_angles']}, data_format='json')
-    
+    if aligned is not None:
+        for assembly_id in aligned['aligned']['files']:
+            action['peptide_contact_position_angles'][assembly_id] = {}
+            action['cleft_torsion_angles'][assembly_id] = {}
+            assembly_identifier = f'{pdb_code}_{assembly_id}'
+            cif_key = aligned['aligned']['files'][assembly_id]['files']['file_key']
+            structure = load_cif(cif_key, assembly_identifier, aws_config)
+            peptide_contact_angles, all_cleft_angles = cleft_torsion_angles(structure, chain_ids[i])
+            action['peptide_contact_position_angles'][assembly_id] = peptide_contact_angles
+            action['cleft_torsion_angles'][assembly_id] = all_cleft_angles
+            i += 1
+        
+        peptide_contact_position_angles_key = awsKeyProvider().block_key(pdb_code, 'peptide_contact_position_angles', 'info')
+        data, success, errors = s3.put(peptide_contact_position_angles_key, {'peptide_contact_position_angles': action['peptide_contact_position_angles']}, data_format='json')
+        cleft_torsion_angles_key = awsKeyProvider().block_key(pdb_code, 'cleft_torsion_angles', 'info')
+        data, success, errors = s3.put(cleft_torsion_angles_key, {'cleft_torsion_angles': action['cleft_torsion_angles']}, data_format='json')
+    else:
+        logging.warn(pdb_code)
+        logging.warn('NO ALIGNED STRUCTURES')
+        step_errors.append('no_aligned_structures')
     output = {
         'action':action,
         'core':core

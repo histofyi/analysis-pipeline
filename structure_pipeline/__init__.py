@@ -31,6 +31,45 @@ import json
 structure_pipeline_views = Blueprint('structure_pipeline_views', __name__)
 
 
+
+def process_errors(errors_dict):
+    minor_errors = []
+    major_errors = []
+    collated_errors = {
+        'minor_errors_dict':{},
+        'major_errors_dict':{},
+        'by_pdb_code':{}
+    }
+    for pdb_code in errors_dict:
+        if errors_dict[pdb_code] is not None:
+            collated_errors['by_pdb_code'][pdb_code] = []
+            for error in set(errors_dict[pdb_code]):
+                collated_errors['by_pdb_code'][pdb_code].append(error)
+            minor_errors.append(pdb_code)
+            if not error in collated_errors['minor_errors_dict']:
+                collated_errors['minor_errors_dict'][error] = []
+            collated_errors['minor_errors_dict'][error].append(pdb_code)
+    return collated_errors, minor_errors, major_errors
+
+
+
+
+
+def roll_up_stats(errors_dict, members, success):
+    collated_errors, minor_errors, major_errors = process_errors(errors_dict)
+    stats = {
+        'members':{'pdb_codes':members, 'count':0},
+        'success':{'pdb_codes':success, 'count':0},
+        'minor_errors':{'pdb_codes': minor_errors, 'count': 0},
+        'major_errors':{'pdb_codes': major_errors, 'count': 0}
+    }
+    for item in stats:
+        stats[item]['count'] = len(stats[item]['pdb_codes'])
+    return stats, collated_errors
+
+
+
+
 pipeline_actions = {
     'class_i': {
         'test':{'action':test, 'next':None, 'name':'Test', 'show_in_list':False, 'link':False},
@@ -107,9 +146,6 @@ def structure_redirect_handler(userobj:Dict) -> Dict:
 
 
 
-def roll_up_errors(errors):
-    pass
-
 
 
 @structure_pipeline_views.get('/<string:mhc_class>/<string:route>/set/<path:set_context>/<path:set_slug>')
@@ -129,27 +165,18 @@ def pipeline_set_handler(userobj, mhc_class, route, set_context, set_slug):
         Dict: a dictionary containing the user object, data aboutt the action performed and the next action in the pipeline
 
     """
+    successes = []
+    members = []
+    errordict = {}
     itemset, success, errors = itemSet(set_slug, set_context).get()
-    success_array = []
-    errors_dict = {}
-    minor_errors_dict = {}
-    error_count = 0
-    minor_error_count = 0
     for pdb_code in itemset['members']:
         pdb_code = pdb_code.lower()
+        members.append(pdb_code)
         data, success, errors = pipeline_actions[mhc_class][route]['action'](pdb_code, current_app.config['AWS_CONFIG'])
         if data:
-            success_array.append(pdb_code.upper())
-            if errors:
-                if not pdb_code in minor_errors_dict:
-                    minor_errors_dict[pdb_code] = {'errors':[]}
-                minor_errors_dict[pdb_code]['errors'].append(errors)
-                minor_error_count += 1
-        else:
-            if not pdb_code in errors_dict:
-                errors_dict[pdb_code] = {'errors':[]}
-            errors_dict[pdb_code]['errors'].append(errors)
-            error_count += 1
+            successes.append(pdb_code)
+        if errors:
+            errordict[pdb_code] = errors
     if pipeline_actions[mhc_class][route]['next']:
         next = pipeline_actions[mhc_class][route]['next']
         next_action = {
@@ -158,16 +185,15 @@ def pipeline_set_handler(userobj, mhc_class, route, set_context, set_slug):
         }
     else:
         next_action = None
-
+    stats, collated_errors = roll_up_stats(errordict, members, successes)
+    if len(errordict) > 0:
+        has_errors = True
+    else:
+        has_errors = False
     return {
-        'success':success_array,
-        'success_count': len(success_array),
-        'item_count': len(itemset['members']),
-        'items':itemset['members'],
-        'minor_error_count': minor_error_count,
-        'minor_errors':minor_errors_dict,
-        'error_count': error_count,
-        'errors':errors_dict,
+        'stats':stats,
+        'collated_errors':collated_errors,
+        'has_errors':has_errors,
         'name':pipeline_actions[mhc_class][route]['name'], 
         'next_action':next_action, 
         'mhc_class':mhc_class, 

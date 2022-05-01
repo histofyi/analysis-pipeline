@@ -138,9 +138,8 @@ def assign_chains(pdb_code, aws_config, force=False):
                     
                 if best_match == 'peptide':
                     update['peptide']['sequence'] = chain['sequence']
-    logging.warn(found_chains)
     if 'unmatched' in found_chains:
-        step_errors.append(['unmatched_chain'])
+        step_errors.append('unmatched_chain')
     s3 = s3Provider(aws_config)
     chains_key = awsKeyProvider().block_key(pdb_code, 'chains', 'info')
     s3.put(chains_key, action)

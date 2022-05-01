@@ -36,11 +36,11 @@
     <div class="grid-container">
         <div class="grid-column proto-pipeline-phase">
             <div class="inner">
-                <span class="phase-title is-idea">Items</span>
-                <span class="heading-extra-large phase-count"><a href="#">{{item_count}}</a></span>
+                <span class="phase-title is-idea"><a>All</a></span>
+                <span class="heading-extra-large phase-count"><a href="#">{{stats.members.count}}</a></span>
                 <p>
-                    {% for pdb_code in items %}
-                    {{pdb_code|upper}}<br />
+                    {% for pdb_code in stats.members.pdb_codes %}
+                        {{pdb_code|upper}}<br />
                     {% endfor %}
                 </p>    
             </div>
@@ -48,11 +48,11 @@
 
         <div class="grid-column proto-pipeline-phase">
             <div class="inner">
-                <span class="phase-title is-alpha">Errors</span>
-                <span class="heading-extra-large phase-count"><a href="#">{{error_count}}</a></span>
+                <span class="phase-title is-alpha"><a href="#major">Errors</a></span>
+                <span class="heading-extra-large phase-count"><a href="#">{{stats.major_errors.count}}</a></span>
                 <p>
-                    {% for pdb_code in errors %}
-                    {{pdb_code|upper}}<br />
+                    {% for pdb_code in stats.major_errors.pdb_code %}
+                        <a href="#{{pdb_code|lower}}">{{pdb_code|upper}}</a><br />
                     {% endfor %}
                 </p>    
             </div>
@@ -60,11 +60,11 @@
 
         <div class="grid-column proto-pipeline-phase">
             <div class="inner">
-                <span class="phase-title is-beta">Minor errors</span>
-                <span class="heading-extra-large phase-count"><a href="#">{{minor_error_count}}</a></span>
+                <span class="phase-title is-beta"><a href="#minor">Minor errors</a></span>
+                <span class="heading-extra-large phase-count"><a href="#">{{stats.minor_errors.count}}</a></span>
                 <p>
-                    {% for pdb_code in minor_errors %}
-                    {{pdb_code|upper}}<br />
+                    {% for pdb_code in stats.minor_errors.pdb_codes %}
+                    <a href="#{{pdb_code|lower}}">{{pdb_code|upper}}</a><br />
                     {% endfor %}
                 </p>    
             </div>
@@ -72,10 +72,10 @@
 
         <div class="grid-column proto-pipeline-phase">
             <div class="inner">
-                <span class="phase-title is-live">Success</span>
-                <span class="heading-extra-large phase-count"><a href="#">{{success_count}}</a></span>
+                <span class="phase-title is-live"><a>Success</a></span>
+                <span class="heading-extra-large phase-count"><a href="#">{{stats.success.count}}</a></span>
                 <p>
-                    {% for pdb_code in success %}
+                {% for pdb_code in stats.success.pdb_codes %}
                     {{pdb_code|upper}}<br />
                 {% endfor %}
                 </p>    
@@ -88,14 +88,49 @@
             <div class="inner">
             {% if next_action %}
                 {% if next_action.slug == 'view' %}
-                Run pipeline on another set
+                    Run pipeline on another set
                 {% else %}
-                <p class="vertical-spacing-top"><strong>Next action</strong> : <a href="/structures/{{mhc_class}}/{{next_action.slug}}/set/{{set_context}}/{{set_slug}}">{{next_action['name']}} for {{set_name}}</a></p>
+                <p><strong>Next action</strong> : <a href="/structures/{{mhc_class}}/{{next_action.slug}}/set/{{set_context}}/{{set_slug}}">{{next_action['name']}} for {{set_name}}</a></p>
                 {% endif %}
             {% endif %}
             </div>
         </div>
     </div>
+
+    {% if has_errors %}
+    <div class="grid-container">
+        <div class="column-full-width">
+            <div class="inner">
+                <h2 class="heading-large vertical-spacing-top">Errors</h2>
+                <h3 class="heading-medium vertical-spacing-top">Errors by structure</h3>
+                {% for pdb_code in collated_errors.by_pdb_code %}
+                <h4 class="heading-small vertical-spacing-top-0-5"><a name="{{pdb_code|lower}}"></a>{{pdb_code}}</h4>
+                    {{collated_errors.by_pdb_code[pdb_code]}}
+                {% endfor %}
+                <h3 class="heading-medium vertical-spacing-top"><a name="major"></a>Errors by type (major)</h3>
+                {% for error_type in collated_errors.majorr_errors_dict %}
+                <h4 class="heading-small vertical-spacing-top-0-5">{{error_type}}</h4>
+                <p>{{collated_errors.major_errors_dict[error_type]}}</p>
+                {% endfor %}
+                <h3 class="heading-medium vertical-spacing-top"><a name="minor"></a>Errors by type (minor)</h3>
+                {% for error_type in collated_errors.minor_errors_dict %}
+                <h4 class="heading-small vertical-spacing-top-0-5">{{error_type}}</h4>
+                <p>{{collated_errors.minor_errors_dict[error_type]}}</p>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    {% else %}
+    <div class="grid-container">
+        <div class="column-full-width">
+            <div class="inner">
+                <h2 class="heading-large vertical-spacing-top">No errors</h2>
+                <p>Move along...</p>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
 </section>
 
 

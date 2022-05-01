@@ -131,10 +131,10 @@ def assign_complex_type(pdb_code:str, aws_config:Dict, force:bool=False) -> Tupl
         logging.warn('POSSIBLE MATCH')
         action['possible_matches'] = possible_matches
         logging.warn(possible_matches)
-        set_errors.append(['unable_to_match_complex_type_exactly'])
+        set_errors.append('unable_to_match_complex_type_exactly')
     else:
         logging.warn('NO MATCH')
-        set_errors.append(['no_matching_complex_types'])
+        set_errors.append('no_matching_complex_types')
         logging.warn(found_chains)
     output = {
         'action':action,

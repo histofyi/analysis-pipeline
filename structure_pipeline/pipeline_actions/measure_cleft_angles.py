@@ -56,11 +56,14 @@ def measure_cleft_angles(pdb_code:str, aws_config:Dict, force:bool=False) -> Dic
             action['peptide_contact_position_angles'][assembly_id] = {}
             action['cleft_torsion_angles'][assembly_id] = {}
             assembly_identifier = f'{pdb_code}_{assembly_id}'
-            cif_key = aligned['aligned']['files'][assembly_id]['files']['file_key']
-            structure = load_cif(cif_key, assembly_identifier, aws_config)
-            peptide_contact_angles, all_cleft_angles = cleft_torsion_angles(structure, chain_ids[i])
-            action['peptide_contact_position_angles'][assembly_id] = peptide_contact_angles
-            action['cleft_torsion_angles'][assembly_id] = all_cleft_angles
+            if aligned['aligned']['files'][assembly_id] is not None:
+                cif_key = aligned['aligned']['files'][assembly_id]['files']['file_key']
+                structure = load_cif(cif_key, assembly_identifier, aws_config)
+                peptide_contact_angles, all_cleft_angles = cleft_torsion_angles(structure, chain_ids[i])
+                action['peptide_contact_position_angles'][assembly_id] = peptide_contact_angles
+                action['cleft_torsion_angles'][assembly_id] = all_cleft_angles
+            else:
+                step_errors.append('missing_aligned_structure')
             i += 1
         
         peptide_contact_position_angles_key = awsKeyProvider().block_key(pdb_code, 'peptide_contact_position_angles', 'info')

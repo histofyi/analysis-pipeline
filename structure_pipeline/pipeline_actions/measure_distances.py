@@ -87,10 +87,13 @@ def measure_distances(pdb_code:str, aws_config:Dict, force:bool=False) -> Dict:
         for assembly_id in aligned['aligned']['files']:
             action['c_alpha_distances'][assembly_id] = {}
             assembly_identifier = f'{pdb_code}_{assembly_id}'
-            cif_key = aligned['aligned']['files'][assembly_id]['files']['file_key']
-            structure = load_cif(cif_key, assembly_identifier, aws_config)
-            c_alpha_set = build_c_alpha_set(structure, chain_ids['class_i_alpha'][i], chain_ids['peptide'][i])
-            action['c_alpha_distances'][assembly_id] = c_alpha_set
+            if aligned['aligned']['files'][assembly_id] is not None:
+                cif_key = aligned['aligned']['files'][assembly_id]['files']['file_key']
+                structure = load_cif(cif_key, assembly_identifier, aws_config)
+                c_alpha_set = build_c_alpha_set(structure, chain_ids['class_i_alpha'][i], chain_ids['peptide'][i])
+                action['c_alpha_distances'][assembly_id] = c_alpha_set
+            else:
+                step_errors.append('missing_aligned_structure')
             i += 1
         c_alpha_distances_key = awsKeyProvider().block_key(pdb_code, 'c_alpha_distances', 'info')
         data, success, errors = s3.put(c_alpha_distances_key, action, data_format='json')

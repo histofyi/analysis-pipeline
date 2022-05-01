@@ -120,12 +120,31 @@
         "ui_text":"CD8",
         "webglcolor":"0x77DDBB"
     },
+    "nkg2d":{
+        "length":120,
+        "range":[-10,10],
+        "features":["nkg2", "klrk1", "nkg2d"],
+        "label":"nkg2d",
+        "ui_text":"Natural Killer Cell Receptor NKG2d",
+        "homologue":"lectin_like_nk_receptor",
+        "webglcolor":"0x77DDBB"
+    },
     "kir":{
         "length":120,
         "range":[-10,10],
         "features":["kir", "killer", "immunoglobulin", "like", "nk", "nkat6"],
         "label":"kir",
         "ui_text":"Killer Ig-Like Receptors",
+        "webglcolor":"0x77DDBB"
+    },
+    "transferrin_receptor":{
+        "length":640,
+        "range":[-10,10],
+        "features":["transferrin", "serum", "tfrc", "receptor"],
+        "label":"hfe2",
+        "non-classical":true,
+        "homologue":"class_i_alpha",
+        "ui_text":"Transferrin Receptor",
         "webglcolor":"0x77DDBB"
     },
     "cd1b":{
@@ -148,6 +167,16 @@
         "ui_text":"Fc receptor (FcRn)",
         "webglcolor":"0x77DDBB"
     },
+    "h2-t22":{
+        "length":260,
+        "range":[-25,10],
+        "features":["h2", "t22", "h2-t22", "ig"],
+        "label":"h2-t22",
+        "non-classical":true,
+        "homologue":"class_i_alpha",
+        "ui_text":"H2-T22",
+        "webglcolor":"0x77DDBB"
+    },
     "hfe2":{
         "length":275,
         "range":[-25,10],
@@ -158,25 +187,30 @@
         "ui_text":"HFE2",
         "webglcolor":"0x77DDBB"
     },
-    "transferrin_receptor":{
-        "length":640,
-        "range":[-10,10],
-        "features":["transferrin", "serum", "tfrc", "receptor"],
-        "label":"hfe2",
-        "non-classical":true,
-        "homologue":"class_i_alpha",
-        "ui_text":"Transferrin Receptor",
-        "webglcolor":"0x77DDBB"
-    },
-    "h2-t22":{
+    "mica":{
         "length":260,
         "range":[-25,10],
-        "features":["h2", "t22", "h2-t22", "ig"],
-        "label":"h2-t22",
+        "features":["mhc", "mica", "perb11.1"],
+        "label":"mica",
         "non-classical":true,
         "homologue":"class_i_alpha",
-        "ui_text":"H2-T22",
+        "ui_text":"MICA",
+        "webglcolor":"0x77DDBB"
+    },
+    "ig_gamma_2a":{
+        "length":225,
+        "range":[-25,10],
+        "features":["ig", "gamma", "2a", "igg-2a"],
+        "label":"ig_gamma_2a",
+        "ui_text":"IG Gamma-2A",
+        "webglcolor":"0x77DDBB"
+    },
+    "us2":{
+        "length":95,
+        "range":[-5,5],
+        "features":["unique", "short", "us2", "glycoprotein"],
+        "label":"us2",
+        "ui_text":"Cytomegalovirus protein US2",
         "webglcolor":"0x77DDBB"
     }
-
 }

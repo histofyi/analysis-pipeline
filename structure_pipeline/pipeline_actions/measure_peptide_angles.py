@@ -40,9 +40,15 @@ def measure_peptide_angles(pdb_code:str, aws_config:Dict, force:bool=False) -> D
     if peptide_structures is not None:
         for assembly_id in peptide_structures['peptide_structures']['files']:
             assembly_identifier = f'{pdb_code}_{assembly_id}'
-            peptide_cif_key = peptide_structures['peptide_structures']['files'][assembly_id]['peptide_only']['file_key']
-            structure = load_cif(peptide_cif_key, assembly_identifier, aws_config)
-            action['peptide_angles'][assembly_id] = peptide_angles(structure)
+            if peptide_structures['peptide_structures']['files'][assembly_id] is not None:
+                if 'peptide_only' in peptide_structures['peptide_structures']['files'][assembly_id]:
+                    peptide_cif_key = peptide_structures['peptide_structures']['files'][assembly_id]['peptide_only']['file_key']
+                    structure = load_cif(peptide_cif_key, assembly_identifier, aws_config)
+                    action['peptide_angles'][assembly_id] = peptide_angles(structure)
+                else:
+                    step_errors.append('missing_peptide_only_structure')
+            else:
+                step_errors.append('missing_peptide_only_structure')
         peptide_angles_key = awsKeyProvider().block_key(pdb_code, 'peptide_angles', 'info')
         data, success, errors = s3.put(peptide_angles_key, action, data_format='json')
     else:

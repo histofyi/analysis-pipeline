@@ -77,4 +77,4 @@ def fetch_publication_info(pdb_code:str, aws_config:Dict, force:bool=False) -> D
         'action': {'publication':publication_info, 'source':'PDBe REST API publication method'} ,
         'core': data
     }
-    return output, True, process_step_errors(step_errors)
+    return output, True, step_errors

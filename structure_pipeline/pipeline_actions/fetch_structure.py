@@ -56,5 +56,5 @@ def get_pdbe_structures(pdb_code:str, aws_config: Dict, force:bool=False):
         'action': action,
         'core': core
     }
-    return output, success, process_step_errors(step_errors)
+    return output, success, step_errors
 

@@ -105,4 +105,4 @@ def fetch_summary_info(pdb_code:str, aws_config, force=False):
         'action':{'summary':summary_info, 'source':'PDBe REST API summary method'},
         'core': data
     }
-    return output, success, process_step_errors(step_errors)
+    return output, success, step_errors

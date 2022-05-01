@@ -43,6 +43,13 @@ complexes = {
                 'label': 'Fc receptor (FcRn)',
                 'slug':'fcrn'
 
+        },
+        {
+                'components':['nkg2d', 'class_i_alpha'],
+                'unique_chains':2,
+                'label': 'MICA with NKG2D',
+                'slug':'mica_with_nkg2d'
+
         }],
         '3':[{
                 'components':['class_i_alpha','beta2m', 'peptide'],
@@ -58,10 +65,22 @@ complexes = {
                 'slug':'class_i_with_peptide_and_cd8'                
             },
             {
-               'components':['class_i_alpha', 'beta2m', 'peptide', 'kir'],
+                'components':['class_i_alpha', 'beta2m', 'peptide', 'kir'],
                 'unique_chains':4,
                 'label': 'MHC Class I with peptide and KIR NK receptor',
                 'slug':'class_i_with_peptide_and_kir'                
+            },
+            {
+                'components':['fcrn', 'beta2m', 'ig_gamma_2a', 'ig_gamma_2a'],
+                'unique_chains':4,
+                'label': 'Fc receptor (FcRn) with IG Gamme-2',
+                'slug':'fcrn_with_ig_gamma_2'                
+            },
+            {
+                'components':['class_i_alpha', 'beta2m', 'peptide', 'us2'],
+                'unique_chains':4,
+                'label': 'MHC Class I with peptide and US2',
+                'slug':'class_i_with_peptide_and_us2'                
             }],
         '5':[{
                'components':['class_i_alpha','beta2m', 'peptide','tcr_alpha','tcr_beta'],

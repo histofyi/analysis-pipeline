@@ -93,4 +93,4 @@ def initialise(pdb_code: str, aws_config: Dict, force:bool=False) -> Tuple[Dict,
         'action':data,
         'core':data
     }
-    return output, success, process_step_errors(step_errors)
+    return output, success, step_errors

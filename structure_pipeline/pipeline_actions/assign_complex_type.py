@@ -9,6 +9,13 @@ import logging
 
 complexes = {
     'chain_counts':{
+        '1':[{
+                'components':['zag'],
+                'unique_chains':1,
+                'label': 'Zinc-Alpha-2-Glycoprotein',
+                'slug':'zag'
+
+        }],
         '2':[{
                 'components':['hfe2','beta2m'],
                 'unique_chains':2,
@@ -28,6 +35,13 @@ complexes = {
                 'unique_chains':2,
                 'label': 'Class I without distinct peptide',
                 'slug':'class_i_possibly_without_peptide'
+
+        },
+        {
+                'components':['cd1a','beta2m'],
+                'unique_chains':2,
+                'label': 'CD1a',
+                'slug':'cd1a'
 
         },
         {
@@ -57,6 +71,13 @@ complexes = {
                 'label': 'MHC Class I with peptide',
                 'slug':'class_i_with_peptide'
 
+        },
+        {
+                'components':['class_i_alpha','beta2m', 'cd8'],
+                'unique_chains':3,
+                'label': 'MHC Class I with CD8',
+                'slug':'class_i_with_cd8'
+
         }],
         '4':[{
                'components':['class_i_alpha', 'beta2m', 'peptide', 'cd8'],
@@ -71,10 +92,28 @@ complexes = {
                 'slug':'class_i_with_peptide_and_kir'                
             },
             {
+                'components':['class_i_alpha', 'beta2m', 'peptide', 'lir1'],
+                'unique_chains':4,
+                'label': 'MHC Class I with peptide and LIR-1',
+                'slug':'class_i_with_peptide_and_lir1'                
+            },
+            {
+                'components':['class_i_alpha', 'beta2m', 'peptide', 'ly49a'],
+                'unique_chains':4,
+                'label': 'MHC Class I with peptide and Ly49a NK receptor',
+                'slug':'class_i_with_peptide_and_ly49a'                
+            },
+            {
                 'components':['fcrn', 'beta2m', 'ig_gamma_2a', 'ig_gamma_2a'],
                 'unique_chains':4,
                 'label': 'Fc receptor (FcRn) with IG Gamme-2',
                 'slug':'fcrn_with_ig_gamma_2'                
+            },
+            {
+                'components':['h2-t22', 'beta2m', 'tcr_delta', 'tcr_gamma'],
+                'unique_chains':4,
+                'label': 'H2-T22 with Gamma/Delta T Cell Receptor',
+                'slug':'h2_22_with_gamma_delta_tcr'                
             },
             {
                 'components':['class_i_alpha', 'beta2m', 'peptide', 'us2'],

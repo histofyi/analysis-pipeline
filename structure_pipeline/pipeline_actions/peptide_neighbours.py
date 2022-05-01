@@ -47,35 +47,39 @@ def peptide_neighbours(pdb_code:str, aws_config:Dict, force:bool=False) -> Tuple
                                 if residue.id[0] == ' ':
                                     for atom in residue:
                                         all_atoms.append(atom)
-                    neighbor = Bio.PDB.NeighborSearch(all_atoms)
-                    neighbours = neighbor.search_all(5, level='R')
-                    for residue_pair in neighbours:
-                        residue_1 = residue_pair[0]
-                        residue_2 = residue_pair[1]
-                        if residue_1.get_parent().id != residue_2.get_parent().id:
-                            chain_pair = [residue_1.get_parent().id, residue_2.get_parent().id]
-                            if class_i_peptide in chain_pair and class_i_alpha in chain_pair:
-                                if residue_1.get_parent().id == class_i_alpha:
-                                    class_i_details = {'residue':residue_1.resname, 'position':residue_1.get_id()[1]}
-                                    peptide_details = {'residue':residue_2.resname, 'position':residue_2.get_id()[1]}
-                                else:
-                                    peptide_details = {'residue':residue_1.resname, 'position':residue_1.get_id()[1]}
-                                    class_i_details = {'residue':residue_2.resname, 'position':residue_2.get_id()[1]}
+                    try:                    
+                        neighbor = Bio.PDB.NeighborSearch(all_atoms)
+                        neighbours = neighbor.search_all(5, level='R')
+                        for residue_pair in neighbours:
+                            residue_1 = residue_pair[0]
+                            residue_2 = residue_pair[1]
+                            if residue_1.get_parent().id != residue_2.get_parent().id:
+                                chain_pair = [residue_1.get_parent().id, residue_2.get_parent().id]
+                                if class_i_peptide in chain_pair and class_i_alpha in chain_pair:
+                                    if residue_1.get_parent().id == class_i_alpha:
+                                        class_i_details = {'residue':residue_1.resname, 'position':residue_1.get_id()[1]}
+                                        peptide_details = {'residue':residue_2.resname, 'position':residue_2.get_id()[1]}
+                                    else:
+                                        peptide_details = {'residue':residue_1.resname, 'position':residue_1.get_id()[1]}
+                                        class_i_details = {'residue':residue_2.resname, 'position':residue_2.get_id()[1]}
+            
 
-                            #TODO offset the peptide and MHC residue ids if needed
+                                    #TODO offset the peptide and MHC residue ids if needed
+                                    
+                                    class_i_residue_id = class_i_details['position']
+                                    peptide_residue_id = peptide_details['position']
 
-                            class_i_residue_id = class_i_details['position']
-                            peptide_residue_id = peptide_details['position']
 
+                                    if class_i_residue_id not in contacts[class_i_alpha]:
+                                        contacts[class_i_alpha][class_i_residue_id] = {'position':class_i_residue_id, 'residue':class_i_details['residue'], 'neighbours':[] }
+                                    contacts[class_i_alpha][class_i_residue_id]['neighbours'].append(peptide_details)
 
-                            if class_i_residue_id not in contacts[class_i_alpha]:
-                                contacts[class_i_alpha][class_i_residue_id] = {'position':class_i_residue_id, 'residue':class_i_details['residue'], 'neighbours':[] }
-                            contacts[class_i_alpha][class_i_residue_id]['neighbours'].append(peptide_details)
-
-                            if peptide_residue_id not in contacts[class_i_peptide]:
-                                contacts[class_i_peptide][peptide_residue_id] = {'position':peptide_residue_id, 'residue':peptide_details['residue'], 'neighbours':[] }
-                            contacts[class_i_peptide][peptide_residue_id]['neighbours'].append(class_i_details)
-
+                                    if peptide_residue_id not in contacts[class_i_peptide]:
+                                        contacts[class_i_peptide][peptide_residue_id] = {'position':peptide_residue_id, 'residue':peptide_details['residue'], 'neighbours':[] }
+                                    contacts[class_i_peptide][peptide_residue_id]['neighbours'].append(class_i_details)
+                    except:
+                        step_errors.append('unknown_biopython_neighbour_exception')
+                        
                     sorted_peptide = dict(sorted(contacts[class_i_peptide].items()))
                 sorted_peptides[assembly_id] = sorted_peptide
             peptide_key = awsKeyProvider().block_key(pdb_code, 'peptide_neighbours', 'info')

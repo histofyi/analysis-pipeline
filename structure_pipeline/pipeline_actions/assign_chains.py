@@ -35,6 +35,9 @@ def assign_chain(chain_length, molecule, molecule_search_terms=None):
             matches = [item for item in molecule_search_terms if item in chains[chain]['features']]
             lower = chains[chain]['length'] + chains[chain]['range'][0]
             upper = chains[chain]['length'] + chains[chain]['range'][1]
+            if 'key_term' in chains[chain]:
+                if chains[chain]['key_term'] in molecule_search_terms:
+                    match_count += 1
             if chain_length > lower and chain_length < upper:
                 in_range = True
             else:

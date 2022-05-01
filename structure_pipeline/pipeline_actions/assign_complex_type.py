@@ -15,6 +15,13 @@ complexes = {
                 'label': 'Zinc-Alpha-2-Glycoprotein',
                 'slug':'zag'
 
+        },
+        {
+                'components':['m157'],
+                'unique_chains':1,
+                'label': 'Mouse cytomegalovirus m157 protein',
+                'slug':'m157'
+
         }],
         '2':[{
                 'components':['hfe2','beta2m'],
@@ -102,6 +109,12 @@ complexes = {
                 'unique_chains':4,
                 'label': 'MHC Class I with peptide and Ly49a NK receptor',
                 'slug':'class_i_with_peptide_and_ly49a'                
+            },
+            {
+                'components':['cd1b', 'beta2m', 'tcr_alpha', 'tcr_beta'],
+                'unique_chains':4,
+                'label': 'CD1d with NKT T-cell receptor',
+                'slug':'cd1b_with_nkt_tcr'                
             },
             {
                 'components':['fcrn', 'beta2m', 'ig_gamma_2a', 'ig_gamma_2a'],

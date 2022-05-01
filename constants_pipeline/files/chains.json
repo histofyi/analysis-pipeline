@@ -247,6 +247,17 @@
         "ui_text":"Zinc-Alpha-2-Glycoprotein",
         "webglcolor":"0x77DDBB"
     },
+    "m157":{
+        "length":285,
+        "range":[-20,10],
+        "features":["m157"],
+        "key_term":"m157",
+        "label":"m157",
+        "non-classical":true,
+        "homologue":"class_i_alpha",
+        "ui_text":"Mouse cytomegalovirus m157 protein",
+        "webglcolor":"0x77DDBB"
+    },
     "ig_gamma_2a":{
         "length":225,
         "range":[-25,10],

@@ -133,6 +133,16 @@
         "homologue":"lectin_like_nk_receptor",
         "webglcolor":"0x77DDBB"
     },
+    "nkg2a":{
+        "length":120,
+        "range":[-10,10],
+        "features":["nkg2", "'a/nkg2", "klrc1", "nkg2a"],
+        "key_term":"nkg2a",
+        "label":"nkg2a",
+        "ui_text":"Natural Killer Cell Receptor NKG2a",
+        "homologue":"lectin_like_nk_receptor",
+        "webglcolor":"0x77DDBB"
+    },
     "ly49a":{
         "length":135,
         "range":[-10,10],
@@ -141,6 +151,15 @@
         "label":"ly49a",
         "ui_text":"Natural Killer Cell Receptor Ly49a",
         "homologue":"lectin_like_nk_receptor",
+        "webglcolor":"0x77DDBB"
+    },
+    "cd94":{
+        "length":120,
+        "range":[-10,10],
+        "features":["cd94", "killer", "klrd1"],
+        "key_term":"cd94",
+        "label":"cd94",
+        "ui_text":"CD94",
         "webglcolor":"0x77DDBB"
     },
     "kir":{
@@ -181,6 +200,17 @@
         "non-classical":true,
         "homologue":"class_i_alpha",
         "ui_text":"CD1b",
+        "webglcolor":"0x77DDBB"
+    },
+    "cd1d":{
+        "length":275,
+        "range":[-25,10],
+        "features":["cd1d", "glycoprotein", "cd1", "cd1d1", "cd1.1"],
+        "key_term":"cd1d",
+        "label":"cd1d",
+        "non-classical":true,
+        "homologue":"class_i_alpha",
+        "ui_text":"CD1d",
         "webglcolor":"0x77DDBB"
     },
     "cd1a":{
@@ -247,6 +277,15 @@
         "ui_text":"Zinc-Alpha-2-Glycoprotein",
         "webglcolor":"0x77DDBB"
     },
+    "pip":{
+        "length":260,
+        "range":[-25,10],
+        "features":["prolactin", "inducible", "gcdfp15", "gpip4", "pip"],
+        "key_term":"pip",
+        "label":"pip",
+        "ui_text":"Prolactin inducible protein (PIP)",
+        "webglcolor":"0x77DDBB"
+    },
     "m157":{
         "length":285,
         "range":[-20,10],
@@ -256,6 +295,17 @@
         "non-classical":true,
         "homologue":"class_i_alpha",
         "ui_text":"Mouse cytomegalovirus m157 protein",
+        "webglcolor":"0x77DDBB"
+    },
+    "ul18":{
+        "length":285,
+        "range":[-20,10],
+        "features":["ul18"],
+        "key_term":"ul18",
+        "label":"ul18",
+        "non-classical":true,
+        "homologue":"class_i_alpha",
+        "ui_text":"Human cytomegalovirus UL18 protein",
         "webglcolor":"0x77DDBB"
     },
     "ig_gamma_2a":{

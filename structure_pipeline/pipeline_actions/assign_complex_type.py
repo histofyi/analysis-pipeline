@@ -59,6 +59,13 @@ complexes = {
 
         },
         {
+                'components':['cd1d','beta2m'],
+                'unique_chains':2,
+                'label': 'CD1d',
+                'slug':'cd1d'
+
+        },
+        {
                 'components':['fcrn','beta2m'],
                 'unique_chains':2,
                 'label': 'Fc receptor (FcRn)',
@@ -70,6 +77,13 @@ complexes = {
                 'unique_chains':2,
                 'label': 'MICA with NKG2D',
                 'slug':'mica_with_nkg2d'
+
+        },
+        {
+                'components':['zag', 'pip'],
+                'unique_chains':2,
+                'label': 'Zinc-Alpha-2-Glycoprotein and Prolactin inducible protein (PIP)',
+                'slug':'zag_with_pip'
 
         }],
         '3':[{
@@ -84,6 +98,13 @@ complexes = {
                 'unique_chains':3,
                 'label': 'MHC Class I with CD8',
                 'slug':'class_i_with_cd8'
+
+        },
+        {
+                'components':['fcrn','beta2m', 'peptide'],
+                'unique_chains':3,
+                'label': 'Fc receptor with peptide',
+                'slug':'fcrn_with_peptide_and_beta2m'
 
         }],
         '4':[{
@@ -111,7 +132,7 @@ complexes = {
                 'slug':'class_i_with_peptide_and_ly49a'                
             },
             {
-                'components':['cd1b', 'beta2m', 'tcr_alpha', 'tcr_beta'],
+                'components':['cd1d', 'beta2m', 'tcr_alpha', 'tcr_beta'],
                 'unique_chains':4,
                 'label': 'CD1d with NKT T-cell receptor',
                 'slug':'cd1b_with_nkt_tcr'                
@@ -139,6 +160,18 @@ complexes = {
                 'unique_chains':5,
                 'label': 'MHC Class I with peptide and Alpha/Beta T cell receptor',
                 'slug':'class_i_with_peptide_and_tcr'                
+            },
+            {
+               'components':['class_i_alpha','beta2m', 'peptide','cd8','cd8'],
+                'unique_chains':5,
+                'label': 'MHC Class I with peptide and CD8 dimer',
+                'slug':'class_i_with_peptide_and_cd8_dimer'                
+            },
+            {
+               'components':['class_i_alpha','beta2m', 'peptide','cd94','nkg2a'],
+                'unique_chains':5,
+                'label': 'MHC Class I with peptide and CD94/NKG2A',
+                'slug':'class_i_with_peptide_and_cd94_and_nkg2a'                
             }]
     }
 }
@@ -150,6 +183,8 @@ def test_complex_types(found_chains, unique_chain_count):
     exact_matches = []
     possible_matches = []
     all_matches = []
+    logging.warn(str(unique_chain_count))
+    logging.warn(found_chains)
     if str(unique_chain_count) in complexes['chain_counts']:
         for item in complexes['chain_counts'][str(unique_chain_count)]:
             matches = [chain for chain in found_chains if chain in item['components']]

@@ -79,9 +79,12 @@ def peptide_neighbours(pdb_code:str, aws_config:Dict, force:bool=False) -> Tuple
                                     contacts[class_i_peptide][peptide_residue_id]['neighbours'].append(class_i_details)
                     except:
                         step_errors.append('unknown_biopython_neighbour_exception')
-                        
-                    sorted_peptide = dict(sorted(contacts[class_i_peptide].items()))
-                sorted_peptides[assembly_id] = sorted_peptide
+                        class_i_peptide = None
+                        sorted_peptide = None
+                    if class_i_peptide:
+                        sorted_peptide = dict(sorted(contacts[class_i_peptide].items()))
+                if sorted_peptide:
+                    sorted_peptides[assembly_id] = sorted_peptide
             peptide_key = awsKeyProvider().block_key(pdb_code, 'peptide_neighbours', 'info')
             s3.put(peptide_key, sorted_peptides)
         else:

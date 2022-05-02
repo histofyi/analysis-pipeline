@@ -80,6 +80,13 @@ complexes = {
 
         },
         {
+                'components':['m152', 'rae1'],
+                'unique_chains':2,
+                'label': 'M152 with ligand RAE-1 gamma',
+                'slug':'m152_with_rae1'
+
+        },
+        {
                 'components':['zag', 'pip'],
                 'unique_chains':2,
                 'label': 'Zinc-Alpha-2-Glycoprotein and Prolactin inducible protein (PIP)',
@@ -94,6 +101,13 @@ complexes = {
 
         },
         {
+                'components':['class_i_alpha','beta2m', 'tapbpr'],
+                'unique_chains':3,
+                'label': 'MHC Class I with TAPBPR',
+                'slug':'class_i_with_tapbpr'
+
+        },
+        {
                 'components':['class_i_alpha','beta2m', 'cd8'],
                 'unique_chains':3,
                 'label': 'MHC Class I with CD8',
@@ -105,6 +119,20 @@ complexes = {
                 'unique_chains':3,
                 'label': 'Fc receptor with peptide',
                 'slug':'fcrn_with_peptide_and_beta2m'
+
+        },
+        {
+                'components':['fcrn','beta2m', 'serum_albumin'],
+                'unique_chains':3,
+                'label': 'Fc receptor with Serum Albumin',
+                'slug':'fcrn_with_beta2m_and_serum_albumin'
+
+        },
+        {
+                'components':['cd1d','beta2m', 'p99p'],
+                'unique_chains':3,
+                'label': 'CD1d with helical peptide p99p',
+                'slug':'cd1d_with_b2m_and_p99p'
 
         }],
         '4':[{
@@ -132,9 +160,27 @@ complexes = {
                 'slug':'class_i_with_peptide_and_ly49a'                
             },
             {
+                'components':['class_i_alpha', 'beta2m', 'peptide', 'ly49c'],
+                'unique_chains':4,
+                'label': 'MHC Class I with peptide and Ly49c NK receptor',
+                'slug':'class_i_with_peptide_and_ly49c'                
+            },
+            {
+                'components':['cd1a', 'beta2m', 'tcr_alpha', 'tcr_beta'],
+                'unique_chains':4,
+                'label': 'CD1a with NKT T-cell alpha/beta receptor',
+                'slug':'cd1b_with_nkt_tcr'                
+            },
+            {
                 'components':['cd1d', 'beta2m', 'tcr_alpha', 'tcr_beta'],
                 'unique_chains':4,
-                'label': 'CD1d with NKT T-cell receptor',
+                'label': 'CD1d with NKT T-cell alpha/beta receptor',
+                'slug':'cd1b_with_nkt_tcr'                
+            },
+            {
+                'components':['cd1d', 'beta2m', 'tcr_delta', 'tcr_gamma'],
+                'unique_chains':4,
+                'label': 'CD1d with NKT T-cell deltat/gamma receptor',
                 'slug':'cd1b_with_nkt_tcr'                
             },
             {
@@ -172,7 +218,16 @@ complexes = {
                 'unique_chains':5,
                 'label': 'MHC Class I with peptide and CD94/NKG2A',
                 'slug':'class_i_with_peptide_and_cd94_and_nkg2a'                
-            }]
+            },
+            {
+               'components':['class_i_alpha','beta2m', 'erp57','tapasin','calreticulin'],
+                'unique_chains':5,
+                'label': 'MHC Class I peptide-loading complex',
+                'slug':'class_i_plc'                
+            }
+            ]
+
+
     }
 }
 

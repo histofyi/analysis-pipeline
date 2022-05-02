@@ -2,7 +2,7 @@
     "class_i_alpha":{
         "length":275,
         "range":[-25,10],
-        "features":["class", "i", "alpha"],
+        "features":["class", "i", "alpha", "sla-1", "bf", "hla", "hla-a", "hla-b", "hla-c"],
         "label":"class_i_alpha",
         "ui_text":"Class I alpha",
         "webglcolor":"0x77DDBB"
@@ -44,6 +44,7 @@
         "length":200,
         "range":[-10,10],
         "features":["t", "cell", "receptor", "alpha", "tcra"],
+        "key_term":"alpha",
         "label":"tcr_alpha",
         "ui_text":"T cell receptor alpha",
         "webglcolor":"0xFF44BB"
@@ -52,6 +53,7 @@
         "length":240,
         "range":[-10,10],
         "features":["t", "cell", "receptor", "beta", "tcrb"],
+        "key_term":"beta",
         "label":"tcr_beta",
         "ui_text":"T cell receptor beta",
         "webglcolor":"0x99DD55"
@@ -123,6 +125,42 @@
         "ui_text":"CD8",
         "webglcolor":"0x77DDBB"
     },
+    "tapbpr":{
+        "length":120,
+        "range":[-10,10],
+        "features":["tap","tapbpl"],
+        "key_term":"tap",
+        "label":"tapbpr",
+        "ui_text":"TAPBPR (Tapasin homologue)",
+        "webglcolor":"0x77DDBB"
+    },
+    "tapasin":{
+        "length":428,
+        "range":[-10,10],
+        "features":["tapasin","tapa","tapbp"],
+        "key_term":"tapasin",
+        "label":"tapasin",
+        "ui_text":"Tapasin",
+        "webglcolor":"0x77DDBB"
+    },
+    "erp57":{
+        "length":481,
+        "range":[-10,10],
+        "features":["erp57","disulfide","isomerase","pdia3"],
+        "key_term":"erp57",
+        "label":"erp57",
+        "ui_text":"Erp57, Protein disulfide-isomerase A3",
+        "webglcolor":"0x77DDBB"
+    },
+    "calreticulin":{
+        "length":400,
+        "range":[-10,10],
+        "features":["calreticulin","calr","crtc"],
+        "key_term":"erp57",
+        "label":"calreticulin",
+        "ui_text":"Calreticulin",
+        "webglcolor":"0x77DDBB"
+    },
     "nkg2d":{
         "length":120,
         "range":[-10,10],
@@ -153,6 +191,16 @@
         "homologue":"lectin_like_nk_receptor",
         "webglcolor":"0x77DDBB"
     },
+    "ly49c":{
+        "length":135,
+        "range":[-10,10],
+        "features":["klra3", "ly-49", "ly-49c", "ly49", "ly49c", "lectin"],
+        "key_term":"ly49c",
+        "label":"ly49c",
+        "ui_text":"Natural Killer Cell Receptor Ly49c",
+        "homologue":"lectin_like_nk_receptor",
+        "webglcolor":"0x77DDBB"
+    },
     "cd94":{
         "length":120,
         "range":[-10,10],
@@ -165,7 +213,7 @@
     "kir":{
         "length":120,
         "range":[-10,10],
-        "features":["kir", "killer", "immunoglobulin", "like", "nk", "nkat6"],
+        "features":["kir", "killer", "immunoglobulin", "like", "nk", "nkat6", "nkat5", "kir2ds2"],
         "key_term":"kir",
         "label":"kir",
         "ui_text":"Killer Ig-Like Receptors",
@@ -269,7 +317,7 @@
     "zag":{
         "length":260,
         "range":[-25,10],
-        "features":["zinc", "alpha", "glycoprotein", "azgp1", "zag", "zngp1"],
+        "features":["zinc", "glycoprotein", "azgp1", "zag", "zngp1"],
         "key_term":"zag",
         "label":"zag",
         "non-classical":true,
@@ -284,6 +332,28 @@
         "key_term":"pip",
         "label":"pip",
         "ui_text":"Prolactin inducible protein (PIP)",
+        "webglcolor":"0x77DDBB"
+    },
+    "rae1":{
+        "length":285,
+        "range":[-20,10],
+        "features":["retinoic","acid","raet1c"],
+        "key_term":"raet1c",
+        "label":"rae1",
+        "non-classical":true,
+        "homologue":"class_i_alpha",
+        "ui_text":"RAE-1 gamma",
+        "webglcolor":"0x77DDBB"
+    },
+    "m152":{
+        "length":285,
+        "range":[-20,10],
+        "features":["m152"],
+        "key_term":"m152",
+        "label":"m152",
+        "non-classical":true,
+        "homologue":"class_i_alpha",
+        "ui_text":"Mouse cytomegalovirus m152 protein",
         "webglcolor":"0x77DDBB"
     },
     "m157":{
@@ -322,6 +392,23 @@
         "features":["unique", "short", "us2", "glycoprotein"],
         "label":"us2",
         "ui_text":"Cytomegalovirus protein US2",
+        "webglcolor":"0x77DDBB"
+    },
+    "serum_albumin":{
+        "length":585,
+        "range":[-5,5],
+        "features":["albumin", "alb"],
+        "label":"serum_albumin",
+        "ui_text":"Serum Albumin",
+        "webglcolor":"0x77DDBB"
+    },
+    "p99p":{
+        "length":22,
+        "range":[-5,5],
+        "features":["p99p"],
+        "key_term":"p99p",
+        "label":"p99p",
+        "ui_text":"P99P",
         "webglcolor":"0x77DDBB"
     }
 }

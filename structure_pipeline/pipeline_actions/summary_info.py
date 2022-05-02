@@ -52,7 +52,13 @@ def fetch_summary_info(pdb_code:str, aws_config, force=False):
         Dict: a dictionary of the summary information from the PDBe and an attribution
     """
     step_errors = []
-    summary_info, success, errors = PDBeProvider(pdb_code).fetch_summary()
+    data = {'summary_info':None}
+    try:
+        summary_info, success, errors = PDBeProvider(pdb_code).fetch_summary()
+    except:
+        success = False
+        summary_info = None
+        step_errors.append('unable_to_fetch_summary')
     if summary_info:
         update = {'complex':{},'structure':{}}
         update['structure']['release_date'] =  parse_date_to_isoformat(summary_info['release_date'])

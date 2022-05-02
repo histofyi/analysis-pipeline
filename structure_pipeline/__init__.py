@@ -112,6 +112,9 @@ pipeline_actions = {
 }
 
 
+exclude_pdb_codes = ['5cnz','6la7']
+
+
 @structure_pipeline_views.get('/')
 @check_user
 @requires_privilege('users')
@@ -190,12 +193,15 @@ def pipeline_set_handler(userobj, mhc_class, route, set_context, set_slug):
     itemset, success, errors = itemSet(set_slug, set_context).get(page_number=page)
     for pdb_code in itemset['members']:
         pdb_code = pdb_code.lower()
-        members.append(pdb_code)
-        data, success, errors = pipeline_actions[mhc_class][route]['action'](pdb_code, current_app.config['AWS_CONFIG'])
-        if data:
-            successes.append(pdb_code)
-        if errors:
-            errordict[pdb_code] = errors
+        if pdb_code in exclude_pdb_codes:
+            errordict[pdb_code] = ['file_excluded_obsolete']
+        else:
+            members.append(pdb_code)
+            data, success, errors = pipeline_actions[mhc_class][route]['action'](pdb_code, current_app.config['AWS_CONFIG'])
+            if data:
+                successes.append(pdb_code)
+            if errors:
+                errordict[pdb_code] = errors
     if pipeline_actions[mhc_class][route]['next']:
         next = pipeline_actions[mhc_class][route]['next']
         next_action = {

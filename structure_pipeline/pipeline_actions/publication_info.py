@@ -37,7 +37,13 @@ def fetch_publication_info(pdb_code:str, aws_config:Dict, force:bool=False) -> D
         force (bool): not currently used, may be implemented to force a re-download in the case of a revised structure
     """
     step_errors = []
-    publication_info, success, errors = PDBeProvider(pdb_code).fetch_publications()
+    data = {'publication':None}
+    try:
+        publication_info, success, errors = PDBeProvider(pdb_code).fetch_publications()
+    except:
+        success = False
+        publication_info = None
+        step_errors.append('unable_to_fetch_publication')
     if publication_info:
         update = {'publication':{'citation':{}}}
         update['publication']['citation']['authors'] = publication_info['author_list']

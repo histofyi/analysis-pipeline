@@ -113,9 +113,14 @@ def set_view(userobj:Dict, set_context:str, set_slug:str) -> Dict:
         Dict: a dictionary containing the user object, an empty variables dictionary and an errors array containing the indication that it's an empty form
 
     """
+    variables = request_variables(None, params=['page_number'])
+    if variables['page_number'] is not None :
+        page_number = int(variables['page_number'])
+    else:
+        page_number = 1
     set_slug = slugify(set_slug)
     set_context = slugify(set_context)
-    itemset, success, errors = itemSet(set_slug, set_context).get()    
+    itemset, success, errors = itemSet(set_slug, set_context).get(page_number=page_number, page_size=25)    
     return {'userobj': userobj, 'itemset':itemset}
 
 

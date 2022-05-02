@@ -1,0 +1,7 @@
+{% for page in itemset.pagination.pages %}
+    {% if page == itemset.pagination.current_page %}
+        <strong>{{page}}</strong>&nbsp;
+    {% else %}
+        <a href="?page_number={{page}}">{{page}}</a>&nbsp;
+    {% endif %}
+{% endfor %}

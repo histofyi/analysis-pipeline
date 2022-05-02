@@ -7,16 +7,22 @@
   <div class="grid-container">
     <div class="column-full-width">
       <div class="inner">
-        <h1 class="vertical-spacing-bottom-0-25">{{itemset.metadata.title}}</h1>
-        <div>Last updated {{itemset.last_updated|timesince}} | {{itemset.members|length}} items</div>
+        <h1 class="vertical-spacing-bottom-0-25">{{itemset.metadata.title|safe}}</h1>
+        <div>Last updated {{itemset.last_updated|timesince}} | {{itemset.pagination.total}} items</div>
+        <br /><hr />
+        <p>Page {{itemset.pagination.current_page}} of {{itemset.pagination.page_count}} | {{itemset.pagination.page_size}} items per page</p>
+        {% include "fragments/set_pagination.html" %}
+        <hr />
         <div class="vertical-spacing-top vertical-spacing-bottom">
           {% for structure in itemset.members %}
-          <div class="vertical-spacing-top-0-25"><strong><a href="/structures/information/{{structure}}" target='_new'>{{structure}}</a></strong></div>
-          <div class="vertical-spacing-bottom-0-5">
+          <div class="vertical-spacing-top-0-25"><strong><a href="/structures/information/{{structure}}" target='_new'>{{structure|upper}}</a></strong></div>
+          <div class="vertical-spacing-bottom-0-25">
             <br />
           </div>
           {% endfor %}
         </div>
+        <hr />
+        {% include "fragments/set_pagination.html" %}
       </div>
     </div>
   </div>

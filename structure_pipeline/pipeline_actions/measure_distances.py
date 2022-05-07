@@ -50,8 +50,8 @@ def build_c_alpha_set(structure, class_i_alpha_chain, peptide_chain):
             pair['from'] = build_residue_dictionary(each[0])
             pair['to'] = build_residue_dictionary(each[1])
             if pair['from'] is not None and pair['to'] is not None:
-                pair['distance'] = float(np.linalg.norm(pair['from']['typed_coords'] - pair['to']['typed_coords']))
-        
+                pair['distance'] = float(np.sqrt(np.sum(pow(pair['from']['typed_coords'] - pair['to']['typed_coords'],2))))
+
                 del pair['from']['typed_coords']
                 del pair['to']['typed_coords']
 

@@ -2,6 +2,6 @@
     {% if page == itemset.pagination.current_page %}
         <strong>{{page}}</strong>&nbsp;
     {% else %}
-        <a href="?page_number={{page}}">{{page}}</a>&nbsp;
+        <a href="?page_number={{page}}{% if intersection %}&intersection={{intersection}}{% endif %}">{{page}}</a>&nbsp;
     {% endif %}
 {% endfor %}

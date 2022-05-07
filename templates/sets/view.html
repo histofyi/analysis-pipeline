@@ -7,22 +7,34 @@
   <div class="grid-container">
     <div class="column-full-width">
       <div class="inner">
-        <h1 class="vertical-spacing-bottom-0-25">{{itemset.metadata.title|safe}}</h1>
-        <div>Last updated {{itemset.last_updated|timesince}} | {{itemset.pagination.total}} items</div>
-        <br /><hr />
-        <p>Page {{itemset.pagination.current_page}} of {{itemset.pagination.page_count}} | {{itemset.pagination.page_size}} items per page</p>
+        {% if itemset %}
+            <h1 class="vertical-spacing-bottom-0-25">{{itemset.metadata.title|safe}}</h1>
+            <div>{% if not filtered %}Last updated {{itemset.last_updated|timesince}} | {% endif %}{{itemset.pagination.total}} items</div>
+            <br /><hr />
+            <p>Page {{itemset.pagination.current_page}} of {{itemset.pagination.page_count}} | {{itemset.pagination.page_size}} items per page</p>
         {% include "fragments/set_pagination.html" %}
         <hr />
+        {% else %}
+        <h1 class="vertical-spacing-bottom-0-25">Ooops, we've got a problem  </h1>
+        {% endif %}
         <div class="vertical-spacing-top vertical-spacing-bottom">
-          {% for structure in itemset.members %}
-          <div class="vertical-spacing-top-0-25"><strong><a href="/structures/information/{{structure}}" target='_new'>{{structure|upper}}</a></strong></div>
-          <div class="vertical-spacing-bottom-0-25">
-            <br />
-          </div>
-          {% endfor %}
+          {% if facet_display == 'info' %}
+            {% include "fragments/sets/info.html" %}
+          {% elif facet_display == 'peptide_angles' %}
+            {% include "fragments/sets/peptide_angles.html" %}
+          {% elif facet_display == 'allele_match' %}
+            {% include "fragments/sets/allele_match.html" %}
+          {% elif facet_display == 'peptide_neighbours' %}
+            {% include "fragments/sets/peptide_neighbours.html" %}
+          {% else %}
+            {% include "fragments/sets/default.html" %}
+          {% endif %}
+
         </div>
+        {% if itemset %}
         <hr />
         {% include "fragments/set_pagination.html" %}
+        {% endif %}
       </div>
     </div>
   </div>

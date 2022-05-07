@@ -233,10 +233,29 @@ class itemSet(DataClass):
         return set_members
 
 
-    def hydrate(self):
-        pass
+    def _intersection(self, first, second):
+        _intersected = list(set(first['members']).intersection(set(second['members'])))
+        return _intersected
 
 
-    def intersection(self):
-        pass
+    def intersection(self, sets, all=False, page_number=None, page_size=None) -> Tuple[Dict, bool, List]:
+        intersected, success, errors = self.get(all=True)
+        if len(sets) > 0: 
+            for next in sets:
+                next_slug = slugify(next[1])
+                next_context = slugify(next[0])
+                self.__init__(next_slug, next_context)
+                nextset, success, errors = self.get(all=True)
+                if nextset:
+                    intersected['members'] = [item for item in intersected['members'] if item in self._intersection(intersected, nextset)]
+                    intersected['metadata']['title'] = f"\"{intersected['metadata']['title']}\" ∩ \"{nextset['metadata']['title']}\""
+        if intersected is not None:
+            if not all:
+                paginated, pagination = self.paginate(intersected['members'], page_number=page_number, page_size=page_size)
+                intersected['pagination'] = pagination
+                if len(paginated) > 0:
+                    intersected['members'] = paginated
+        return intersected, success, errors
+
+        
 

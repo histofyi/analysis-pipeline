@@ -1,0 +1,26 @@
+{% for structure in itemset.hydrated_members %}
+            <p><strong>{{structure.pdb_code | upper}}</strong></p>
+            {% if structure.peptide_angles.peptide_angles %}
+            <table width="100%">
+                <tr>
+                    {% for position in structure.peptide_angles.peptide_angles['1'] %}
+                        <td>
+                            <strong>P{{structure.peptide_angles.peptide_angles['1'][position]['position']}} {{structure.peptide_angles.peptide_angles['1'][position]['residue']}}
+                            </strong>
+                            <br />
+                            {% set angles = ['phi', 'psi', 'chi1', 'chi2', 'chi3', 'chi4'] %}
+                            {% for angle in angles %}
+                                {% if structure.peptide_angles.peptide_angles['1'][position][angle] %}
+                                    {{angle}}: {{structure.peptide_angles.peptide_angles['1'][position][angle] | round}}
+                            {% else %}
+                                {{angle}}: 
+                            {% endif %}
+                            <br />
+                            {% endfor %}
+                        </td>
+                    {% endfor %}
+                </tr>
+            </table>
+            {% endif %}
+            <br />
+          {% endfor %}

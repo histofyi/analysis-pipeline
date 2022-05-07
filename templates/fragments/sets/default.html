@@ -1,0 +1,14 @@
+    {% for structure in itemset.hydrated_members %}
+    <tr>
+        <td><strong>{{structure.pdb_code | upper}}</strong><br /><br /></td>
+        {% if structure %}
+        <td>
+            {% for key in structure.core %}        
+                <p><strong>{{key}}</strong>: {{structure.core[key]}}</p>
+            {% endfor %}
+        </td>
+        {% endif %}
+    </tr>
+    {% endfor %}
+    
+    </table>

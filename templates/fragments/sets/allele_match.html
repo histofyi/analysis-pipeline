@@ -1,0 +1,25 @@
+<table width="90%">
+<th>
+    <td><p>allele</p></td>
+    <td>allele group</td>
+    <td>locus</td>
+    <td>id</td>
+    <td>match type</td>
+    <td>confidence</td>
+    <td>mhc class</td>
+</th>
+{% set keys = ['allele', 'allele_group', 'locus', 'id', 'match_type', 'confidence', 'class']%}
+{% for structure in itemset.hydrated_members %}
+<tr>
+    <td><strong>{{structure.pdb_code | upper}}</strong></td>
+    {% if structure.allele_match %}
+    {% for item in keys %}
+    <td>
+        <p>{{structure.allele_match[item]}}</p>
+    </td>
+    {% endfor %}
+{% endif %}
+</tr>
+{% endfor %}
+
+</table>

@@ -2,7 +2,7 @@ from flask import Blueprint, current_app, request, redirect
 from typing import Dict
 
 from common.decorators import check_user, requires_privilege, templated
-from common.models import itemSet
+from common.models import itemSet, Core, PeptideNeighbours, PeptideAngles, AlleleMatch
 
 from common.forms import request_variables, validate_variables
 from common.helpers import slugify
@@ -18,6 +18,29 @@ set_pipeline_views = Blueprint('set_pipeline_views', __name__)
 
 contexts = ["complex_type", "similarity", "differences", "publication", "features", "chronology", "crystallography", "species", "resolution", "locus", "allele", "allele_group", "peptide_sequence", "peptide_length", "peptide_cluster", "peptide_features", "search_query", "matching", "testing","errors"]
 
+
+views = {
+    'view':{
+        'facet':Core,
+        'facet_display':'info'
+    },
+    'peptide_neighbours':{
+        'facet':PeptideNeighbours,
+        'facet_display':'peptide_neighbours'
+    },
+    'peptide_angles':{
+        'facet':PeptideAngles,
+        'facet_display':'peptide_angles'
+    },
+    'allele_match':{
+        'facet':AlleleMatch,
+        'facet_display':'allele_match'
+    },
+    'record':{
+        'facet':Core,
+        'facet_display':'record'
+    }
+}
 
 @set_pipeline_views.get('/')
 @check_user
@@ -98,13 +121,29 @@ def sets_create_action_handler(userobj:Dict) -> Dict:
         return {'userobj': userobj, 'variables':variables, 'validated': validated, 'errors':errors, 'success':success, 'itemset':itemset, 'contexts':contexts}
 
 
-@set_pipeline_views.get('/view/<string:set_context>/<string:set_slug>')
+#TODO there must be a cleaner way to do this
+def get_additional_sets(list_string):
+    to_replace = ['[',']']
+    for item in to_replace:
+        list_string = list_string.replace(item,'')
+    try:
+        tuples = list_string.split('),(')
+    except:
+        tuples = list_string
+    tuples = [this_tuple.replace('(','').replace(')','') for this_tuple in tuples]
+    additional_sets = [tuple(tuple_item.replace('(','').split(',')) for tuple_item in tuples]
+    logging.warn(additional_sets)
+    return additional_sets
+
+    
+
+@set_pipeline_views.get('/<string:view>/<string:set_context>/<string:set_slug>')
 @check_user
 @requires_privilege('users')
 @templated('sets/view')
-def set_view(userobj:Dict, set_context:str, set_slug:str) -> Dict:
+def set_view(userobj:Dict, view, set_context:str, set_slug:str) -> Dict:
     """
-    This handler provides the form for changing the members of a set, adding or removing
+    This handler provides the for viewing a set and the various facets
 
     Args: 
         userobj (Dict): a dictionary describing the currently logged in user with the correct privileges
@@ -113,15 +152,40 @@ def set_view(userobj:Dict, set_context:str, set_slug:str) -> Dict:
         Dict: a dictionary containing the user object, an empty variables dictionary and an errors array containing the indication that it's an empty form
 
     """
-    variables = request_variables(None, params=['page_number'])
+    variables = request_variables(None, params=['page_number','intersection','difference','union'])
+    filtered = False
+    set_slug = slugify(set_slug)
+    set_context = slugify(set_context)
+    itemset = None
+    operator = None
+    page_size = 25
     if variables['page_number'] is not None :
         page_number = int(variables['page_number'])
     else:
         page_number = 1
-    set_slug = slugify(set_slug)
-    set_context = slugify(set_context)
-    itemset, success, errors = itemSet(set_slug, set_context).get(page_number=page_number, page_size=25)    
-    return {'userobj': userobj, 'itemset':itemset}
+    if variables['intersection'] is not None:
+        operator = 'intersection'
+        filtered = True
+        logging.warn('INTERSECTION')
+        logging.warn(variables['intersection'])
+        additional_sets_type_and_slug = get_additional_sets(variables['intersection'])
+        itemset = itemSet(set_slug, set_context).intersection(additional_sets_type_and_slug, page_number=page_number, page_size=page_size)
+    elif variables['union'] is not None:
+        operator = 'union'
+        filtered = True
+        logging.warn('UNION')
+        logging.warn(variables['union'])
+    elif variables['difference'] is not None:
+        operator = 'difference'
+        filtered = True
+        logging.warn(variables['difference'])
+        logging.warn('DIFFERENCE')
+    else:
+        itemset = itemSet(set_slug, set_context).get(page_number=page_number, page_size=page_size)
+    if view in views:
+        if itemset is not None:
+            itemset, success, errors = views[view]['facet']().hydrate(itemset)
+        return {'userobj': userobj, 'itemset':itemset, 'facet_display':views[view]['facet_display'], 'operator':operator, 'filtered':filtered, 'intersection':variables['intersection']}
 
 
 @set_pipeline_views.get('/<string:action>/complete/<string:set_context>/<string:set_slug>')
@@ -194,7 +258,6 @@ def sets_add_remove_action_handler(userobj:Dict, action:str, set_context:str, se
         members = [variables['members']]
     else:
         success = False
-    logging.warn(members)
     if success:
         if action == 'add':
             itemset, success, errors = itemSet(set_slug).add_members(members)

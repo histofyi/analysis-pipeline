@@ -1,0 +1,7 @@
+<table>
+    {% for structure in itemset.hydrated_members %}
+    <tr>
+        <td><p><strong>{{structure.pdb_code|upper}}&nbsp;&nbsp;&nbsp;</strong></p></td><td><p>{{ structure.core.allele | class_i_display_name }}&nbsp;</p></td><td><p> binding {{structure.core.peptide.sequence}}</p></td><td><p> at {{structure.core.resolution | resolution_display | safe}} resolution</p></td><td>{{structure.core.organism.common_name|capitalize}}</td>
+    </tr>
+    {% endfor %}
+</table>

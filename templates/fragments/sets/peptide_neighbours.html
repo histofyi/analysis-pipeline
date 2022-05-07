@@ -1,0 +1,18 @@
+{% for structure in itemset.hydrated_members %}
+<p><strong>{{structure.pdb_code | upper}}</strong></p>
+<table width="100%">
+    <tr>
+        {% for position in structure.peptide_neighbours['1'] %}
+            <td>
+                <strong>P{{structure.peptide_neighbours['1'][position].position }}
+                {{structure.peptide_neighbours['1'][position].residue }}</strong>
+                <br />
+                {% for position in structure.peptide_neighbours['1'][position].neighbours %}
+                    {{position.residue}}{{position.position}}<br />
+                {% endfor %}
+            </td>
+        {% endfor %}
+    </tr>
+</table>
+<br />
+{% endfor %}

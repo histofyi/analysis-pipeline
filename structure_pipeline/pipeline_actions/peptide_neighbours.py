@@ -76,7 +76,8 @@ def peptide_neighbours(pdb_code:str, aws_config:Dict, force:bool=False) -> Tuple
 
                                     if peptide_residue_id not in contacts[class_i_peptide]:
                                         contacts[class_i_peptide][peptide_residue_id] = {'position':peptide_residue_id, 'residue':peptide_details['residue'], 'neighbours':[] }
-                                    contacts[class_i_peptide][peptide_residue_id]['neighbours'].append(class_i_details)
+                                    if class_i_details not in contacts[class_i_peptide][peptide_residue_id]['neighbours']:
+                                        contacts[class_i_peptide][peptide_residue_id]['neighbours'].append(class_i_details)
                     except:
                         step_errors.append('unknown_biopython_neighbour_exception')
                         class_i_peptide = None

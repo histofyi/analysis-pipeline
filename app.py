@@ -10,7 +10,7 @@ from common.decorators import requires_privilege, check_user, templated
 from common.blueprints.auth import auth_handlers
 import common.providers as providers
 import common.functions as functions
-
+import common.filters as filters
 
 import toml
 import logging
@@ -148,7 +148,18 @@ def design_system_hander():
     return {}
 
 
+
 ### Template filters ###
+
+
+@app.template_filter()
+def class_i_display_name(allele):
+    return filters.class_i_display_name(allele)
+
+
+@app.template_filter()
+def resolution_display(allele):
+    return filters.resolution_display(allele)
 
 
 @app.template_filter()

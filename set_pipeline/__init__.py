@@ -140,7 +140,7 @@ def get_additional_sets(list_string):
 @set_pipeline_views.get('/<string:view>/<string:set_context>/<string:set_slug>')
 @check_user
 @requires_privilege('users')
-@templated('sets/view')
+@templated('shared/browse_set')
 def set_view(userobj:Dict, view, set_context:str, set_slug:str) -> Dict:
     """
     This handler provides the for viewing a set and the various facets

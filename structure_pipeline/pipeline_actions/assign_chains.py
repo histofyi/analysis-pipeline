@@ -15,6 +15,8 @@ import logging
 from structure_pipeline.pipeline_actions.match_chains import match_chains
 
 
+alpha_chains = ['class_i_alpha', 'mr1', 'cd1a', 'cd1b', 'cd1d', 'fcrn', 'mica', 'hfe2']
+
 
 def process_molecule_search_terms(molecule:str) -> List:
     return [term.lower() for term in molecule.replace('-',' ').split(' ')]
@@ -129,7 +131,7 @@ def assign_chains(pdb_code, aws_config, force=False):
                 action[chain_id]['best_match'] = best_match
                 action[chain_id]['sequences'] = [chain['sequence']]
                 found_chains.append(best_match)
-                if best_match in ['class_i_alpha', 'class_ii_alpha']:
+                if best_match in alpha_chains:
                     organism = organism_update(chain['source'][0]['organism_scientific_name'])
                     if organism:
                         update['organism'] = organism

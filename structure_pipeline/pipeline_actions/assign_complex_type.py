@@ -22,6 +22,20 @@ complexes = {
                 'label': 'Mouse cytomegalovirus m157 protein',
                 'slug':'m157'
 
+        },
+        {
+                'components':['mica'],
+                'unique_chains':1,
+                'label': 'MHC class I chain-related protein A',
+                'slug':'mica'
+
+        },
+        {
+                'components':['micb'],
+                'unique_chains':1,
+                'label': 'MHC class I chain-related protein B',
+                'slug':'micb'
+
         }],
         '2':[{
                 'components':['hfe2','beta2m'],
@@ -73,7 +87,7 @@ complexes = {
 
         },
         {
-                'components':['nkg2d', 'class_i_alpha'],
+                'components':['nkg2d', 'mica'],
                 'unique_chains':2,
                 'label': 'MICA with NKG2D',
                 'slug':'mica_with_nkg2d'
@@ -134,7 +148,15 @@ complexes = {
                 'label': 'CD1d with helical peptide p99p',
                 'slug':'cd1d_with_b2m_and_p99p'
 
-        }],
+        },
+        {
+                'components':['hfe2', 'beta2m', 'transferrin_receptor'],
+                'unique_chains':3,
+                'label': 'HFE2 with the Transferrin Receptor',
+                'slug':'hfe2_with_beta2m_and_transferrin_receptor'
+
+        }
+        ],
         '4':[{
                'components':['class_i_alpha', 'beta2m', 'peptide', 'cd8'],
                 'unique_chains':4,
@@ -169,25 +191,49 @@ complexes = {
                 'components':['cd1a', 'beta2m', 'tcr_alpha', 'tcr_beta'],
                 'unique_chains':4,
                 'label': 'CD1a with NKT T-cell alpha/beta receptor',
-                'slug':'cd1b_with_nkt_tcr'                
+                'slug':'cd1a_with_nkt__alpha_beta_tcr'                
+            },
+            {
+                'components':['cd1b', 'beta2m', 'tcr_alpha', 'tcr_beta'],
+                'unique_chains':4,
+                'label': 'CD1b with NKT T-cell alpha/beta receptor',
+                'slug':'cd1b_with_nkt_alpha_beta_tcr'                
             },
             {
                 'components':['cd1d', 'beta2m', 'tcr_alpha', 'tcr_beta'],
                 'unique_chains':4,
                 'label': 'CD1d with NKT T-cell alpha/beta receptor',
-                'slug':'cd1b_with_nkt_tcr'                
+                'slug':'cd1d_with_nkt_alpha_beta_tcr'                
             },
             {
                 'components':['cd1d', 'beta2m', 'tcr_delta', 'tcr_gamma'],
                 'unique_chains':4,
-                'label': 'CD1d with NKT T-cell deltat/gamma receptor',
-                'slug':'cd1b_with_nkt_tcr'                
+                'label': 'CD1d with NKT T-cell gamma/delta receptor',
+                'slug':'cd1b_with_nkt_gamma_delta_tcr'                
+            },
+            {
+                'components':['mr1', 'beta2m', 'tcr_delta', 'tcr_gamma'],
+                'unique_chains':4,
+                'label': 'MR1 with gamma/delta T-cell receptor',
+                'slug':'mr1_with_gamma_delta_tcr'                
+            },
+            {
+                'components':['mr1', 'beta2m', 'tcr_alpha', 'tcr_beta'],
+                'unique_chains':4,
+                'label': 'MR1 with alpha/beta T-cell receptor',
+                'slug':'mr1_with_alpha_beta_tcr'                
             },
             {
                 'components':['fcrn', 'beta2m', 'ig_gamma_2a', 'ig_gamma_2a'],
                 'unique_chains':4,
-                'label': 'Fc receptor (FcRn) with IG Gamme-2',
+                'label': 'Fc receptor (FcRn) with IG Gamma-2',
                 'slug':'fcrn_with_ig_gamma_2'                
+            },
+            {
+                'components':['fcrn', 'beta2m', 'serum_albumin', 'ig_gamma_2a'],
+                'unique_chains':4,
+                'label': 'Fc receptor (FcRn) with IG Gamma-2 and Serum Albumin',
+                'slug':'fcrn_with_ig_gamma_2_and_serum_albumin'                
             },
             {
                 'components':['h2-t22', 'beta2m', 'tcr_delta', 'tcr_gamma'],
@@ -200,13 +246,41 @@ complexes = {
                 'unique_chains':4,
                 'label': 'MHC Class I with peptide and US2',
                 'slug':'class_i_with_peptide_and_us2'                
-            }],
+            },
+            {
+            
+                'components':['ul18','beta2m', 'lir1', 'peptide'],
+                'unique_chains':4,
+                'label': 'UL18 with peptide and LIR1',
+                'slug':'ul18_with_peptide_and_lir1'                
+            },
+            {
+            
+                'components':['class_i_alpha','beta2m', 'e3', 'peptide'],
+                'unique_chains':4,
+                'label': 'MHC Class I with peptide and E3',
+                'slug':'class_i_with_peptide_and_e3'                
+            } 
+            ],
         '5':[{
                'components':['class_i_alpha','beta2m', 'peptide','tcr_alpha','tcr_beta'],
                 'unique_chains':5,
                 'label': 'MHC Class I with peptide and Alpha/Beta T cell receptor',
-                'slug':'class_i_with_peptide_and_tcr'                
+                'slug':'class_i_with_peptide_and_alpha_beta_tcr'                
             },
+            {
+               'components':['class_i_alpha', 'beta2m', 'peptide', 'tcr_delta', 'tcr_gamma'],
+                'unique_chains':5,
+                'label': 'MHC Class I with peptide and Gamma/Delta T cell receptor',
+                'slug':'class_i_with_peptide_and_gamma_delta_tcr'                
+            },
+            {
+               'components':['class_i_alpha', 'beta2m', 'peptide', 'scvf_alpha', 'scvf_beta'],
+                'unique_chains':5,
+                'label': 'MHC Class I with peptide and SCFV',
+                'slug':'class_i_with_peptide_and_scfv'                
+            },
+            
             {
                'components':['class_i_alpha','beta2m', 'peptide','cd8','cd8'],
                 'unique_chains':5,
@@ -238,21 +312,23 @@ def test_complex_types(found_chains, unique_chain_count):
     exact_matches = []
     possible_matches = []
     all_matches = []
-    logging.warn(str(unique_chain_count))
-    logging.warn(found_chains)
     if str(unique_chain_count) in complexes['chain_counts']:
         for item in complexes['chain_counts'][str(unique_chain_count)]:
             matches = [chain for chain in found_chains if chain in item['components']]
             if len(matches) == unique_chain_count:
-                exact_matches.append(item)
+                false_matches = [item for item in item['components'] if item not in found_chains]
+                if item not in exact_matches and len(false_matches) == 0:
+                    exact_matches.append(item)
             confidence = len(matches)/unique_chain_count 
             if confidence > 0.6:
-                possible_matches.append({
+                match = {
                     'matching_chains':matches,
                     'confidence':confidence,
                     'matching_chain_count':len(matches),
                     'unique_chain_count': unique_chain_count
-                })
+                }
+                if match not in possible_matches:
+                    possible_matches.append(match)
         if len(exact_matches) == 1:
             return exact_matches[0], None
         else:
@@ -273,7 +349,7 @@ def assign_complex_type(pdb_code:str, aws_config:Dict, force:bool=False) -> Tupl
     chains, success, errors = s3.get(chains_key)
     found_chains = []
     for chain in chains:
-        chain_assignment = chains[chain]['best_match']
+        chain_assignment = chains[chain]['best_match']['match']
         found_chains.append(chain_assignment)
     exact_match, possible_matches = test_complex_types(found_chains, core['unique_chain_count'])
     if exact_match:

@@ -85,8 +85,8 @@ def measure_distances(pdb_code:str, aws_config:Dict, force:bool=False) -> Dict:
     chains, success, errors = s3.get(chains_key)
     chain_ids = {'class_i_alpha':[],'peptide':[]}
     for chain in chains:
-        if chains[chain]['best_match'] in ['class_i_alpha','peptide']:
-            chain_ids[chains[chain]['best_match']] = chains[chain]['chains']
+        if chains[chain]['best_match']['match'] in ['class_i_alpha','peptide']:
+            chain_ids[chains[chain]['best_match']['match']] = chains[chain]['chains']
     i = 0
     action = {'c_alpha_distances':{}}
     if aligned is not None:

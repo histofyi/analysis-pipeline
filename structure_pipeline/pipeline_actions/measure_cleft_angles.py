@@ -48,7 +48,7 @@ def measure_cleft_angles(pdb_code:str, aws_config:Dict, force:bool=False) -> Dic
     chains, success, errors = s3.get(chains_key)
     chain_ids = None
     for chain in chains:
-        if chains[chain]['best_match'] == 'class_i_alpha':
+        if chains[chain]['best_match']['match'] == 'class_i_alpha':
             chain_ids = chains[chain]['chains']
     i = 0
     if aligned is not None:

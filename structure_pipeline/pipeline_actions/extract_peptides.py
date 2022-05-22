@@ -21,7 +21,7 @@ def extract_peptides(pdb_code:str, aws_config:Dict, force:bool=False) -> Dict:
     chains, success, errors = s3.get(chains_key)
     chain_ids = None
     for chain in chains:
-        if chains[chain]['best_match'] == 'peptide':
+        if chains[chain]['best_match']['match'] == 'peptide':
             chain_ids = chains[chain]['chains']
     action = {'peptide_structures':{'files':{}}}
     i = 0

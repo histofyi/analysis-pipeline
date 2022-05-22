@@ -2,13 +2,18 @@ from typing import List, Dict, Tuple, Union
 from common.providers import s3Provider, awsKeyProvider, PDBeProvider
 from common.models import itemSet
 
-from common.helpers import fetch_constants, fetch_core, update_block, slugify
+from common.helpers import fetch_constants, fetch_core, update_block, slugify, levenshtein_ratio_and_distance
 
 from common.models import itemSet
 
 
 from rich import print
 from rich.panel import Panel
+from rich.console import Console
+
+console = Console()
+
+
 
 import logging
 
@@ -22,48 +27,28 @@ def process_molecule_search_terms(molecule:str) -> List:
     return [term.lower() for term in molecule.replace('-',' ').split(' ')]
 
 
-def assign_chain(chain_length, molecule, molecule_search_terms=None):
+def assign_chain(chain_length, chain_sequence, molecule_search_terms=None):
     logging.warn(molecule_search_terms)
-    if not molecule_search_terms:
-        molecule_search_terms = process_molecule_search_terms(molecule)
     max_match_count = 0
     best_match = 'unmatched'
+    best_match_score = 0
     possible_matches = []
     chains = fetch_constants('chains')
-    for chain in chains:
-        if chain_length < 20:
-            best_match = 'peptide'
-        else:
-            matches = [item for item in molecule_search_terms if item in chains[chain]['features']]
-            lower = chains[chain]['length'] + chains[chain]['range'][0]
-            upper = chains[chain]['length'] + chains[chain]['range'][1]
-            if 'key_term' in chains[chain]:
-                if chains[chain]['key_term'] in molecule_search_terms:
-                    match_count += 1
-            if chain_length > lower and chain_length < upper:
-                in_range = True
-            else:
-                in_range = False
-            match_count = len(matches)
-            if in_range:
-                match_count += 1
-            #TODO test why in_range was required, function works better without it on test set
-            #if match_count > max_match_count and in_range:
-            #TODO remove comment if not needed
-            if match_count > max_match_count:
-                max_match_count = match_count
-                best_match = chains[chain]['label']
-            else:
-                if matches and match_count > 1:
-                    possible_matches.append({'match_count':match_count, 'in_range':in_range, 'matches':matches ,'chain_type': chains[chain]['label'], 'search_terms':molecule_search_terms, 'chain_length':chain_length, 'lower':lower, 'upper':upper })
-    if best_match == 'unmatched':
-        logging.warn(molecule_search_terms)
-        logging.warn(possible_matches)
-    if best_match == 'unmatched' and len(possible_matches) > 1:
-        logging.warn(possible_matches)
+    if len(chain_sequence) < 20:
+        return {'score':1, 'match':'peptide'}
     else:
-        logging.warn(best_match)
-    return best_match
+        with console.status(f"Matching for...{molecule_search_terms}"):
+            for chain in chains:
+                if 'sequences' in chains[chain]:
+                    if chains[chain]['sequences']:
+                        for test in chains[chain]['sequences']:
+                            length_difference = abs(len(test) - len(chain_sequence))
+                            if length_difference < 50:
+                                ratio, distance = levenshtein_ratio_and_distance(test.lower(), chain_sequence.lower())
+                                if ratio > best_match_score:
+                                    best_match_score = ratio
+                                    best_match = chain
+        return {'score':best_match_score, 'match':best_match}
 
 
 def organism_update(organism_scientific):
@@ -105,6 +90,8 @@ def assign_chains(pdb_code, aws_config, force=False):
     logging.warn(pdb_code)
     step_errors = []
     core, success, errors = fetch_core(pdb_code, aws_config)
+    print(errors)
+    print(pdb_code)
     action = {}
     update = {'peptide':core['peptide']}
     molecules_info, success, errors = PDBeProvider(pdb_code).fetch_molecules()
@@ -127,11 +114,11 @@ def assign_chains(pdb_code, aws_config, force=False):
                     if chain['gene_name'] is not None:
                         for item in chain['gene_name']:
                             molecule_search_terms.append(item.lower())
-                best_match = assign_chain(chain_length, None, molecule_search_terms=molecule_search_terms)
+                best_match = assign_chain(chain_length, chain['sequence'], molecule_search_terms=molecule_search_terms)
                 action[chain_id]['best_match'] = best_match
                 action[chain_id]['sequences'] = [chain['sequence']]
                 found_chains.append(best_match)
-                if best_match in alpha_chains:
+                if best_match['match'] in alpha_chains:
                     organism = organism_update(chain['source'][0]['organism_scientific_name'])
                     if organism:
                         update['organism'] = organism
@@ -141,7 +128,7 @@ def assign_chains(pdb_code, aws_config, force=False):
                         missing_organism = chain['source'][0]['organism_scientific_name']
                         print(Panel(f'Unable to match organism : {missing_organism}', style="red"))
                     
-                if best_match == 'peptide':
+                if best_match['match'] == 'peptide':
                     update['peptide']['sequence'] = chain['sequence']
     if 'unmatched' in found_chains:
         step_errors.append('unmatched_chain')

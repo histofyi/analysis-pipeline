@@ -183,6 +183,12 @@ complexes = {
                 'slug':'class_i_with_peptide_and_lir1'                
             },
             {
+                'components':['class_i_alpha', 'beta2m', 'peptide', 'lir2'],
+                'unique_chains':4,
+                'label': 'MHC Class I with peptide and LIR-2',
+                'slug':'class_i_with_peptide_and_lir2'                
+            },
+            {
                 'components':['class_i_alpha', 'beta2m', 'peptide', 'ly49a'],
                 'unique_chains':4,
                 'label': 'MHC Class I with peptide and Ly49a NK receptor',

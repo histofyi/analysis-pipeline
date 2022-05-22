@@ -143,6 +143,13 @@ complexes = {
 
         },
         {
+                'components':['fcrn','beta2m', 'ig_gamma_2a'],
+                'unique_chains':3,
+                'label': 'Fc receptor with IG Gamma 2a',
+                'slug':'fcrn_with_beta2m_and_ig_gamma_2a'
+
+        },
+        {
                 'components':['cd1d','beta2m', 'p99p'],
                 'unique_chains':3,
                 'label': 'CD1d with helical peptide p99p',

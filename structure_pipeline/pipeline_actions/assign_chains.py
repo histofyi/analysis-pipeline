@@ -69,17 +69,31 @@ def create_or_update_organism_set(organism, mhc_alpha_chain, pdb_code):
     species = organism['common_name']
     class_name = None
     #TODO these sorts of labels should be centrally done somehow
-    if mhc_alpha_chain == 'class_i_alpha':
+    if mhc_alpha_chain['match'] == 'class_i_alpha':
         class_name = 'Class I'
-    else:
+    elif mhc_alpha_chain['match'] == 'class_ii_alpha':
         class_name = 'Class II'
-    set_title = f'{species.capitalize()} {class_name}'
-    set_slug = slugify(set_title)
-    set_description = f'{set_title} structures. Automatically assigned'
-    context = 'species'
-    logging.warn(pdb_code)
-    itemset, success, errors = itemSet(set_slug, context).create_or_update(set_title, set_description, [pdb_code], context)
-    return itemset, success, errors
+    elif 'cd1' == mhc_alpha_chain['match']:
+        class_name = 'CD1'
+    elif 'mr1' == mhc_alpha_chain['match']:
+        class_name = 'MR1'
+    elif 'fcrn' == mhc_alpha_chain['match']:
+        class_name = 'FcRn'
+    elif 'mica' == mhc_alpha_chain['match']:
+        class_name = 'MICA'
+    elif 'micb' == mhc_alpha_chain['match']:
+        class_name = 'MICB'
+    else:
+        class_name = None
+    if class_name:
+        set_title = f'{species.capitalize()} {class_name}'
+        set_slug = slugify(set_title)
+        set_description = f'{set_title} structures. Automatically assigned'
+        context = 'species'
+        itemset, success, errors = itemSet(set_slug, context).create_or_update(set_title, set_description, [pdb_code], context)
+        return itemset, success, errors
+    else:
+        return {}, False, ['no_class_name']
 
 
 

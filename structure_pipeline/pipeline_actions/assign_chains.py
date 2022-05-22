@@ -20,7 +20,7 @@ import logging
 from structure_pipeline.pipeline_actions.match_chains import match_chains
 
 
-alpha_chains = ['class_i_alpha', 'mr1', 'cd1a', 'cd1b', 'cd1d', 'fcrn', 'mica', 'hfe2']
+alpha_chains = ['class_i_alpha', 'mr1', 'cd1a', 'cd1b', 'cd1d', 'fcrn', 'mica', 'hfe2', 'h2-t22']
 
 
 def process_molecule_search_terms(molecule:str) -> List:

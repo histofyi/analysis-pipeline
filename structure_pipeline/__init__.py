@@ -112,7 +112,7 @@ pipeline_actions = {
 }
 
 
-exclude_pdb_codes = ['5cnz','6la7']
+exclude_pdb_codes = ['5cnz','6la7','472d']
 
 
 @structure_pipeline_views.get('/')
@@ -248,10 +248,14 @@ def pipeline_item_handler(userobj, mhc_class, route, pdb_code):
 
     """
     force = False
-    if 'force' in request.args.to_dict():
-        if request.args.get('force') == 'True':
-            force = True
-    data, success, errors = pipeline_actions[mhc_class][route]['action'](pdb_code.lower(), current_app.config['AWS_CONFIG'], force)
+    if pdb_code in exclude_pdb_codes:
+        errors = ['file_excluded_obsolete_or_not_mhc']
+        data = {'action':{'error':'in exclusion list'},'core':{'error':'in exclusion list'}}
+    else:
+        if 'force' in request.args.to_dict():
+            if request.args.get('force') == 'True':
+                force = True
+        data, success, errors = pipeline_actions[mhc_class][route]['action'](pdb_code.lower(), current_app.config['AWS_CONFIG'], force)
 
     if pipeline_actions[mhc_class][route]['next']:
         next = pipeline_actions[mhc_class][route]['next']

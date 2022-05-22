@@ -162,7 +162,6 @@ def match_chains(pdb_code, aws_config, force=False):
     data, success, errors = s3.get(core_key)
     species = fetch_constants('species')
     scientific_names = [scientific for scientific in species]
-    logging.warn(data)
     if organism:
         if organism not in scientific_names:
             step_errors.append('no_match_for:'+ organism)
@@ -245,7 +244,6 @@ def match_chains(pdb_code, aws_config, force=False):
             logging.warn('-----')
             logging.warn(pdb_code)
             logging.warn(allele_match)
-            logging.warn('HELLO')
 
             if 'HLA-' in allele_match['locus'] and 'HLA-' not in allele_match['allele']:
                 allele_match['allele'] = 'HLA-' + allele_match['allele']

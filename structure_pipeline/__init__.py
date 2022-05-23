@@ -186,7 +186,7 @@ def pipeline_set_handler(userobj, mhc_class, route, set_context, set_slug):
     successes = []
     members = []
     errordict = {}
-    itemset, success, errors = itemSet(set_slug, set_context).get(page_number=page)
+    itemset, success, errors = itemSet(set_slug, set_context).get(page_number=page, page_size=100)
     for pdb_code in itemset['members']:
         pdb_code = pdb_code.lower()
         if pdb_code in exclude_pdb_codes:

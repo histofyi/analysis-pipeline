@@ -28,17 +28,19 @@ def get_pdbe_structures(pdb_code:str, aws_config: Dict, force:bool=False):
             key = awsKeyProvider().cif_file_key(assembly_identifier, 'split')
             cif_data, success, errors = s3.get(key, data_format='cif')
             if errors:
-                step_errors.append(errors)
+                step_errors.append('not_in_datastore')
             if not success:
                 has_updates = True
                 cif_data = download_cif_file(pdb_code, assembly_id)
                 data, success, errors = s3.put(key, cif_data, data_format='cif')
-                action['assemblies']['files'][str(assembly_id)] = {
-                    'files':{
-                        'file_key': key,
-                        'last_updated': datetime.now().isoformat()
+                if success:
+                    step_errors.remove('not_in_datastore')
+                    action['assemblies']['files'][str(assembly_id)] = {
+                        'files':{
+                            'file_key': key,
+                            'last_updated': datetime.now().isoformat()
+                        }
                     }
-                }
             else:
                 if 'files' in core['assemblies']:
                     action['assemblies']['files'][str(assembly_id)] = core['assemblies']['files'][str(assembly_id)]

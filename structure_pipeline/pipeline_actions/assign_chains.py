@@ -20,7 +20,7 @@ import logging
 from structure_pipeline.pipeline_actions.match_chains import match_chains
 
 
-alpha_chains = ['class_i_alpha', 'mr1', 'cd1a', 'cd1b', 'cd1d', 'fcrn', 'mica', 'hfe2', 'h2-t22']
+alpha_chains = ['class_i_alpha', 'mr1', 'cd1a', 'cd1b', 'cd1d', 'fcrn', 'mica', 'micb', 'hfe2', 'h2-t22','zag']
 
 
 def process_molecule_search_terms(molecule:str) -> List:
@@ -28,7 +28,6 @@ def process_molecule_search_terms(molecule:str) -> List:
 
 
 def assign_chain(chain_length, chain_sequence, molecule_search_terms=None):
-    logging.warn(molecule_search_terms)
     max_match_count = 0
     best_match = 'unmatched'
     best_match_score = 0
@@ -59,9 +58,9 @@ def organism_update(organism_scientific):
             'scientific_name':species[organism_slug]['scientific_name'],
             'common_name':species[organism_slug]['common_name']
         }
-
     else:
         organism_update = None
+        print(organism_scientific)
     return organism_update
 
 
@@ -73,18 +72,10 @@ def create_or_update_organism_set(organism, mhc_alpha_chain, pdb_code):
         class_name = 'Class I'
     elif mhc_alpha_chain['match'] == 'class_ii_alpha':
         class_name = 'Class II'
-    elif 'cd1' == mhc_alpha_chain['match']:
-        class_name = 'CD1'
-    elif 'mr1' == mhc_alpha_chain['match']:
-        class_name = 'MR1'
-    elif 'fcrn' == mhc_alpha_chain['match']:
-        class_name = 'FcRn'
-    elif 'mica' == mhc_alpha_chain['match']:
-        class_name = 'MICA'
-    elif 'micb' == mhc_alpha_chain['match']:
-        class_name = 'MICB'
     else:
-        class_name = None
+        for chain in alpha_chains:
+            if mhc_alpha_chain['match'] == chain:
+                class_name = chain.upper()
     if class_name:
         set_title = f'{species.capitalize()} {class_name}'
         set_slug = slugify(set_title)
@@ -104,8 +95,6 @@ def assign_chains(pdb_code, aws_config, force=False):
     logging.warn(pdb_code)
     step_errors = []
     core, success, errors = fetch_core(pdb_code, aws_config)
-    print(errors)
-    print(pdb_code)
     action = {}
     update = {'peptide':core['peptide']}
     molecules_info, success, errors = PDBeProvider(pdb_code).fetch_molecules()
@@ -133,19 +122,25 @@ def assign_chains(pdb_code, aws_config, force=False):
                 action[chain_id]['sequences'] = [chain['sequence']]
                 found_chains.append(best_match)
                 if best_match['match'] in alpha_chains:
-                    organism = organism_update(chain['source'][0]['organism_scientific_name'])
+                    species_overrides = fetch_constants('species_overrides')
+                    if pdb_code in species_overrides:
+                        organism_scientific = species_overrides[pdb_code]['organism_scientific_name']
+                    else:
+                        organism_scientific = chain['source'][0]['organism_scientific_name']
+                    organism = organism_update(organism_scientific)
                     if organism:
                         update['organism'] = organism
-                        print(organism)
                         itemset, success, errors = create_or_update_organism_set(organism, best_match, pdb_code)
                     else:
                         missing_organism = chain['source'][0]['organism_scientific_name']
+                        step_errors.append(f'missing_organism__{slugify(missing_organism)}')
                         print(Panel(f'Unable to match organism : {missing_organism}', style="red"))
                     
                 if best_match['match'] == 'peptide':
                     update['peptide']['sequence'] = chain['sequence']
     if 'unmatched' in found_chains:
         step_errors.append('unmatched_chain')
+    print (action)
     s3 = s3Provider(aws_config)
     chains_key = awsKeyProvider().block_key(pdb_code, 'chains', 'info')
     s3.put(chains_key, action)

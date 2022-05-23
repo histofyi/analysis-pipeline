@@ -601,6 +601,13 @@
 		"stem": "bubu",
 		"common_name": "Water Buffalo"
 	},
+	"bos_taurus": {
+		"class_i": ["1","nc1","2", "3"],
+		"class_ii": ["dqa", "dqa1", "dqb", "dra", "drb1", "drb3"],
+		"scientific_name": "Bos taurus",
+		"stem": "bola",
+		"common_name": "Domestic cattle"
+	},
 	"equus_caballus": {
 		"class_i": ["n", "1", "2", "3", "4", "6", "7", "16", "17", "18"],
 		"class_ii": ["dmb", "dob", "dqa1", "dqa2", "dqa3", "dqb1", "dqb2", "dqb3", "dra", "drb1", "drb2", "drb3"],
@@ -663,5 +670,76 @@
 		"scientific_name": "Ginglymostoma cirratum",
 		"stem": "gici",
 		"common_name": "Nurse shark"
+	},
+	"canis_lupus_familiaris": {
+		"class_i": ["12", "64", "79", "88", "88l"],
+		"class_ii": ["dqa1", "dqb1", "drb1"],
+		"scientific_name": "Canis lupus familiaris",
+		"stem": "dla",
+		"common_name": "Domestic dog"
+	},
+	"felis_catus": {
+		"class_i": ["e"],
+		"class_ii": [],
+		"scientific_name": "Felis catus",
+		"stem": "fla",
+		"common_name": "Domestic cat"
+	},
+	"anas_platyrhynchos": {
+		"class_i": ["uaa"],
+		"class_ii": [],
+		"scientific_name": "Anas platyrhynchos",
+		"stem": "anpl",
+		"common_name": "Mallard duck"
+	},
+	"ctenopharyngodon_idella": {
+		"class_i": ["uaa"],
+		"class_ii": [],
+		"scientific_name": "Ctenopharyngodon idella",
+		"stem": "pctid",
+		"common_name": "Grass carp"
+	},
+	"xenopus_laevis": {
+		"class_i": ["uaa"],
+		"class_ii": [],
+		"scientific_name": "Xenopus laevis",
+		"stem": "pxela",
+		"common_name": "African clawed frog"
+	},
+	"pteropus_alecto": {
+		"class_i": ["n"],
+		"class_ii": [],
+		"scientific_name": "Pteropus alecto",
+		"stem": "ptal",
+		"common_name": "Black fruit bat"
+	},
+	"oryctolagus_cuniculus": {
+		"class_i": ["a"],
+		"class_ii": [],
+		"scientific_name": "Oryctolagus cuniculus",
+		"stem": "rla",
+		"common_name": "European rabbit"
+	},
+	"anolis_carolinensis": {
+		"class_i": ["ua"],
+		"class_ii": [],
+		"scientific_name": "Anolis carolinensis",
+		"stem": "anca",
+		"common_name": "Green anole lizard"
+	},
+	"ailuropoda_melanoleuca": {
+		"class_i": [],
+		"class_ii": [],
+		"scientific_name": "Ailuropoda melanoleuca",
+		"stem": "aime",
+		"common_name": "Giant panda"
+	}
+	,
+	"trichosurus_vulpecula": {
+		"class_i": ["ub"],
+		"class_ii": [],
+		"scientific_name": "Trichosurus vulpecula",
+		"stem": "trvu",
+		"common_name": "Common brushtail possum"
 	}
 }

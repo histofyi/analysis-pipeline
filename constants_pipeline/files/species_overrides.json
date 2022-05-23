@@ -1,42 +1,26 @@
 {
     "7ji2":{
-        "organism_scientific":"mus musculus",
-        "organism_common":"mouse"
-    },
-    "7cpo":{
-        "organism_scientific":"anolis carolinensis",
-        "organism_common":"green anole lizard"
-    },
-    "6m2k":{
-        "organism_scientific":"oryctolagus cuniculus",
-        "organism_common":"rabit"
+        "organism_scientific_name":"mus musculus"
     },
     "6nca":{
-        "organism_scientific":"homo sapiens",
-        "organism_common":"human"
+        "organism_scientific_name":"homo sapiens"
     },
     "6bxq":{
-        "organism_scientific":"homo sapiens",
-        "organism_common":"human"
+        "organism_scientific_name":"homo sapiens"
     },
     "3czf":{
-        "organism_scientific":"homo sapiens",
-        "organism_common":"human"
+        "organism_scientific_name":"homo sapiens"
     },
     "5xs3":{
-        "organism_scientific":"homo sapiens",
-        "organism_common":"human"
+        "organism_scientific_name":"homo sapiens"
     },
     "6l9n":{
-        "organism_scientific":"mus musculus",
-        "organism_common":"mouse"
+        "organism_scientific_name":"mus musculus"
     },
     "6l9m":{
-        "organism_scientific":"mus musculus",
-        "organism_common":"mouse"
+        "organism_scientific_name":"mus musculus"
     },
     "5gsr":{
-        "organism_scientific":"mus musculus",
-        "organism_common":"mouse"
+        "organism_scientific_name":"mus musculus"
     }
 }

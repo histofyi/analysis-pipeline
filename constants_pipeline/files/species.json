@@ -656,5 +656,12 @@
 		"scientific_name": "Capra hircus",
 		"stem": "cahi",
 		"common_name": "Goat"
+	},
+	"ginglymostoma_cirratum": {
+		"class_i": [],
+		"class_ii": [],
+		"scientific_name": "Ginglymostoma cirratum",
+		"stem": "gici",
+		"common_name": "Nurse shark"
 	}
 }

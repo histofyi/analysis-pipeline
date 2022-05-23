@@ -59,6 +59,13 @@ complexes = {
 
         },
         {
+                'components':['mr1','beta2m'],
+                'unique_chains':2,
+                'label': 'MR1',
+                'slug':'mr1'
+
+        },
+        {
                 'components':['cd1a','beta2m'],
                 'unique_chains':2,
                 'label': 'CD1a',

@@ -117,7 +117,7 @@
         "range":[-7,7],
         "features":["peptide"],
         "label":"peptide",
-        "ui_text":"Unassigned peptide",
+        "ui_text":"Peptide",
         "webglcolor":"0x908EA8"
     },
     "class_i_peptide":{
@@ -125,7 +125,7 @@
         "range":[-7,7],
         "features":["peptide"],
         "label":"class_i_peptide",
-        "ui_text":"Class I peptide",
+        "ui_text":"Class I bound peptide",
         "webglcolor":"0x908EA8"
     },
     "class_i_peptide_nter":{

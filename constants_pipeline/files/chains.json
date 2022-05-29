@@ -100,7 +100,8 @@
         "range":[-10,10],
         "features":["t", "cell", "receptor", "delta", "tcrd"],
         "sequences":["AQKVTQAQSSVSMPVRKAVTLNCLYETSWWSYYIFWYKQLPSKEMIFLIRQGSDEQNAKSGRYSVNFKKAAKSVALTISALQLEDSAKYFCALGVRAFLRDWGIRVLIFGKGTRVTVEPRSQPHTKPSVFVMKNGTNVACLVKEFYPKDIRINLVSSKKITEFDPAIVISPSGKYNAVKLGKYEDSNSVTCSVQHDNKTVHSTDFEVKTDSTDHVKPKETENTKQPSKSASGLVPR",
-        "SDKVTQSSPDQTVASGSEVVLLCTYDTVYSNPDLFWYRIRPDYSFQFVFYGDNSRSEGADFTQGRFSVKHILTQKAFHLVISPVRTEDSATYYCATRLWLGDPHTDKLIFGKGTRVTVEPNIQNPDPAVYQLRDSKSSDKSVCLFTDFDSQTNVSQSKDSDVYITDKCVLDMRSMDFKSNSAVAWSNKSDFACANAFNNSIIPEDTFFPSPESS"],
+        "SDKVTQSSPDQTVASGSEVVLLCTYDTVYSNPDLFWYRIRPDYSFQFVFYGDNSRSEGADFTQGRFSVKHILTQKAFHLVISPVRTEDSATYYCATRLWLGDPHTDKLIFGKGTRVTVEPNIQNPDPAVYQLRDSKSSDKSVCLFTDFDSQTNVSQSKDSDVYITDKCVLDMRSMDFKSNSAVAWSNKSDFACANAFNNSIIPEDTFFPSPESS",
+        "MKQEVTQIPAALSVPEGENLVLNCSFTDSAIYNLQWFRQDPGKGLTSLLLIQSSQREQTSGRLNASLDKSSGRSTLYIAASQPGDSATYLCAVRMDSSYKLIFGSGTRLLVRPDIQNPDPAVYQLRDSKSSDKSVCLFTDFDSQTNVSQSKDSDVYITDKCVLDMRSMDFKSNSAVAWSNKSDFACANAFNNSIIPEDTFFPSPESS"],
         "key_term":"delta",
         "label":"tcr_delta",
         "ui_text":"T cell receptor delta",
@@ -153,7 +154,7 @@
         "key_term":"cd8",
         "label":"cd8",
         "ui_text":"CD8",
-        "webglcolor":"0x77DDBB"
+        "webglcolor":"0x666666"
     },
     "tapbpr":{
         "length":120,
@@ -163,7 +164,7 @@
         "key_term":"tap",
         "label":"tapbpr",
         "ui_text":"TAPBPR (Tapasin homologue)",
-        "webglcolor":"0x77DDBB"
+        "webglcolor":"0x666666"
     },
     "tapasin":{
         "length":428,
@@ -173,7 +174,7 @@
         "key_term":"tapasin",
         "label":"tapasin",
         "ui_text":"Tapasin",
-        "webglcolor":"0x77DDBB"
+        "webglcolor":"0x666666"
     },
     "erp57":{
         "length":481,
@@ -183,7 +184,7 @@
         "key_term":"erp57",
         "label":"erp57",
         "ui_text":"Erp57, Protein disulfide-isomerase A3",
-        "webglcolor":"0x77DDBB"
+        "webglcolor":"0x666666"
     },
     "calreticulin":{
         "length":400,
@@ -193,7 +194,7 @@
         "key_term":"erp57",
         "label":"calreticulin",
         "ui_text":"Calreticulin",
-        "webglcolor":"0x77DDBB"
+        "webglcolor":"0x666666"
     },
     "nkg2a":{
         "length":120,
@@ -204,7 +205,7 @@
         "label":"nkg2a",
         "ui_text":"Natural Killer Cell Receptor NKG2a",
         "homologue":"lectin_like_nk_receptor",
-        "webglcolor":"0x77DDBB"
+        "webglcolor":"0x666666"
     },
     "nkg2d":{
         "length":120,
@@ -215,7 +216,7 @@
         "label":"nkg2d",
         "ui_text":"Natural Killer Cell Receptor NKG2d",
         "homologue":"lectin_like_nk_receptor",
-        "webglcolor":"0x77DDBB"
+        "webglcolor":"0x666666"
     },
     "ly49a":{
         "length":135,
@@ -226,7 +227,7 @@
         "label":"ly49a",
         "ui_text":"Natural Killer Cell Receptor Ly49a",
         "homologue":"lectin_like_nk_receptor",
-        "webglcolor":"0x77DDBB"
+        "webglcolor":"0x666666"
     },
     "ly49c":{
         "length":135,
@@ -237,7 +238,7 @@
         "label":"ly49c",
         "ui_text":"Natural Killer Cell Receptor Ly49c",
         "homologue":"lectin_like_nk_receptor",
-        "webglcolor":"0x77DDBB"
+        "webglcolor":"0x666666"
     },
     "cd94":{
         "length":120,
@@ -247,7 +248,7 @@
         "key_term":"cd94",
         "label":"cd94",
         "ui_text":"CD94",
-        "webglcolor":"0x77DDBB"
+        "webglcolor":"0x666666"
     },
     "kir":{
         "length":120,
@@ -257,7 +258,7 @@
         "key_term":"kir",
         "label":"kir",
         "ui_text":"Killer Ig-Like Receptors",
-        "webglcolor":"0x77DDBB"
+        "webglcolor":"0x666666"
     },
     "lir1":{
         "length":190,
@@ -268,7 +269,7 @@
         "key_term":"lir",
         "label":"lir1",
         "ui_text":"LIR-1",
-        "webglcolor":"0x77DDBB"
+        "webglcolor":"0x666666"
     },
     "lir2":{
         "length":190,
@@ -278,7 +279,7 @@
         "key_term":"lir",
         "label":"lir2",
         "ui_text":"LIR-2",
-        "webglcolor":"0x77DDBB"
+        "webglcolor":"0x666666"
     },
     "transferrin_receptor":{
         "length":640,
@@ -290,7 +291,7 @@
         "non-classical":true,
         "homologue":"class_i_alpha",
         "ui_text":"Transferrin Receptor",
-        "webglcolor":"0x77DDBB"
+        "webglcolor":"0x666666"
     },
     "mr1":{
         "length":275,
@@ -302,7 +303,7 @@
         "non-classical":true,
         "homologue":"class_i_alpha",
         "ui_text":"MR1",
-        "webglcolor":"0x77DDBB"
+        "webglcolor":"0x666666"
     },
     "cd1a":{
         "length":275,
@@ -314,7 +315,7 @@
         "non-classical":true,
         "homologue":"class_i_alpha",
         "ui_text":"CD1a",
-        "webglcolor":"0x77DDBB"
+        "webglcolor":"0x666666"
     },
     "cd1b":{
         "length":275,
@@ -326,7 +327,7 @@
         "non-classical":true,
         "homologue":"class_i_alpha",
         "ui_text":"CD1b",
-        "webglcolor":"0x77DDBB"
+        "webglcolor":"0x666666"
     },
     "cd1d":{
         "length":275,
@@ -338,7 +339,7 @@
         "non-classical":true,
         "homologue":"class_i_alpha",
         "ui_text":"CD1d",
-        "webglcolor":"0x77DDBB"
+        "webglcolor":"0x666666"
     },
     "fcrn":{
         "length":275,
@@ -350,7 +351,7 @@
         "non-classical":true,
         "homologue":"class_i_alpha",
         "ui_text":"Fc receptor (FcRn)",
-        "webglcolor":"0x77DDBB"
+        "webglcolor":"0x666666"
     },
     "h2-t22":{
         "length":260,
@@ -361,7 +362,7 @@
         "non-classical":true,
         "homologue":"class_i_alpha",
         "ui_text":"H2-T22",
-        "webglcolor":"0x77DDBB"
+        "webglcolor":"0x666666"
     },
     "hfe2":{
         "length":275,
@@ -372,7 +373,7 @@
         "non-classical":true,
         "homologue":"class_i_alpha",
         "ui_text":"HFE2",
-        "webglcolor":"0x77DDBB"
+        "webglcolor":"0x666666"
     },
     "mica":{
         "length":260,
@@ -384,7 +385,7 @@
         "non-classical":true,
         "homologue":"class_i_alpha",
         "ui_text":"MICA",
-        "webglcolor":"0x77DDBB"
+        "webglcolor":"0x666666"
     },
     "micb":{
         "length":260,
@@ -396,7 +397,7 @@
         "non-classical":true,
         "homologue":"class_i_alpha",
         "ui_text":"MICB",
-        "webglcolor":"0x77DDBB"
+        "webglcolor":"0x666666"
     },
     "zag":{
         "length":260,
@@ -408,7 +409,7 @@
         "non-classical":true,
         "homologue":"class_i_alpha",
         "ui_text":"Zinc-Alpha-2-Glycoprotein",
-        "webglcolor":"0x77DDBB"
+        "webglcolor":"0x666666"
     },
     "pip":{
         "length":118,
@@ -418,7 +419,7 @@
         "key_term":"pip",
         "label":"pip",
         "ui_text":"Prolactin inducible protein (PIP)",
-        "webglcolor":"0x77DDBB"
+        "webglcolor":"0x666666"
     },
     "rae1":{
         "length":205,
@@ -430,7 +431,7 @@
         "non-classical":true,
         "homologue":"class_i_alpha",
         "ui_text":"RAE-1 gamma",
-        "webglcolor":"0x77DDBB"
+        "webglcolor":"0x666666"
     },
     "m152":{
         "length":309,
@@ -442,7 +443,7 @@
         "non-classical":true,
         "homologue":"class_i_alpha",
         "ui_text":"Mouse cytomegalovirus m152 protein",
-        "webglcolor":"0x77DDBB"
+        "webglcolor":"0x666666"
     },
     "m157":{
         "length":285,
@@ -454,7 +455,7 @@
         "non-classical":true,
         "homologue":"class_i_alpha",
         "ui_text":"Mouse cytomegalovirus m157 protein",
-        "webglcolor":"0x77DDBB"
+        "webglcolor":"0x666666"
     },
     "ul18":{
         "length":281,
@@ -466,7 +467,7 @@
         "non-classical":true,
         "homologue":"class_i_alpha",
         "ui_text":"Human cytomegalovirus UL18 protein",
-        "webglcolor":"0x77DDBB"
+        "webglcolor":"0x666666"
     },
     "ig_gamma_2a":{
         "length":225,
@@ -475,7 +476,7 @@
         "sequences":["VPRECNPCGCTGSEVSSVFIFPPKTKDVLTITLTPKVTCVVVDISQNDPEVRFSWFIDDVEVHTAQTHAPEKQSNSTLRSVSELPIVHRDWLNGKTFKCKVNSGAFPAPIEKSISKPEGTPRGPQVYTMAPPKEEMTQSQVSITCMVKGFYPPDIYTEWKMNGQPQENYKNTPPTMDTDGSYFLYSKLNVKKETWQQGNTFTCSVLHEGLHNHHTEKSLSHSPGK"],
         "label":"ig_gamma_2a",
         "ui_text":"IG Gamma-2A",
-        "webglcolor":"0x77DDBB"
+        "webglcolor":"0x666666"
     },
     "us2":{
         "length":95,
@@ -484,7 +485,7 @@
         "sequences":["PWFQIEDNRCYIDNGKLFARGSIVGNMSRFVFDPKADYGGVGENLYVHADDVEFVPGESLKWNVRNLDVMPIFETLALRLVLQGDVIWLRCVPEL"],
         "label":"us2",
         "ui_text":"Cytomegalovirus protein US2",
-        "webglcolor":"0x77DDBB"
+        "webglcolor":"0x666666"
     },
     "e3":{
         "length":100,
@@ -493,7 +494,7 @@
         "sequences":["AKKVEFKEPACNVTFKSEANECTTLIKCTTEHEKLIIRHKDKIGKYAVYAIWQPGDTNDYNVTVFQGENRKTFMYKFPFYEMCDITMYMSKQYKLWPPQK"],
         "label":"e3",
         "ui_text":"Human Adenovirus 6 protein E3",
-        "webglcolor":"0x77DDBB"
+        "webglcolor":"0x666666"
     },
     "serum_albumin":{
         "length":585,
@@ -502,7 +503,7 @@
         "sequences":["DAHKSEVAHRFKDLGEENFKALVLIAFAQYLQQCPFEDHVKLVNEVTEFAKTCVADESAENCDKSLHTLFGDKLCTVATLRETYGEMADCCAKQEPERNECFLQHKDDNPNLPRLVRPEVDVMCTAFHDNEETFLKKYLYEIARRHPYFYAPELLFFAKRYKAAFTECCQAADKAACLLPKLDELRDEGKASSAKQRLKCASLQKFGERAFKAWAVARLSQRFPKAEFAEVSKLVTDLTKVHTECCHGDLLECADDRADLAKYICENQDSISSKLKECCEKPLLEKSHCIAEVENDEMPADLPSLAADFVESKDVCKNYAEAKDVFLGMFLYEYARRHPDYSVVLLLRLAKTYETTLEKCCAAADPHECYAKVFDEFKPLVEEPQNLIKQNCELFEQLGEYKFQNALLVRYTKKVPQMSAPTLVEVSRNLGKVGSKCCKHPEAKRMPCAEDYLSVVLNQLCVLHEKTPVSDRVTKCCTESLVNRRPCFSALEVDETYVPKEFNAGTFTFHADICTLSEKERQIKKQTALVELVKHKPKATKEQLKAAMDDFAAFVEKCCKADDKETCFAEEGKKLVAASQAALGL"],
         "label":"serum_albumin",
         "ui_text":"Serum Albumin",
-        "webglcolor":"0x77DDBB"
+        "webglcolor":"0x666666"
     },
     "p99p":{
         "length":22,
@@ -512,6 +513,6 @@
         "key_term":"p99p",
         "label":"p99p",
         "ui_text":"P99P",
-        "webglcolor":"0x77DDBB"
+        "webglcolor":"0x666666"
     }
 }

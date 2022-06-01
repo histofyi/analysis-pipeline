@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+
+{% block main %}
+
+
+<section class="proto-style-block typography vertical-spacing-top">
+  <div class="grid-container">
+    <div class="column-full-width">
+      <div class="inner bottom-border">
+        <h1 class="vertical-spacing-bottom">Notes</h1>
+        <div class="vertical-spacing-bottom">
+            Create notes on MHC Structures
+        </div>
+        <div class="vertical-spacing-bottom">
+            {% set action = "/structures/lookup" %}
+            {% set method = "POST" %}
+            {% set section = "notes" %}
+            {% include "shared/partials/forms/structure_lookup.html" %}
+
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+
+
+
+
+{% endblock %}

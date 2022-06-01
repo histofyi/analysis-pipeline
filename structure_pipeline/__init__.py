@@ -155,10 +155,22 @@ def structure_redirect_handler(userobj:Dict) -> Dict:
         url = f'/structures/{mhc_class.lower()}/initialise/set/{set_context.lower()}/{set_slug.lower()}'
         return redirect(url)
     else:
-        return redirect('/pipeline/structures/')
+        return redirect('/structures/')
 
 
-
+@structure_pipeline_views.post('/lookup')
+@check_user
+@requires_privilege('users')
+def structure_lookup_handler(userobj:Dict) -> Dict:
+    variables = request_variables(None, params=['pdb_code', 'section'])
+    section = variables['section']
+    if 'pdb_code' in variables:
+        pdb_code = variables['pdb_code'].lower()
+        redirect_url = f'/{section}/view/{pdb_code}'
+        return redirect(redirect_url)
+    else:
+        return_url = f'/{section}/'
+        return redirect(return_url)
 
 
 @structure_pipeline_views.get('/<string:mhc_class>/<string:route>/set/<path:set_context>/<path:set_slug>')

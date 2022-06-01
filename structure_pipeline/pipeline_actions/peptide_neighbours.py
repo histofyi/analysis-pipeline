@@ -21,6 +21,9 @@ def peptide_neighbours(pdb_code:str, aws_config:Dict, force:bool=False) -> Tuple
     peptide_chains = []
     mhc_chains = []
     sorted_peptides = {}
+    class_i_alpha = None
+    class_i_peptide = None
+    sorted_peptide = None
     if mhc_class == 'class_i':
         for chain in chains:
             if chains[chain]['best_match']['match'] == 'peptide':

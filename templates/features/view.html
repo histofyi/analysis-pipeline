@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+
+{% block main %}
+
+
+<section class="proto-style-block typography vertical-spacing-top">
+  <div class="grid-container">
+    <div class="column-full-width">
+      <div class="inner bottom-border">
+        <h1 class="vertical-spacing-bottom">Features {% if structure %} for {{pdb_code|upper}} {% endif %}</h1>
+        {% if 'not_mhc' in errors %}
+        <div class="vertical-spacing-bottom">
+            '{{pdb_code}}' is not an MHC molecule
+        </div>
+        <div class="vertical-spacing-bottom">
+            {% set action = "/structures/lookup" %}
+            {% set method = "POST" %}
+            {% set section = "features" %}
+            {% include "shared/partials/forms/structure_lookup.html" %}
+        </div>
+        {% else %}
+        <div class="vertical-spacing-bottom">
+            <a href="/features/add/{{pdb_code|lower}}">Add features</a> for <strong>{{pdb_code|upper}}</strong>
+        </div>
+        {% if features %}
+        <div class="vertical-spacing-bottom">
+            of edit existing ones...
+        </div>
+        {% endif %}
+        {% endif %}
+        <div class="vertical-spacing-bottom"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+
+
+
+
+{% endblock %}

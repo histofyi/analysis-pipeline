@@ -13,6 +13,15 @@ def download_cif_file(pdb_code, assembly_id):
     return cif_data
 
 
+def build_assembly_block(key):
+    return {
+            'files':{
+                    'file_key': key,
+                    'last_updated': datetime.now().isoformat()
+                }
+            }
+
+
 def get_pdbe_structures(pdb_code:str, aws_config: Dict, force:bool=False):
     step_errors = []
     core, success, errors = fetch_core(pdb_code, aws_config)
@@ -26,27 +35,29 @@ def get_pdbe_structures(pdb_code:str, aws_config: Dict, force:bool=False):
         while assembly_id <= core['assembly_count']:
             assembly_identifier = f'{pdb_code}_{assembly_id}'
             key = awsKeyProvider().cif_file_key(assembly_identifier, 'split')
+            # get the local file
             cif_data, success, errors = s3.get(key, data_format='cif')
-            if errors:
-                step_errors.append('not_in_datastore')
+            # if the local file is not there
             if not success:
                 has_updates = True
                 cif_data = download_cif_file(pdb_code, assembly_id)
                 data, success, errors = s3.put(key, cif_data, data_format='cif')
                 if success:
-                    step_errors.remove('not_in_datastore')
-                    action['assemblies']['files'][str(assembly_id)] = {
-                        'files':{
-                            'file_key': key,
-                            'last_updated': datetime.now().isoformat()
-                        }
-                    }
+                    action['assemblies']['files'][str(assembly_id)] = build_assembly_block(key)
+                    print (f'FILE DOWNLOADED FOR {assembly_identifier}')
             else:
                 if 'files' in core['assemblies']:
-                    action['assemblies']['files'][str(assembly_id)] = core['assemblies']['files'][str(assembly_id)]
+                    if str(assembly_id) in core['assemblies']['files']:
+                        action['assemblies']['files'][str(assembly_id)] = core['assemblies']['files'][str(assembly_id)]
+                        print (f'FILE ALREADY EXISTS FOR {assembly_identifier}')
+                    else:
+                        has_updates = True
+                        action['assemblies']['files'][str(assembly_id)] = build_assembly_block(key)
+                        print (f'FILE ALREADY EXISTS FOR {assembly_identifier}')
                 else:
-                    # TODO fix the edge case where we already have the files but have initialsed the records
-                    logging.warn("EDGE CASE TO FIX!")
+                    action['assemblies']['files'][str(assembly_id)] = build_assembly_block(key)
+                    has_updates = True
+                    print (f'FILE ALREADY EXISTS FOR {assembly_identifier}')
             assembly_id += 1
         if has_updates:
             update = action

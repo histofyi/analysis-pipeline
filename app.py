@@ -101,7 +101,7 @@ def create_app():
             'aws_region':app.config['AWS_REGION'],
             's3_url':app.config['LOCAL_S3_URL'],
             'local':True,
-            's3_bucket':app.config['S3_BUCKET'] 
+            's3_bucket':app.config['LOCAL_BUCKET'] 
         }
     else:
         app.config['AWS_CONFIG'] = {
@@ -120,7 +120,7 @@ app = create_app()
 
 
 # TODO refactor this to check the AWS S3/Minio connection not the filesystem
-@cache.memoize(timeout=5)
+#@cache.memoize(timeout=5)
 def check_datastore():
     """
     A function to return a small piece of JSON to indicate whether or not the connection to AWS is working

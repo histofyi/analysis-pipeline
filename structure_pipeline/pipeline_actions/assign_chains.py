@@ -33,6 +33,7 @@ def assign_chain(chain_length, chain_sequence, molecule_search_terms=None):
     best_match_score = 0
     possible_matches = []
     chains = fetch_constants('chains')
+    print (chain_sequence)
     if len(chain_sequence) < 20:
         return {'score':1, 'match':'peptide'}
     else:
@@ -87,9 +88,38 @@ def create_or_update_organism_set(organism, mhc_alpha_chain, pdb_code):
         return {}, False, ['no_class_name']
 
 
+def trim_sequence(sequence:str, mhc_starts:Dict, mhc_class:str)->str:
+    """
+    This function takes in a sequence, checks it's length to see if there's a chance of it being a Class I sequence.
+
+    It then tests known Class I chain starts against the sequence, and if it finds one, checks the index of that sequence.
+
+    If the index is greater than 1, it trims off the signal peptide and truncates to 275.
+
+    This is because some structures - e.g. 1BII have a long sequence for the full length protein, rather than the mature cytoplasmic domain
+
+
+    Args:
+        sequence (str): the sequence to be trimmed if appropriate
+        mhc_starts (Dict): the dictionary of MHC starting points
+        mhc_class (str): the class of MHC molecule (dictionary key) e.g. 'class_i'
+
+    Returns:
+        str: the sequence, trimmed if appropriate
+
+    """
+    if len(sequence) > 175:
+        chain_starts = mhc_starts[mhc_class]['alpha']
+        for chain_start in chain_starts:
+            if chain_start in sequence:
+                if sequence.index(chain_start) > 2:
+                    sequence = sequence[sequence.index(chain_start):]
+                    sequence = sequence[:275]
+    return sequence
 
 
 def assign_chains(pdb_code, aws_config, force=False):
+    mhc_starts = fetch_constants('mhc_starts')
     print('--------------------')
     print(' ')
     logging.warn(pdb_code)
@@ -106,8 +136,10 @@ def assign_chains(pdb_code, aws_config, force=False):
                 action[chain_id] = {
                     'molecule':chain['molecule_name'][0].lower(),
                     'chains':chain['in_chains'],
+                    # TODO see if length is used elsewhere
                     'length':chain['length'],
                     'gene_name':chain['gene_name'],
+                    # TODO see if these are used elsewhere
                     'start':[source['mappings'][0]['start']['residue_number'] for source in chain['source']],
                     'end':[source['mappings'][0]['end']['residue_number'] for source in chain['source']]
                 }
@@ -117,6 +149,10 @@ def assign_chains(pdb_code, aws_config, force=False):
                     if chain['gene_name'] is not None:
                         for item in chain['gene_name']:
                             molecule_search_terms.append(item.lower())
+                chain['sequence'] = trim_sequence(chain['sequence'], mhc_starts, 'class_i')
+                if len(chain['sequence']) < action[chain_id]['length']:
+                    action[chain_id]['length'] = len(chain['sequence'])
+                    chain_length = len(chain['sequence'])
                 best_match = assign_chain(chain_length, chain['sequence'], molecule_search_terms=molecule_search_terms)
                 action[chain_id]['best_match'] = best_match
                 action[chain_id]['sequences'] = [chain['sequence']]

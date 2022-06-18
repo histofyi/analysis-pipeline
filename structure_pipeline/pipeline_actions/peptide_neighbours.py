@@ -6,6 +6,7 @@ from common.providers import s3Provider, awsKeyProvider
 from common.helpers import update_block, fetch_core, load_cif
 import logging
 
+import json
 
 
 def peptide_neighbours(pdb_code:str, aws_config:Dict, force:bool=False) -> Tuple[Dict,bool,List]:
@@ -15,7 +16,10 @@ def peptide_neighbours(pdb_code:str, aws_config:Dict, force:bool=False) -> Tuple
     s3 = s3Provider(aws_config)
     chains_key = awsKeyProvider().block_key(pdb_code, 'chains', 'info')
     chains, success, errors = s3.get(chains_key)
-    mhc_class = core['class']
+    if 'class_i' in core['complex']['slug']:
+        mhc_class = 'class_i'
+    else:
+        mhc_class = None
     peptide_neighbours = {}
     contacts = {}
     peptide_chains = []

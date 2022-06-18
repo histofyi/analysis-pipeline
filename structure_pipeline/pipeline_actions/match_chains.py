@@ -162,12 +162,13 @@ def match_chains(pdb_code, aws_config, force=False):
     data, success, errors = s3.get(core_key)
     species = fetch_constants('species')
     scientific_names = [scientific for scientific in species]
+    print (scientific_names)
     if organism:
         if organism not in scientific_names:
             step_errors.append('no_match_for:'+ organism)
             return {}, False, step_errors
         else:
-            if organism in ['homo_sapiens','mus_musculus']:
+            if organism in scientific_names:
                 mhc_class = None
                 chains_key = awsKeyProvider().block_key(pdb_code, 'chains', 'info')
                 data, success, errors = s3.get(chains_key)

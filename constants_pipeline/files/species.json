@@ -4,21 +4,21 @@
         "class_ii":["dra","dpa","dqa","drb","dpb","dqb"],
         "scientific_name":"Homo sapiens",
         "stem":"hla",
-        "common_name":"human"
+        "common_name":"Human"
     },
     "mus_musculus": {
         "class_i":["k","d","l"],
         "class_ii":["aalpha", "ealpha","abeta", "ebeta"],
         "scientific_name":"Mus musculus",
         "stem":"h2",
-        "common_name":"mouse"
+        "common_name":"Mouse"
     },
 	"alouatta_pigra": {
 		"class_i": [],
 		"class_ii": ["drb"],
 		"scientific_name": "Alouatta pigra",
 		"stem": "alpi",
-		"common_name": "Guatemalan black howler"
+		"common_name": "Guatemalan Black Howler"
 	},
 	"aotus_azarai": {
 		"class_i": [],
@@ -633,7 +633,7 @@
 		"class_i": ["mic1", "mic2", "tap1", "tap2", "1", "2", "3", "4", "5", "6", "7", "8", "9", "11", "12"],
 		"class_ii": ["dma", "dmb", "doa", "dob1", "dqa", "dqb1", "dra", "drb1", "drb2", "drb3", "drb4", "drb5"],
 		"scientific_name": "Sus scrofa",
-		"stem": "unkn",
+		"stem": "sla",
 		"common_name": "Feral Pig"
 	},
 	"rattus_norvegicus": {

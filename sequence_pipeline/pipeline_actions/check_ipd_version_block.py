@@ -1,7 +1,4 @@
-from .http import httpProvider
-from .s3 import s3Provider
-
-from .common import build_s3_sequence_key
+from common.providers import httpProvider, s3Provider, awsKeyProvider
 
 from bs4 import BeautifulSoup
 
@@ -11,7 +8,7 @@ import json
 
 def check_ipd_version(aws_config):
     s3 = s3Provider(aws_config)
-    key = build_s3_sequence_key('ipd_versions', format='json')
+    key = awsKeyProvider().metadata_key('sequences','ipd_versions')
     previous_version, success, errors = s3.get(key)
     url = 'https://www.ebi.ac.uk/ipd/mhc/version/'
     data = httpProvider().get(url, 'txt')

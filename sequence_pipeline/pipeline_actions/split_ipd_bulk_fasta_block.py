@@ -1,9 +1,10 @@
 from Bio import SeqIO
 
-from .s3 import s3Provider
-from .http import httpProvider
+from common.providers import s3Provider, httpProvider
+from common.providers.aws import awsKeyProvider
 
-from .common import build_s3_sequence_key, generate_fasta_file_handle
+def generate_fasta_file_handle():
+    pass
 
 import logging
 
@@ -21,8 +22,9 @@ def fetch_ipd_data_remote():
     else:
         return {}, False, ['unable_to_fetch_ipd_data']
 
+
 def fetch_local_ipd_data(s3):
-    key = build_s3_sequence_key('mhc_prot_ipd', format='fasta')
+    key = awsKeyProvider.sequence_key('mhc_prot_ipd', format='fasta')
     return s3.get(key, data_format='fasta')
 
 
@@ -70,10 +72,10 @@ def split_ipd_bulk_fasta(aws_config, remote=True):
     locus_set = []
     for species in loci:
         for locus in loci[species]:
-            key = build_s3_sequence_key('raw/' +locus, format='json')
+            key = awsKeyProvider().sequence_key('raw/' +locus, format='json')
             locus_set.append(locus)
             s3.put(key, loci[species][locus])
-    key = build_s3_sequence_key('locus_list', format='json')
+    key = wsKeyProvider().sequence_key('locus_list', format='json')
     s3.put(key, locus_list)
 
             
@@ -106,7 +108,7 @@ def split_ipd_bulk_fasta(aws_config, remote=True):
             else:
                 if locus not in species_map[species]['class_i']['alpha']:
                     species_map[species]['class_i']['alpha'].append(locus)
-    key = build_s3_sequence_key('species_map', format='json')
+    key = wsKeyProvider().sequence_key('species_map', format='json')
     s3.put(key, species_map)
     
 

@@ -2,6 +2,8 @@ from flask import Blueprint, current_app, request
 
 from .pipeline_actions import split_ipd_bulk_fasta, process_ipd_bulk_fasta, fetch_ipd_species, check_ipd_version
 
+from common.decorators import check_user, requires_privilege, templated
+
 
 import logging
 import json
@@ -36,6 +38,16 @@ pipeline_actions = {
         'fetch_ipd_species':{'action':fetch_ipd_species,'next':'process_ipd'},
         'process_ipd':{'action':process_ipd_bulk_fasta,'next':'process_hla'}
 }
+
+
+
+# Home
+@sequence_pipeline_views.get('/')
+@templated('sequences/index')
+def home_handler():
+    return {'erors':None}
+
+
 
 
 # Named bulk step handler

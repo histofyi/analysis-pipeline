@@ -17,7 +17,7 @@
             "beta":["h2-abeta", "h2-ebeta"]
         }
     },
-    "rat": {
+    "rattus_norvegicus": {
         "class_i":{
             "alpha":["rano-a1","rano-a2","rano-a","rano-ba","rano-bb"]
         },
@@ -26,7 +26,7 @@
             "beta":["rano-db1"]
         }
     },
-    "pig":{
+    "sus_scrofa":{
         "class_i":{
             "alpha":["sla-1","sla-2","sla-3","sla-6"]
         },

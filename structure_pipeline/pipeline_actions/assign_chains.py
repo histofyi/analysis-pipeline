@@ -1,5 +1,5 @@
 from typing import List, Dict, Tuple, Union
-from common.providers import s3Provider, awsKeyProvider, PDBeProvider
+from common.providers import s3Provider, awsKeyProvider, PDBeProvider, rcsbProvider
 from common.models import itemSet
 
 from common.helpers import fetch_constants, fetch_core, update_block, slugify, levenshtein_ratio_and_distance
@@ -129,8 +129,24 @@ def assign_chains(pdb_code, aws_config, force=False):
     update = {'peptide':core['peptide']}
     molecules_info, success, errors = PDBeProvider(pdb_code).fetch_molecules()
     found_chains = []
+    i = 0
+    rcsb = rcsbProvider(pdb_code)
     for chain in molecules_info:
         if 'molecule' not in chain:
+            i += 1
+            print (i)
+            uniprot_id = None
+            source_organism = None
+            protein_name = None
+            source_protein = None
+            start = None
+            rcsb_data, success, errors = rcsb.fetch_uniprot(i)
+            if len(rcsb_data) > 0:
+                uniprot_id = rcsb_data[0]['rcsb_id']
+                source_organism = rcsb_data[0]['rcsb_uniprot_protein']['source_organism']
+                protein_name = rcsb_data[0]['rcsb_uniprot_protein']['name']
+            else:
+                rcsb_data = None
             if 'length' in chain:
                 chain_id = chain['entity_id']
                 action[chain_id] = {
@@ -150,6 +166,28 @@ def assign_chains(pdb_code, aws_config, force=False):
                         for item in chain['gene_name']:
                             molecule_search_terms.append(item.lower())
                 chain['sequence'] = trim_sequence(chain['sequence'], mhc_starts, 'class_i')
+                if rcsb_data:
+                    if 'sequence' in rcsb_data[0]['rcsb_uniprot_protein']:
+                        rcsb_uniprot_sequence = rcsb_data[0]['rcsb_uniprot_protein']['sequence']
+                    else:
+                        rcsb_uniprot_sequence = None
+                    action[chain_id]['source_protein'] = {
+                            'uniprot_id':uniprot_id,
+                            'protein_name':protein_name,
+                            'source_organism':source_organism,
+                            'sequence': rcsb_uniprot_sequence
+                    }
+                    if rcsb_uniprot_sequence:
+                        if chain['sequence'] in rcsb_uniprot_sequence:
+                            start = rcsb_uniprot_sequence.index(chain['sequence'])
+                            action[chain_id]['source_protein']['start_index'] = start
+                            action[chain_id]['source_protein']['end_index'] = start + len(chain['sequence']) - 1
+                        elif chain['sequence'][:10] in rcsb_uniprot_sequence:
+                            start = rcsb_uniprot_sequence.index(chain['sequence'][:10])
+                            action[chain_id]['source_protein']['start_index'] = start
+                            action[chain_id]['source_protein']['end_index'] = start + len(chain['sequence']) - 1
+                            action[chain_id]['source_protein']['mutations'] = True
+
                 if len(chain['sequence']) < action[chain_id]['length']:
                     action[chain_id]['length'] = len(chain['sequence'])
                     chain_length = len(chain['sequence'])

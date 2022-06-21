@@ -13,7 +13,7 @@ from .pipeline_actions import test, view, initialise
 from .pipeline_actions import assign_chains, assign_complex_type
 
 # EMBL PDBe REST API methods
-from .pipeline_actions import fetch_summary_info, fetch_publication_info, fetch_experiment_info, get_pdbe_structures
+from .pipeline_actions import fetch_summary_info, fetch_publication_info, fetch_doi_url, fetch_experiment_info, get_pdbe_structures
 
 # EMBL-IPD data based methods
 from .pipeline_actions import match_chains
@@ -87,7 +87,8 @@ pipeline_actions = {
         'initialise':{'action':initialise, 'name':'Initialise', 'show_in_list':False, 'link':False, 'next':'fetch_summary'},
         'fetch_summary':{'action':fetch_summary_info, 'name': 'Fetch summary', 'show_in_list':False, 'link':False, 'next':'fetch_structure'},
         'fetch_structure':{'action':get_pdbe_structures, 'name':'Fetch structure', 'show_in_list':False, 'link':False, 'next':'fetch_publications'},
-        'fetch_publications':{'action':fetch_publication_info, 'name': 'Fetch publications', 'show_in_list':False, 'link':False, 'next':'fetch_experiment'},
+        'fetch_publications':{'action':fetch_publication_info, 'name': 'Fetch publications', 'show_in_list':False, 'link':False, 'next':'fetch_doi_url'},
+        'fetch_doi_url':{'action':fetch_doi_url, 'name': 'Fetch DOI url', 'show_in_list':False, 'link':False, 'next':'fetch_experiment'},
         'fetch_experiment':{'action':fetch_experiment_info, 'name': 'Fetch experiment information', 'show_in_list':False, 'link':False, 'next':'assign_chains'},
         'assign_chains':{'action':assign_chains, 'name': 'Assign chains', 'show_in_list':False, 'link':False, 'next':'assign_complex_type'},
         'assign_complex_type':{'action':assign_complex_type, 'name': 'Assign complex type', 'show_in_list':False, 'link':False, 'next':'match_chains'},

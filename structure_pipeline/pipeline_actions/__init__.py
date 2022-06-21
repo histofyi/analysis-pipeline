@@ -4,6 +4,7 @@ from .initialise import initialise # can reset all of the data in the core file 
 
 from .summary_info import fetch_summary_info # fetch from PDBe REST API
 from .publication_info import fetch_publication_info # fetch from PDBe REST API
+from .fetch_doi_url import fetch_doi_url # fetch from https://dx.doi.org/ using python-doi
 from .experiment_info import fetch_experiment_info # fetch from PDBe REST API
 
 from .fetch_structure import get_pdbe_structures # fetch from PDBe Coordinate Server

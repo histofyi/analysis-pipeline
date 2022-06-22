@@ -9,7 +9,9 @@ CONSTANTS_FILES = {
     'loci':{'slug':'loci', 'name': 'Loci', 'description':'A set of MHC Class I and Class II loci derived from the IPD dataset'},
     'peptide_lengths':{'slug':'peptide_lengths', 'name': 'Peptide lengths', 'description': 'A set of human readable names for different length peptides' },
     'species_overrides':{'slug':'species_overrides','name':'Species overrides','description':'A dataset to correct the species of specific structures.'},
-    'species':{'slug':'species','name':'Species','description':'A set of standardised species and loci dervied from IPD dataset.'}
+    'species':{'slug':'species','name':'Species','description':'A set of standardised species and loci dervied from IPD dataset.'},
+    'pockets':{'slug':'pockets','name':'Pockets','description':'A set of amino acid residues which make up the pockets of MHC molecules.'},
+    'features':{'slug':'features','name':'Features','description':'A set of positions which perform a specific role.'}
 }
 
 

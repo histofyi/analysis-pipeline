@@ -13,6 +13,7 @@ from .assign_complex_type import assign_complex_type # computed
 from .match_chains import match_chains # computed from IPD data using Levenshtein distance where needed
 from .match_peptide import api_match_peptide # computed from IEDB REST API
 
+from .map_pockets import map_pockets # computed from sequence
 from .align_structures import align_structures # computed with BioPython
 from .peptide_neighbours import peptide_neighbours  # computed using BioPython
 from .peptide_features import peptide_features  # computed from peptide_neighbours

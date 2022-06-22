@@ -21,6 +21,9 @@ from .pipeline_actions import match_chains
 # IEDB.org API based methods
 from .pipeline_actions import api_match_peptide
 
+# sequnce based methods 
+from .pipeline_actions import map_pockets
+
 # structure based methods (BioPython etc)
 from .pipeline_actions import align_structures, peptide_neighbours, peptide_features, extract_peptides, measure_peptide_angles, measure_cleft_angles, measure_distances
 
@@ -93,7 +96,8 @@ pipeline_actions = {
         'assign_chains':{'action':assign_chains, 'name': 'Assign chains', 'show_in_list':False, 'link':False, 'next':'assign_complex_type'},
         'assign_complex_type':{'action':assign_complex_type, 'name': 'Assign complex type', 'show_in_list':False, 'link':False, 'next':'match_chains'},
         'match_chains':{'action':match_chains, 'name': 'Match to MHC sequences', 'show_in_list':False, 'link':False, 'next':'match_peptide'},
-        'match_peptide':{'action':api_match_peptide, 'name': 'Match peptide', 'link':False, 'next':'align'},
+        'match_peptide':{'action':api_match_peptide, 'name': 'Match peptide', 'link':False, 'next':'map_pockets'},
+        'map_pockets':{'action':map_pockets, 'name': 'Map pockets', 'link':False, 'next':'align'},
         'align': {'action':align_structures, 'name': 'Align structures', 'link':False, 'next':'peptide_neighbours'},
         'peptide_neighbours': {'action':peptide_neighbours, 'name': 'Find peptide neighbours', 'link':False, 'next':'peptide_features'},
         'peptide_features': {'action':peptide_features, 'name': 'Define peptide features', 'link':False, 'next':'extract_peptides'},

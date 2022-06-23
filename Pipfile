@@ -21,6 +21,7 @@ Flask-Caching = "*"
 Authlib = "*"
 pyjwt = "*"
 rich = "*"
+algoliasearch = "*"
 
 [dev-packages]
 

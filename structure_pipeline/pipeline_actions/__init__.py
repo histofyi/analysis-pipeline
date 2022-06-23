@@ -21,3 +21,5 @@ from .extract_peptides import extract_peptides  # computed with BioPython
 from .measure_peptide_angles import measure_peptide_angles  # computed with BioPython
 from .measure_cleft_angles import measure_cleft_angles  # computed with BioPython
 from .measure_distances import measure_distances  # computed with BioPython
+
+from .index_to_algolia import index_to_algolia # using the Algolia python client

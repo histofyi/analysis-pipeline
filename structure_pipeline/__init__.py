@@ -27,6 +27,9 @@ from .pipeline_actions import map_pockets
 # structure based methods (BioPython etc)
 from .pipeline_actions import align_structures, peptide_neighbours, peptide_features, extract_peptides, measure_peptide_angles, measure_cleft_angles, measure_distances
 
+# indexing based methods
+from .pipeline_actions import index_to_algolia
+
 
 import logging
 import json
@@ -104,7 +107,8 @@ pipeline_actions = {
         'extract_peptides': {'action':extract_peptides, 'name': 'Extract peptides', 'link':False, 'next':'measure_peptide_angles'},
         'measure_peptide_angles': {'action':measure_peptide_angles, 'name': 'Measure peptide angles', 'link':False, 'next':'measure_cleft_angles'},
         'measure_cleft_angles': {'action':measure_cleft_angles, 'name': 'Measure cleft angles', 'link':False, 'next':'measure_distances'},
-        'measure_distances': {'action':measure_distances, 'name': 'Measure C alpha distances', 'link':False, 'next':'view'}
+        'measure_distances': {'action':measure_distances, 'name': 'Measure C alpha distances', 'link':False, 'next':'index_to_algolia'},
+        'index_to_algolia': {'action':index_to_algolia, 'name': 'Index to Algolia', 'link':False, 'next':'view'}
 
         # TODO re-implement/refactor these actions
 #        'peptide_positions': {'action':peptide_positions, 'blocks':['peptide_positions']},

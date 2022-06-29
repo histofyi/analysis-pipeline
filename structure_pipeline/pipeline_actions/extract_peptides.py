@@ -18,7 +18,6 @@ def extract_peptides(pdb_code:str, aws_config:Dict, force:bool=False) -> Dict:
     aligned, success, errors = fetch_facet(pdb_code, 'aligned', aws_config)
     chains, success, errors = fetch_facet(pdb_code, 'chains', aws_config)
     chain_ids = None
-    print (chains)
     for chain in chains:
         if chains[chain]['best_match']['match'] == 'peptide':
             chain_ids = chains[chain]['chains']

@@ -7,7 +7,7 @@ import datetime
 
 
 from common.providers import s3Provider, awsKeyProvider, PDBeProvider
-from common.helpers import update_block, fetch_core, load_cif, save_cif, SelectChains, NonHetSelect
+from common.helpers import load_pdb, update_block, fetch_core, fetch_facet, load_cif, save_cif, SelectChains, NonHetSelect
 import logging
 
 
@@ -15,10 +15,8 @@ def extract_peptides(pdb_code:str, aws_config:Dict, force:bool=False) -> Dict:
     step_errors = []
     core, success, errors = fetch_core(pdb_code, aws_config)
     s3 = s3Provider(aws_config)
-    aligned_key = awsKeyProvider().block_key(pdb_code, 'aligned', 'info')
-    aligned, success, errors = s3.get(aligned_key)
-    chains_key = awsKeyProvider().block_key(pdb_code, 'chains', 'info')
-    chains, success, errors = s3.get(chains_key)
+    aligned, success, errors = fetch_facet(pdb_code, 'aligned', aws_config)
+    chains, success, errors = fetch_facet(pdb_code, 'chains', aws_config)
     chain_ids = None
     for chain in chains:
         if chains[chain]['best_match']['match'] == 'peptide':
@@ -28,12 +26,14 @@ def extract_peptides(pdb_code:str, aws_config:Dict, force:bool=False) -> Dict:
     if chain_ids is None:
         step_errors.append("no_chain_ids")
     if aligned is not None and chain_ids is not None:
-        for assembly_id in aligned['aligned']['files']:
+        print (aligned)
+        for assembly_id in aligned:
             assembly_identifier = f'{pdb_code}_{assembly_id}'
-            action['peptide_structures']['files'][assembly_id] = {}
-            if aligned['aligned']['files'][assembly_id] is not None:
-                cif_key = aligned['aligned']['files'][assembly_id]['files']['file_key']
-                structure = load_cif(cif_key, assembly_identifier, aws_config)
+            action['peptide_structures'][assembly_id] = {'peptide_only':{'files':{}}, 'peptide_and_hetatoms':{'files':{}}}
+            if aligned[assembly_id] ['files'] is not None:
+                pdb_file_key = aligned[assembly_id]['files']['pdb_file_key']
+                print (pdb_file_key)
+                structure = load_pdb(pdb_file_key, assembly_identifier, aws_config)
                 chain_id = chain_ids[i]
                 for model in structure:
                     for chain in model:
@@ -44,19 +44,19 @@ def extract_peptides(pdb_code:str, aws_config:Dict, force:bool=False) -> Dict:
                             io.save(peptide_and_hetatoms_cif_file, SelectChains(chain_id))
                             cif_key = awsKeyProvider().cif_file_key(assembly_identifier, 'peptide_and_hetatoms')
                             cif_data = save_cif(cif_key, peptide_and_hetatoms_cif_file, aws_config)
-                            action['peptide_structures']['files'][assembly_id]['peptide_and_hetatoms'] = {'file_key':cif_key, 'last_updated':datetime.datetime.now().isoformat()}
+                            action['peptide_structures'][assembly_id]['peptide_and_hetatoms']['files'] = {'file_key':cif_key, 'last_updated':datetime.datetime.now().isoformat()}
                             peptide_structure = load_cif(cif_key, assembly_identifier, aws_config)
                             io.set_structure(peptide_structure)
                             peptide_cif_file = StringIO()
                             io.save(peptide_cif_file, NonHetSelect())
                             cif_key = awsKeyProvider().cif_file_key(assembly_identifier, 'peptide')
                             cif_data = save_cif(cif_key, peptide_cif_file, aws_config)
-                            action['peptide_structures']['files'][assembly_id]['peptide_only'] = {'file_key':cif_key, 'last_updated':datetime.datetime.now().isoformat()}
+                            action['peptide_structures'][assembly_id]['peptide_only']['files'] = {'file_key':cif_key, 'last_updated':datetime.datetime.now().isoformat()}
             else:
                 step_errors.append('missing_aligned_structure')
             i += 1
         peptide_structures_key = awsKeyProvider().block_key(pdb_code, 'peptide_structures', 'info')
-        data, success, errors = s3.put(peptide_structures_key, action, data_format='json')
+        data, success, errors = s3.put(peptide_structures_key, action['peptide_structures'], data_format='json')
     else:
         logging.warn(pdb_code)
         logging.warn('NO ALIGNED STRUCTURES')

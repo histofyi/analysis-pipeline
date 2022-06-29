@@ -13,7 +13,6 @@ direct_mapping = ['homo_sapiens','macaca_mulatta','equus_caballus','felis_catus'
 def map_pockets(pdb_code, aws_config, force=False):
     s3 = s3Provider(aws_config)
     mhc_pockets = fetch_constants('pockets')['class_i']
-    print (mhc_pockets)
     step_errors = []
     sequence = None
     required_chain = 'class_i_alpha'

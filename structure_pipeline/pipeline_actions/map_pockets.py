@@ -19,7 +19,10 @@ def map_pockets(pdb_code, aws_config, force=False):
     required_chain = 'class_i_alpha'
     core, success, errors = fetch_core(pdb_code, aws_config)
     if 'organism' in core:
-        organism = slugify(core['organism']['scientific_name'])
+        if 'scientific_name' in core['organism']:
+            organism = slugify(core['organism']['scientific_name'])
+        else:
+            organism = None
     else:
         organism = None
     if organism:

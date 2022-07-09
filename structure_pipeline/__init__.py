@@ -25,7 +25,7 @@ from .pipeline_actions import api_match_peptide
 from .pipeline_actions import map_pockets
 
 # structure based methods (BioPython etc)
-from .pipeline_actions import align_structures, peptide_neighbours, peptide_features, extract_peptides, measure_peptide_angles, measure_cleft_angles, measure_distances
+from .pipeline_actions import align_structures, peptide_neighbours, peptide_features, extract_peptides, extract_abds, measure_peptide_angles, measure_cleft_angles, measure_distances
 
 # indexing based methods
 from .pipeline_actions import index_to_algolia
@@ -104,7 +104,8 @@ pipeline_actions = {
         'align': {'action':align_structures, 'name': 'Align structures', 'link':False, 'next':'peptide_neighbours'},
         'peptide_neighbours': {'action':peptide_neighbours, 'name': 'Find peptide neighbours', 'link':False, 'next':'peptide_features'},
         'peptide_features': {'action':peptide_features, 'name': 'Define peptide features', 'link':False, 'next':'extract_peptides'},
-        'extract_peptides': {'action':extract_peptides, 'name': 'Extract peptides', 'link':False, 'next':'measure_peptide_angles'},
+        'extract_peptides': {'action':extract_peptides, 'name': 'Extract peptides', 'link':False, 'next':'extract_abds'},
+        'extract_abds': {'action':extract_abds, 'name': 'Extract antigen binding domains', 'link':False, 'next':'measure_peptide_angles'},
         'measure_peptide_angles': {'action':measure_peptide_angles, 'name': 'Measure peptide angles', 'link':False, 'next':'measure_cleft_angles'},
         'measure_cleft_angles': {'action':measure_cleft_angles, 'name': 'Measure cleft angles', 'link':False, 'next':'measure_distances'},
         'measure_distances': {'action':measure_distances, 'name': 'Measure C alpha distances', 'link':False, 'next':'index_to_algolia'},

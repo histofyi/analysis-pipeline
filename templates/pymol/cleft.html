@@ -1,0 +1,62 @@
+
+{% for structure in structures %}
+
+pdb_code = '{{structure.pdb_code}}'
+orientation = '{{orientation}}'
+
+cmd.load('http://127.0.0.1:8080/structures/downloads/{{structure.pdb_code}}_1_abd.cif', 'class_i')
+cmd.load('http://127.0.0.1:8080/structures/downloads/{{structure.pdb_code}}_1_peptide.cif', 'peptide')
+cmd.set_view({{orientations[orientation]['class_i']}})
+cmd.hide(representation="cartoon", selection="class_i")
+cmd.hide(representation="sticks", selection="class_i")
+cmd.hide(representation="spheres", selection="class_i")
+cmd.show(representation="mesh", selection="class_i")
+cmd.hide(representation="cartoon", selection="peptide")
+cmd.color("gray80","class_i")
+
+cmd.save('tmp/cutaway/pse/{{pdb_code}}_1_{{orientation}}.pse')
+
+{% for size in sizes %}
+cmd.png('tmp/cutaway/{{orientation}}/{{structure.pdb_code}}_1_cutaway_{{size}}.png', width={{sizes[size].width}}, height={{sizes[size].height}}, dpi=300, ray=1, quiet=0)
+{% endfor %}
+
+
+
+cmd.delete('class_i')
+cmd.show(representation="sticks", selection="peptide")
+cmd.set_view({{orientations[orientation]['peptide']}})
+
+util.cbay("peptide")
+cmd.remove("hydro")
+
+{% for size in sizes %}
+cmd.png('tmp/cutaway/{{orientation}}/{{structure.pdb_code}}_1_peptide_{{size}}.png', width={{sizes[size].width}}, height={{sizes[size].height}}, dpi=300, ray=1, quiet=0)
+{% endfor %}
+
+cmd.hide('sticks','peptide')
+
+print ('hidden')
+
+myspace = {'resnumbers': []}
+cmd.iterate('(peptide)', 'resnumbers.append(resi)', space=myspace)
+resnumbers = sorted([resnumber for resnumber in set(myspace['resnumbers'])])
+print (resnumbers)
+for resnumber in resnumbers:
+    print (resnumber)
+    selection_name = f'sele_{resnumber}'
+    selection_string = f'resi {resnumber}'
+    cmd.select(selection_name, selection_string)
+    cmd.show('sticks', selection_name)
+    filename = f'tmp/captcha/{orientation}/{pdb_code}_1_{resnumber}.png'
+    cmd.png(filename, width=1200, height=1100, dpi=300, ray=1, quiet=0)
+    cmd.hide('sticks', selection_name)
+    cmd.hide('sticks')
+
+cmd.delete('all')
+
+{% endfor %}
+print('\a')
+cmd.quit()    
+
+
+

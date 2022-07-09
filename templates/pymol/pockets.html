@@ -1,0 +1,29 @@
+import os
+
+{% for structure in structures %}
+cmd.load('https://www.histo.fyi/structures/downloads/{{structure.pdb_code}}_1_abd.cif')
+cmd.set_view((\
+0.997432590,    0.070144698,    0.014454702,\
+-0.023742054,    0.133436739,    0.990772903,\
+0.067568570,   -0.988572299,    0.134759426,\
+0.000000000,    0.000000000, -167.991149902,\
+-42.288372040,   56.106903076,   63.375183105,\
+132.445495605,  203.536804199,  -20.000000000 ))
+cmd.color('grey80','all')
+cmd.show('surface')
+cmd.show('sticks', 'all and not (name c,n)')
+cmd.set('transparency', 0.25, 'all')
+cmd.bg_color('white')
+{% for pocket in pockets %}
+cmd.select("{{pocket.letter}}_pocket", "{{pocket.selection}}")
+cmd.color("{{pocket.color}}", "{{pocket.letter}}_pocket")
+{% endfor %}
+cmd.select("none")
+cmd.save('tmp/pockets/pse/{{structure.pdb_code}}_pockets.pse')
+{% for size in sizes %}
+cmd.png('tmp/pockets/png/{{structure.pdb_code}}_pockets_{{size}}.png', width={{sizes[size].width}}, height={{sizes[size].height}}, dpi=300, ray=1, quiet=0)
+{% endfor %}
+cmd.delete('all')
+{% endfor %}
+print('\a')
+cmd.quit()

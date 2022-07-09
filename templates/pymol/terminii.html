@@ -1,0 +1,50 @@
+import os
+
+{% for structure in structures %}
+cmd.load('http://127.0.0.1:8080/structures/downloads/{{structure.pdb_code}}_1_abd.cif')
+cmd.set_view((\
+0.997432590,    0.070144698,    0.014454702,\
+-0.023742054,    0.133436739,    0.990772903,\
+0.067568570,   -0.988572299,    0.134759426,\
+0.000000000,    0.000000000, -167.991149902,\
+-42.288372040,   56.106903076,   63.375183105,\
+132.445495605,  203.536804199,  -20.000000000 ))
+cmd.color('grey80','all')
+
+cmd.set_color('pn_col', [120,148,177])
+cmd.set_color('p1_col', [137,141,160])
+cmd.set_color('p2_col', [156,139,151])
+cmd.set_color('pc-1_col', [190, 160, 164])
+cmd.set_color('pc_col', [239, 176, 168])
+
+cmd.bg_color('white')
+{% for group in groups %}
+cmd.select("{{group.name}}", "{{group.selection}}")
+cmd.color("{{group.color}}", "{{group.name}}")
+cmd.show('sticks', '{{group.name}} and not (name c,n)')
+{% endfor %}
+cmd.select("none")
+cmd.load('http://127.0.0.1:8080/structures/downloads/{{structure.pdb_code}}_1_peptide.cif', 'peptide')
+cmd.show(representation="sticks", selection="peptide")
+cmd.hide('sticks', 'peptide and not (name c,n,ca,o)')
+cmd.hide('cartoon', 'peptide')
+#util.cbay("peptide")
+cmd.remove("hydro")
+cmd.color("grey20","peptide")
+cmd.set_view((\
+0.987191737,    0.144092813,    0.068489783,\
+-0.090891190,    0.155132830,    0.983703732,\
+0.131119445,   -0.977328837,    0.166242555,\
+0.000000000,    0.000000000, -167.991149902,\
+-42.288372040,   56.106903076,   63.375183105,\
+132.445495605,  203.536804199,  -20.000000000 ))
+cmd.save('tmp/terminii/pse/{{structure.pdb_code}}_terminii.pse')
+{% for size in sizes %}
+cmd.png('tmp/terminii/png/{{structure.pdb_code}}_terminii_{{size}}.png', width={{sizes[size].width}}, height={{sizes[size].height}}, dpi=300, ray=1, quiet=0)
+{% endfor %}
+cmd.delete('all')
+
+{% endfor %}
+print('\a')
+cmd.quit()
+

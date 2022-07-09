@@ -23,6 +23,7 @@ from sequence_pipeline import sequence_pipeline_views
 from constants_pipeline import constants_views
 from notes_pipeline import notes_views
 from features_pipeline import features_views
+from pymol_pipeline import pymol_views
 
 
 config = {
@@ -74,6 +75,7 @@ def create_app():
     app.register_blueprint(set_pipeline_views, url_prefix='/sets')
     app.register_blueprint(notes_views, url_prefix='/notes')
     app.register_blueprint(features_views, url_prefix='/features')
+    app.register_blueprint(pymol_views, url_prefix='/pymol')
 
 
 

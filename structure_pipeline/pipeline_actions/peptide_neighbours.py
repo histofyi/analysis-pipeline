@@ -16,10 +16,11 @@ def peptide_neighbours(pdb_code:str, aws_config:Dict, force:bool=False) -> Tuple
     s3 = s3Provider(aws_config)
     chains_key = awsKeyProvider().block_key(pdb_code, 'chains', 'info')
     chains, success, errors = s3.get(chains_key)
-    if 'class_i' in core['complex']['slug']:
-        mhc_class = 'class_i'
-    else:
-        mhc_class = None
+    mhc_class = None
+    if 'complex' in core:
+        if 'slug' in core['complex']:
+            if 'class_i' in core['complex']['slug']:
+                mhc_class = 'class_i'
     peptide_neighbours = {}
     contacts = {}
     peptide_chains = []
